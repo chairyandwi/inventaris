@@ -1,0 +1,142 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Ruang;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+
+class RuangController extends Controller
+{
+    public function index(Request $request)
+    {
+        $query = Ruang::query();
+
+        // Search functionality
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->where('nama_ruang', 'like', "%{$searchTerm}%")
+                  ->orWhere('nama_gedung', 'like', "%{$searchTerm}%")
+                  ->orWhere('nama_lantai', 'like', "%{$searchTerm}%")
+                  ->orWhere('keterangan', 'like', "%{$searchTerm}%");
+        }
+
+        // Sorting
+        $sortBy = $request->get('sort_by', 'idruang');
+        $sortDirection = $request->get('sort_direction', 'asc');
+
+        $allowedSortFields = ['idruang', 'nama_ruang', 'nama_gedung', 'nama_lantai'];
+        if (in_array($sortBy, $allowedSortFields)) {
+            $query->orderBy($sortBy, $sortDirection);
+        } else {
+            $query->orderBy('idruang', 'asc');
+        }
+
+        // Pagination
+        $perPage = $request->get('per_page', 10);
+        $allowedPerPage = [10, 25, 50, 100];
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 10;
+        }
+
+        $ruang = $query->paginate($perPage)->appends($request->all());
+
+        return view('pegawai.ruang.index', compact('ruang'));
+    }
+
+    public function create()
+    {
+        return view('pegawai.ruang.create');
+    }
+
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'nama_ruang'   => 'required|string|max:100|unique:ruang,nama_ruang',
+            'nama_gedung'  => 'required|string|max:100',
+            'nama_lantai'  => 'required|string|max:100',
+            'keterangan'   => 'nullable|string|max:255',
+        ], [
+            'nama_ruang.required'  => 'Nama ruang wajib diisi',
+            'nama_ruang.unique'    => 'Nama ruang sudah ada',
+            'nama_gedung.required' => 'Nama gedung wajib diisi',
+            'nama_lantai.required' => 'Nama lantai wajib diisi',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        Ruang::create($request->only(['nama_ruang', 'nama_gedung', 'nama_lantai', 'keterangan']));
+
+        return redirect()->route('pegawai.ruang.index')
+            ->with('success', 'Ruang berhasil ditambahkan');
+    }
+
+    public function show(Ruang $ruang)
+    {
+        return view('pegawai.ruang.show', compact('ruang'));
+    }
+
+    public function edit(Ruang $ruang)
+    {
+        return view('pegawai.ruang.edit', compact('ruang'));
+    }
+
+    public function update(Request $request, Ruang $ruang)
+    {
+        $validator = Validator::make($request->all(), [
+            'nama_ruang'   => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('ruang', 'nama_ruang')->ignore($ruang->idruang, 'idruang'),
+            ],
+            'nama_gedung'  => 'required|string|max:100',
+            'nama_lantai'  => 'required|string|max:100',
+            'keterangan'   => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        try {
+            $ruang->update($request->only(['nama_ruang', 'nama_gedung', 'nama_lantai', 'keterangan']));
+
+            return redirect()->route('pegawai.ruang.index')
+                ->with('success', 'Ruang berhasil diubah');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal mengubah ruang: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    public function destroy(Ruang $ruang)
+    {
+        try {
+            $ruang->delete();
+
+            return redirect()->route('pegawai.ruang.index')
+                ->with('success', 'Ruang berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->route('pegawai.ruang.index')
+                ->with('error', 'Gagal menghapus ruang: ' . $e->getMessage());
+        }
+    }
+
+    public function api()
+    {
+        $ruang = Ruang::select('idruang', 'nama_ruang', 'nama_gedung', 'nama_lantai', 'keterangan')
+            ->orderBy('nama_ruang')
+            ->get();
+
+        return response()->json($ruang);
+    }
+}
