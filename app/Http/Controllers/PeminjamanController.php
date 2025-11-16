@@ -46,9 +46,12 @@ class PeminjamanController extends Controller
             abort(403);
         }
 
-        $barang = Barang::where('stok', '>', 0)
-            ->orderBy('nama_barang')
-            ->get();
+        $barang = Barang::withCount('units')->get()->filter(function ($item) {
+            return $item->stok > $item->units_count;
+        })->map(function ($item) {
+            $item->available_stok = $item->stok - $item->units_count;
+            return $item;
+        })->values();
         $ruang = Ruang::orderBy('nama_ruang')->get();
 
         return view('peminjam.peminjaman.create', compact('barang', 'ruang'));
@@ -61,21 +64,38 @@ class PeminjamanController extends Controller
     {
         $request->validate([
             'idbarang' => 'required|exists:barang,idbarang',
-            'idruang' => 'required|exists:ruang,idruang',
+            'kegiatan' => 'required|in:kampus,luar',
+            'keterangan_kegiatan' => 'required|string|max:255',
+            'idruang' => 'required_if:kegiatan,kampus|nullable|exists:ruang,idruang',
             'jumlah' => 'required|integer|min:1',
+            'tgl_kembali_rencana' => 'required|date|after:today',
+            'foto_identitas' => 'required|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $barang = Barang::findOrFail($request->idbarang);
 
-        if ($barang->stok < $request->jumlah) {
+        $assignedUnits = $barang->units()->count();
+        $availableStok = max($barang->stok - $assignedUnits, 0);
+
+        if ($availableStok <= 0) {
+            return back()->with('error', 'Barang ini sedang tidak tersedia untuk dipinjam.');
+        }
+
+        if ($request->jumlah > $availableStok) {
             return back()->with('error', 'Stok barang tidak mencukupi.');
         }
+
+        $fotoPath = $request->file('foto_identitas')->store('identitas', 'public');
 
         Peminjaman::create([
             'idbarang' => $request->idbarang,
             'iduser' => Auth::id(),
-            'idruang' => $request->idruang,
+            'idruang' => $request->kegiatan === 'kampus' ? $request->idruang : null,
             'jumlah' => $request->jumlah,
+            'foto_identitas' => $fotoPath,
+            'tgl_kembali_rencana' => $request->tgl_kembali_rencana,
+            'kegiatan' => $request->kegiatan,
+            'keterangan_kegiatan' => $request->keterangan_kegiatan,
             'status' => 'pending',
         ]);
 
@@ -114,14 +134,10 @@ class PeminjamanController extends Controller
      */
     public function reject(Request $request, $id)
     {
-        $request->validate([
-            'alasan_penolakan' => 'required|string|max:255',
-        ]);
-
         $peminjaman = Peminjaman::findOrFail($id);
         $peminjaman->update([
             'status' => 'ditolak',
-            'alasan_penolakan' => $request->alasan_penolakan,
+            'alasan_penolakan' => null,
         ]);
 
         return back()->with('success', 'Peminjaman ditolak.');
@@ -130,14 +146,19 @@ class PeminjamanController extends Controller
     /**
      * Kembalikan barang (role: pegawai).
      */
-    public function return($id)
+    public function return(Request $request, $id)
     {
+        $request->validate([
+            'tgl_kembali_real' => 'required|date',
+            'konfirmasi_pengembalian' => 'accepted',
+        ]);
+
         $peminjaman = Peminjaman::with('barang')->findOrFail($id);
         $barang = $peminjaman->barang;
 
         $peminjaman->update([
             'status' => 'dikembalikan',
-            'tgl_kembali' => now(),
+            'tgl_kembali' => $request->tgl_kembali_real,
         ]);
 
         $barang->increment('stok', $peminjaman->jumlah);
@@ -146,26 +167,13 @@ class PeminjamanController extends Controller
     }
     public function laporan(Request $request)
     {
-        $query = \App\Models\Peminjaman::with(['barang', 'user']);
-
-        // contoh filter sederhana
-        if ($request->status && $request->status !== 'all') {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->start_date) {
-            $query->whereDate('tgl_pinjam', '>=', $request->start_date);
-        }
-
-        if ($request->end_date) {
-            $query->whereDate('tgl_pinjam', '<=', $request->end_date);
-        }
-
-        $peminjaman = $query->paginate(10);
+        $peminjaman = $this->filteredPeminjaman($request)
+            ->paginate(10)
+            ->appends($request->only('status', 'start_date', 'end_date'));
 
         return view('pegawai.peminjaman.laporan', compact('peminjaman'));
     }
-    public function cetak()
+    public function cetak(Request $request)
     {
         // Pastikan user login dan role pegawai
         if (!auth('web')->check()) {
@@ -177,12 +185,11 @@ class PeminjamanController extends Controller
         if (!$user || $user->role !== 'pegawai') {
             abort(403, 'Anda tidak memiliki akses.');
         }
-    
-        // Ambil data peminjaman beserta relasinya
-        $peminjaman = Peminjaman::with(['barang', 'user', 'ruang'])
-                        ->orderByDesc('idpeminjaman')
-                        ->get();
-    
+
+        $peminjaman = $this->filteredPeminjaman($request, includeRuang: true)
+            ->orderByDesc('idpeminjaman')
+            ->get();
+
         // Generate PDF menggunakan view cetak peminjaman
         $pdf = Pdf::loadView('pegawai.peminjaman.cetak', compact('peminjaman'))
                   ->setPaper('A4', 'portrait');
@@ -202,5 +209,29 @@ class PeminjamanController extends Controller
         }
 
         return redirect()->route('pegawai.peminjaman.index');
+    }
+
+    private function filteredPeminjaman(Request $request, bool $includeRuang = false)
+    {
+        $relations = ['barang', 'user'];
+        if ($includeRuang) {
+            $relations[] = 'ruang';
+        }
+
+        $query = Peminjaman::with($relations);
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('tgl_pinjam', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('tgl_pinjam', '<=', $request->end_date);
+        }
+
+        return $query;
     }
 }
