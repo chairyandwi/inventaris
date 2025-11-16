@@ -40,10 +40,12 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Barang</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Peminjam</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ruang</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kegiatan</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jumlah</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Identitas</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tgl Pinjam</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tgl Kembali</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rencana Kembali</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tgl Kembali Aktual</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
                         </tr>
@@ -58,16 +60,32 @@
                                     {{ $p->barang->nama_barang }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
-                                    {{ $p->user->name }}
+                                    {{ $p->user->nama ?? $p->user->username ?? $p->user->email ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
-                                    {{ $p->ruang->nama_ruang }}
+                                    <div>
+                                        <p class="font-semibold">{{ $p->kegiatan === 'kampus' ? 'Kegiatan Kampus' : 'Kegiatan Luar Kampus' }}</p>
+                                        <p class="text-xs text-gray-500">{{ $p->keterangan_kegiatan ?? '-' }}</p>
+                                        @if($p->kegiatan === 'kampus')
+                                            <p class="text-xs text-gray-500">Lokasi: {{ $p->ruang->nama_ruang ?? '-' }}</p>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
                                     {{ $p->jumlah }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
+                                    @if($p->foto_identitas)
+                                        <a href="{{ asset('storage/'.$p->foto_identitas) }}" target="_blank" class="text-indigo-600 hover:underline text-xs">Lihat</a>
+                                    @else
+                                        <span class="text-gray-400 text-xs">-</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-900">
                                     {{ $p->tgl_pinjam ? $p->tgl_pinjam->format('d-m-Y H:i') : '-' }}
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-900">
+                                    {{ $p->tgl_kembali_rencana ? $p->tgl_kembali_rencana->format('d-m-Y') : '-' }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
                                     {{ $p->tgl_kembali ? $p->tgl_kembali->format('d-m-Y H:i') : '-' }}
@@ -98,15 +116,24 @@
                                                 method="POST">
                                                 @csrf
                                                 <button type="submit"
-                                                    class="px-2 py-1 bg-red-500 text-white text-xs rounded">Reject</button>
+                                                    class="px-2 py-1 bg-red-500 text-white text-xs rounded w-full">Reject</button>
                                             </form>
                                         @elseif($p->status == 'dipinjam')
-                                            <!-- Return -->
                                             <form action="{{ route('pegawai.peminjaman.return', $p->idpeminjaman) }}"
-                                                method="POST">
+                                                method="POST" class="space-y-2">
                                                 @csrf
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-600 mb-1">Tanggal pengembalian aktual</label>
+                                                    <input type="datetime-local" name="tgl_kembali_real"
+                                                        class="w-full border-gray-300 rounded focus:border-indigo-500 focus:ring-indigo-500 text-xs"
+                                                        value="{{ now()->format('Y-m-d\TH:i') }}" required>
+                                                </div>
+                                                <label class="flex items-center text-xs text-gray-600 space-x-2">
+                                                    <input type="checkbox" name="konfirmasi_pengembalian" required class="text-indigo-600 border-gray-300 rounded">
+                                                    <span>Barang sudah diterima</span>
+                                                </label>
                                                 <button type="submit"
-                                                    class="px-2 py-1 bg-blue-500 text-white text-xs rounded">Return</button>
+                                                    class="w-full px-2 py-1 bg-blue-500 text-white text-xs rounded">Konfirmasi</button>
                                             </form>
                                         @endif
                                     </div>

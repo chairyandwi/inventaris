@@ -33,9 +33,11 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Barang</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ruang</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kegiatan</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Identitas</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diajukan</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rencana Kembali</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                         </tr>
@@ -50,13 +52,29 @@
                                     {{ $pinjam->barang->nama_barang ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                    {{ $pinjam->ruang->nama_ruang ?? '-' }}
+                                    <div>
+                                        <p class="font-semibold">{{ $pinjam->kegiatan === 'kampus' ? 'Kegiatan Kampus' : 'Kegiatan Luar Kampus' }}</p>
+                                        <p class="text-xs text-gray-500">{{ $pinjam->keterangan_kegiatan ?? '-' }}</p>
+                                        @if($pinjam->kegiatan === 'kampus')
+                                            <p class="text-xs text-gray-500">Lokasi: {{ $pinjam->ruang->nama_ruang ?? '-' }}</p>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                     {{ $pinjam->jumlah }} unit
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                    @if($pinjam->foto_identitas)
+                                        <a href="{{ asset('storage/'.$pinjam->foto_identitas) }}" target="_blank" class="text-indigo-600 hover:underline text-xs">Lihat</a>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ $pinjam->created_at?->format('d M Y H:i') ?? '-' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                    {{ $pinjam->tgl_kembali_rencana?->format('d M Y') ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span @class([

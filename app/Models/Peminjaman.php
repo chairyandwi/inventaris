@@ -21,10 +21,22 @@ class Peminjaman extends Model
         'iduser',
         'idruang',
         'jumlah',
+        'foto_identitas',
         'tgl_pinjam',
+        'tgl_kembali_rencana',
         'tgl_kembali',
         'status',
         'alasan_penolakan',
+        'kegiatan',
+        'keterangan_kegiatan',
+    ];
+
+    protected $casts = [
+        'tgl_pinjam' => 'datetime',
+        'tgl_kembali_rencana' => 'date',
+        'tgl_kembali' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     // Relasi ke Barang

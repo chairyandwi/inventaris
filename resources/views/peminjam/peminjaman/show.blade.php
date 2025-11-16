@@ -32,12 +32,30 @@
                     <p class="text-lg font-semibold text-gray-900">{{ $peminjaman->jumlah }} unit</p>
                 </div>
                 <div>
-                    <p class="text-sm text-gray-500 mb-1">Ruang Penggunaan</p>
-                    <p class="text-lg font-semibold text-gray-900">{{ $peminjaman->ruang->nama_ruang ?? '-' }}</p>
+                    <p class="text-sm text-gray-500 mb-1">Jenis Kegiatan</p>
+                    <p class="text-lg font-semibold text-gray-900">
+                        {{ $peminjaman->kegiatan === 'kampus' ? 'Kegiatan di Kampus' : 'Kegiatan di Luar Kampus' }}
+                    </p>
+                    <p class="text-sm text-gray-500">Kepentingan: {{ $peminjaman->keterangan_kegiatan ?? '-' }}</p>
+                    @if($peminjaman->kegiatan === 'kampus')
+                        <p class="text-sm text-gray-500">Lokasi: {{ $peminjaman->ruang->nama_ruang ?? '-' }}</p>
+                    @endif
                 </div>
                 <div>
                     <p class="text-sm text-gray-500 mb-1">Tanggal Pengajuan</p>
                     <p class="text-lg font-semibold text-gray-900">{{ $peminjaman->created_at?->format('d M Y H:i') ?? '-' }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500 mb-1">Rencana Pengembalian</p>
+                    <p class="text-lg font-semibold text-gray-900">{{ $peminjaman->tgl_kembali_rencana?->format('d M Y') ?? '-' }}</p>
+                </div>
+                <div class="md:col-span-2">
+                    <p class="text-sm text-gray-500 mb-2">Foto Identitas</p>
+                    @if($peminjaman->foto_identitas)
+                        <img src="{{ asset('storage/'.$peminjaman->foto_identitas) }}" alt="Foto Identitas" class="rounded-xl border border-gray-100 max-h-80 object-contain">
+                    @else
+                        <p class="text-sm text-gray-400">Tidak ada foto identitas.</p>
+                    @endif
                 </div>
             </div>
 
@@ -47,7 +65,7 @@
                     <p class="text-lg font-semibold text-gray-900">{{ $peminjaman->tgl_pinjam?->format('d M Y H:i') ?? '-' }}</p>
                 </div>
                 <div>
-                    <p class="text-sm text-gray-500 mb-1">Tanggal Pengembalian</p>
+                    <p class="text-sm text-gray-500 mb-1">Konfirmasi Pengembalian</p>
                     <p class="text-lg font-semibold text-gray-900">{{ $peminjaman->tgl_kembali?->format('d M Y H:i') ?? '-' }}</p>
                 </div>
             </div>

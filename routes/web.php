@@ -16,6 +16,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\BarangMasukController;
 use App\Http\Controllers\PeminjamanController;
+use App\Http\Controllers\InventarisRuangController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -73,6 +74,7 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
     Route::resource('user', UserController::class);
     Route::resource('barang', BarangController::class);
     Route::resource('barang_masuk', BarangMasukController::class);
+    Route::resource('inventaris-ruang', InventarisRuangController::class)->only(['index', 'create', 'store', 'destroy']);
 
     // Manajemen peminjaman (pegawai approve/reject/return)
     Route::resource('peminjaman', PeminjamanController::class);

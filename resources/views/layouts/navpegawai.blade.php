@@ -45,6 +45,14 @@
                           </svg>                          
                         Ruang
                     </a>
+                    <a href="{{ route('pegawai.inventaris-ruang.index') }}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5l9-4.5 9 4.5-9 4.5-9-4.5z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9 4.5 9-4.5" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5l9 4.5 9-4.5" />
+                        </svg>
+                        Inventaris Ruang
+                    </a>
                     <a href="{{ route('pegawai.barang.index') }}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" viewBox="0 0 50 50">
                             <g fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -138,6 +146,14 @@
                         </g>
                     </svg> 
                     Barang
+                </a>
+                <a href="{{ route('pegawai.inventaris-ruang.index') }}" class="flex items-center text-gray-700 hover:text-indigo-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5l9-4.5 9 4.5-9 4.5-9-4.5z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9 4.5 9-4.5" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5l9 4.5 9-4.5" />
+                    </svg>
+                    Inventaris Ruang
                 </a>
                 <a href="#" class="flex items-center text-gray-700 hover:text-indigo-600">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">

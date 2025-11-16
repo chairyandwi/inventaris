@@ -95,7 +95,7 @@
                 <th width="20">NO</th>
                 <th>Barang</th>
                 <th>Peminjam</th>
-                <th>Ruang</th>
+                <th>Kegiatan</th>
                 <th>Jumlah</th>
                 <th>Tgl Pinjam</th>
                 <th>Tgl Kembali</th>
@@ -106,8 +106,16 @@
                 <tr>
                     <td class="number-cell">{{ $no++ }}</td>
                     <td class="text-cell">{{ $p->barang->nama_barang ?? '-' }}</td>
-                    <td class="text-cell">{{ $p->user->name ?? '-' }}</td>
-                    <td class="text-cell">{{ $p->ruang->nama_ruang ?? '-' }}</td>
+                    <td class="text-cell">
+                        {{ $p->user->nama ?? $p->user->username ?? $p->user->email ?? '-' }}
+                    </td>
+                    <td class="text-cell">
+                        <b>{{ $p->kegiatan === 'kampus' ? 'Kampus' : 'Luar Kampus' }}</b><br>
+                        {{ $p->keterangan_kegiatan ?? '-' }}<br>
+                        @if($p->kegiatan === 'kampus')
+                            Lokasi: {{ $p->ruang->nama_ruang ?? '-' }}
+                        @endif
+                    </td>
                     <td class="center-cell">{{ $p->jumlah }}</td>
                     <td class="center-cell">{{ $p->tgl_pinjam ? $p->tgl_pinjam->format('d-m-Y H:i') : '-' }}</td>
                     <td class="center-cell">{{ $p->tgl_kembali ? $p->tgl_kembali->format('d-m-Y H:i') : '-' }}</td>

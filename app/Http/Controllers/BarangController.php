@@ -3,9 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
+use App\Models\BarangUnit;
 use App\Models\Kategori;
+use App\Models\Ruang;
+use App\Support\KodeInventarisGenerator;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 
@@ -40,7 +45,8 @@ class BarangController extends Controller
     public function create()
     {
         $kategori = Kategori::orderBy('nama_kategori')->get();
-        return view('pegawai.barang.create', compact('kategori'));
+        $ruang = Ruang::orderBy('nama_ruang')->get();
+        return view('pegawai.barang.create', compact('kategori', 'ruang'));
     }
 
     public function store(Request $request)
@@ -49,29 +55,61 @@ class BarangController extends Controller
             'idkategori'   => 'required|exists:kategori,idkategori',
             'kode_barang'  => 'required|string|max:20|unique:barang,kode_barang',
             'nama_barang'  => 'required|string|max:100',
+            'jenis_barang' => 'required|in:pinjam,tetap',
             'stok'         => 'nullable|integer|min:0',
             'keterangan'   => 'nullable|string|max:500',
+            'distribusi_ruang' => 'required_if:jenis_barang,tetap|array|min:1',
+            'distribusi_ruang.*' => 'required_with:distribusi_jumlah.*|exists:ruang,idruang',
+            'distribusi_jumlah' => 'required_if:jenis_barang,tetap|array',
+            'distribusi_jumlah.*' => 'required_with:distribusi_ruang.*|integer|min:1|max:500',
+            'distribusi_catatan' => 'array|nullable',
+            'distribusi_catatan.*' => 'nullable|string|max:255',
         ], [
             'idkategori.required' => 'Kategori wajib dipilih',
             'idkategori.exists'   => 'Kategori tidak valid',
             'kode_barang.required'=> 'Kode barang wajib diisi',
             'kode_barang.unique'  => 'Kode barang sudah ada',
             'nama_barang.required'=> 'Nama barang wajib diisi',
+            'jenis_barang.required' => 'Jenis barang wajib dipilih',
+            'distribusi_ruang.required_if' => 'Pilih minimal satu ruang inventaris',
+            'distribusi_ruang.*.exists' => 'Ruang tidak valid',
+            'distribusi_jumlah.*.integer' => 'Jumlah unit harus angka',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        Barang::create($validator->validated());
+        $validated = $validator->validated();
+        $barangData = Arr::except($validated, ['ruang_tetap', 'jumlah_tetap', 'keterangan_inventaris']);
+
+        DB::transaction(function () use ($barangData, $request) {
+            $barang = Barang::create($barangData);
+            $this->syncInventarisUnits($barang, $request);
+        });
 
         return redirect()->route('pegawai.barang.index')->with('success', 'Barang berhasil ditambahkan');
     }
 
     public function edit(Barang $barang)
     {
+        $barang->load('units.ruang');
         $kategori = Kategori::orderBy('nama_kategori')->get();
-        return view('pegawai.barang.edit', compact('barang', 'kategori'));
+        $ruang = Ruang::orderBy('nama_ruang')->get();
+        $inventarisDistribusi = $barang->units->groupBy('idruang')->map(function ($items) {
+            $first = $items->first();
+            return [
+                'ruang' => $first->idruang,
+                'jumlah' => $items->count(),
+                'catatan' => $first->keterangan,
+            ];
+        })->values()->toArray();
+        return view('pegawai.barang.edit', compact(
+            'barang',
+            'kategori',
+            'ruang',
+            'inventarisDistribusi'
+        ));
     }
 
     public function update(Request $request, Barang $barang)
@@ -80,15 +118,28 @@ class BarangController extends Controller
             'idkategori'   => 'required|exists:kategori,idkategori',
             'kode_barang'  => ['required', 'string', 'max:20', Rule::unique('barang', 'kode_barang')->ignore($barang->idbarang, 'idbarang')],
             'nama_barang'  => 'required|string|max:100',
+            'jenis_barang' => 'required|in:pinjam,tetap',
             'stok'         => 'nullable|integer|min:0',
             'keterangan'   => 'nullable|string|max:500',
+            'distribusi_ruang' => 'required_if:jenis_barang,tetap|array|min:1',
+            'distribusi_ruang.*' => 'required_with:distribusi_jumlah.*|exists:ruang,idruang',
+            'distribusi_jumlah' => 'required_if:jenis_barang,tetap|array',
+            'distribusi_jumlah.*' => 'required_with:distribusi_ruang.*|integer|min:1|max:500',
+            'distribusi_catatan' => 'array|nullable',
+            'distribusi_catatan.*' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $barang->update($validator->validated());
+        $validated = $validator->validated();
+        $barangData = Arr::except($validated, ['ruang_tetap', 'jumlah_tetap', 'keterangan_inventaris']);
+
+        DB::transaction(function () use ($barangData, $barang, $request) {
+            $barang->update($barangData);
+            $this->syncInventarisUnits($barang, $request);
+        });
 
         return redirect()->route('pegawai.barang.index')->with('success', 'Barang berhasil diubah');
     }
@@ -105,7 +156,18 @@ class BarangController extends Controller
 
     public function show(Barang $barang)
     {
-        return view('pegawai.barang.show', compact('barang'));
+        $barang->load(['kategori', 'units.ruang']);
+        $units = $barang->units;
+        $distribution = $units->groupBy('idruang')->map(function ($items) {
+            $ruang = $items->first()->ruang;
+            return [
+                'ruang' => $ruang->nama_ruang ?? '-',
+                'gedung' => $ruang->nama_gedung ?? '-',
+                'jumlah' => $items->count(),
+            ];
+        })->values();
+
+        return view('pegawai.barang.show', compact('barang', 'units', 'distribution'));
     }
 
     public function api()
@@ -138,5 +200,55 @@ class BarangController extends Controller
                   ->setPaper('A4', 'portrait');
 
         return $pdf->download('Laporan_Barang.pdf');
+    }
+
+    protected function syncInventarisUnits(Barang $barang, Request $request): void
+    {
+        if ($barang->jenis_barang !== 'tetap') {
+            $barang->units()->delete();
+            return;
+        }
+
+        $barang->units()->delete();
+
+        $ruangList = $request->input('distribusi_ruang', []);
+        $jumlahList = $request->input('distribusi_jumlah', []);
+        $catatanList = $request->input('distribusi_catatan', []);
+
+        $records = [];
+
+        foreach ($ruangList as $index => $ruangId) {
+            if (!$ruangId) {
+                continue;
+            }
+
+            $jumlah = (int)($jumlahList[$index] ?? 0);
+            if ($jumlah <= 0) {
+                continue;
+            }
+
+            $ruang = Ruang::find($ruangId);
+            if (!$ruang) {
+                continue;
+            }
+
+            $catatan = $catatanList[$index] ?? null;
+
+            for ($i = 1; $i <= $jumlah; $i++) {
+                $records[] = [
+                    'idbarang' => $barang->idbarang,
+                    'idruang' => $ruang->idruang,
+                    'nomor_unit' => $i,
+                    'kode_unit' => KodeInventarisGenerator::make($barang, $ruang, $i),
+                    'keterangan' => $catatan,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
+
+        if ($records) {
+            BarangUnit::insert($records);
+        }
     }
 }
