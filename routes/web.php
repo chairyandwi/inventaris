@@ -5,6 +5,7 @@ use App\Models\Ruang;
 use App\Models\Barang;
 use App\Models\Kategori;
 use App\Models\BarangMasuk;
+use App\Models\Peminjaman;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
@@ -26,7 +27,7 @@ Route::get('/', function () {
             case 'pegawai':
                 return redirect()->route('pegawai.index');
             case 'peminjam':
-                return redirect()->route('peminjam.dashboard');
+                return redirect()->route('peminjam.index');
         }
     }
     return view('home');
@@ -86,9 +87,27 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:peminjam'])->prefix('peminjam')->name('peminjam.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('peminjam.dashboard');
-    })->name('dashboard');
+    Route::get('/', function () {
+        $userId = Auth::id();
+
+        $totalPeminjaman = Peminjaman::where('iduser', $userId)->count();
+        $pendingPeminjaman = Peminjaman::where('iduser', $userId)->where('status', 'pending')->count();
+        $dipinjamPeminjaman = Peminjaman::where('iduser', $userId)->where('status', 'dipinjam')->count();
+        $selesaiPeminjaman = Peminjaman::where('iduser', $userId)->where('status', 'dikembalikan')->count();
+        $ditolakPeminjaman = Peminjaman::where('iduser', $userId)->where('status', 'ditolak')->count();
+        $barangTersedia = Barang::count();
+        $ruangTersedia = Ruang::count();
+
+        return view('peminjam.index', compact(
+            'totalPeminjaman',
+            'pendingPeminjaman',
+            'dipinjamPeminjaman',
+            'selesaiPeminjaman',
+            'ditolakPeminjaman',
+            'barangTersedia',
+            'ruangTersedia'
+        ));
+    })->name('index');
 
     // Ajukan & lihat status peminjaman
     Route::resource('peminjaman', PeminjamanController::class)->only(['index', 'create', 'store', 'show']);

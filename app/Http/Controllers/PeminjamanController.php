@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Barang;
 use App\Models\Peminjaman;
 use Illuminate\Http\Request;
+use App\Models\Ruang;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,14 +14,44 @@ class PeminjamanController extends Controller
     /**
      * Tampilkan daftar semua peminjaman.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $user = Auth::user();
+
+        if ($user && $user->role === 'peminjam') {
+            $peminjaman = Peminjaman::with(['barang', 'ruang'])
+                ->where('iduser', $user->id)
+                ->latest()
+                ->paginate(10);
+
+            return view('peminjam.peminjaman.index', compact('peminjaman'));
+        }
+
         // gunakan paginate biar bisa pakai firstItem(), lastItem(), total()
         $peminjaman = Peminjaman::with(['barang', 'user', 'ruang'])
             ->latest()
             ->paginate(10);
 
         return view('pegawai.peminjaman.index', compact('peminjaman'));
+    }
+
+    /**
+     * Form ajukan peminjaman (role: peminjam).
+     */
+    public function create()
+    {
+        $user = Auth::user();
+
+        if (!$user || $user->role !== 'peminjam') {
+            abort(403);
+        }
+
+        $barang = Barang::where('stok', '>', 0)
+            ->orderBy('nama_barang')
+            ->get();
+        $ruang = Ruang::orderBy('nama_ruang')->get();
+
+        return view('peminjam.peminjaman.create', compact('barang', 'ruang'));
     }
 
     /**
@@ -48,7 +79,11 @@ class PeminjamanController extends Controller
             'status' => 'pending',
         ]);
 
-        return redirect()->route('peminjaman.index')
+        $redirectRoute = Auth::user() && Auth::user()->role === 'peminjam'
+            ? 'peminjam.peminjaman.index'
+            : 'pegawai.peminjaman.index';
+
+        return redirect()->route($redirectRoute)
             ->with('success', 'Permintaan peminjaman berhasil diajukan.');
     }
 
@@ -159,6 +194,13 @@ class PeminjamanController extends Controller
     public function show($id)
     {
         $peminjaman = Peminjaman::with(['barang', 'user', 'ruang'])->findOrFail($id);
-        return view('pegawai.peminjaman.show', compact('peminjaman'));
+        $user = Auth::user();
+
+        if ($user && $user->role === 'peminjam') {
+            abort_unless($peminjaman->iduser === $user->id, 403);
+            return view('peminjam.peminjaman.show', compact('peminjaman'));
+        }
+
+        return redirect()->route('pegawai.peminjaman.index');
     }
 }

@@ -23,8 +23,10 @@
                 @include('layouts.navkabag')
             @elseif(Auth::user()->role === 'pegawai')
                 @include('layouts.navpegawai')
+            @elseif(Auth::user()->role === 'peminjam')
+                @include('layouts.navpeminjam')
             @else
-                @include('layouts.navpegawai')
+                @include('layouts.navguest')
             @endif
         @else
             @include('layouts.navguest')
