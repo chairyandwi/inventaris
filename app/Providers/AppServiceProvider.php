@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\AppConfiguration;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,6 +24,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (!Schema::hasTable('app_configurations')) {
+            View::share('globalAppConfig', null);
+            return;
+        }
+
         $appConfig = Cache::remember('app_config', 3600, function () {
             return AppConfiguration::first();
         });
