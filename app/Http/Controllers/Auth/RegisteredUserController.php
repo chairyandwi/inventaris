@@ -51,15 +51,14 @@ class RegisteredUserController extends Controller
         Auth::login($user);
 
         if ($user->role === 'admin') {
-            return redirect()->route('admin.dashboard');
+            return redirect()->route('admin.index');
         } elseif ($user->role === 'kabag') {
-            return redirect()->route('kabag.dashboard');
+            return redirect()->route('kabag.index');
         } elseif ($user->role === 'pegawai') {
             return redirect()->route('pegawai.index');
-        } 
-        else {
-            // pegawai & peminjam
-            return redirect()->route('peminjam.peminjaman');   
-        };
+        } else {
+            // default peminjam dashboard
+            return redirect()->route('peminjam.index');
+        }
     }
 }

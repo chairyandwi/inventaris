@@ -46,6 +46,10 @@
                     <p class="text-lg font-semibold text-gray-900">{{ $peminjaman->created_at?->format('d M Y H:i') ?? '-' }}</p>
                 </div>
                 <div>
+                    <p class="text-sm text-gray-500 mb-1">Rencana Peminjaman</p>
+                    <p class="text-lg font-semibold text-gray-900">{{ $peminjaman->tgl_pinjam_rencana?->format('d M Y') ?? '-' }}</p>
+                </div>
+                <div>
                     <p class="text-sm text-gray-500 mb-1">Rencana Pengembalian</p>
                     <p class="text-lg font-semibold text-gray-900">{{ $peminjaman->tgl_kembali_rencana?->format('d M Y') ?? '-' }}</p>
                 </div>

@@ -37,6 +37,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Identitas</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diajukan</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rencana Pinjam</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rencana Kembali</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
@@ -74,6 +75,9 @@
                                     {{ $pinjam->created_at?->format('d M Y H:i') ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                    {{ $pinjam->tgl_pinjam_rencana?->format('d M Y') ?? '-' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                     {{ $pinjam->tgl_kembali_rencana?->format('d M Y') ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -94,7 +98,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                                <td colspan="10" class="px-6 py-12 text-center text-gray-500">
                                     <p class="text-lg font-semibold">Belum ada pengajuan peminjaman</p>
                                     <p class="text-sm mt-2">Klik tombol "Ajukan Peminjaman" untuk memulai.</p>
                                 </td>

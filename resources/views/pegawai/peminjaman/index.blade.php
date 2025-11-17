@@ -30,6 +30,12 @@
             </div>
         </div>
 
+        @error('alasan_penolakan')
+            <div class="mb-4 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg">
+                {{ $message }}
+            </div>
+        @enderror
+
         <!-- Card wrapper -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <!-- Table -->
@@ -43,6 +49,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kegiatan</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jumlah</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Identitas</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rencana Pinjam</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tgl Pinjam</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rencana Kembali</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tgl Kembali Aktual</th>
@@ -82,6 +89,9 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
+                                    {{ $p->tgl_pinjam_rencana ? $p->tgl_pinjam_rencana->format('d-m-Y') : '-' }}
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-900">
                                     {{ $p->tgl_pinjam ? $p->tgl_pinjam->format('d-m-Y H:i') : '-' }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
@@ -100,24 +110,30 @@
                                     ])>
                                         {{ ucfirst($p->status) }}
                                     </span>
+                                    @if($p->status === 'ditolak' && $p->alasan_penolakan)
+                                        <p class="text-xs text-rose-600 mt-1">Alasan: {{ $p->alasan_penolakan }}</p>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 text-sm font-medium">
-                                    <div class="flex items-center space-x-2">
+                                    <div class="flex flex-wrap gap-2 w-full">
                                         @if ($p->status == 'pending')
                                             <!-- Approve -->
                                             <form action="{{ route('pegawai.peminjaman.approve', $p->idpeminjaman) }}"
-                                                method="POST">
+                                                method="POST" class="flex-1 min-w-[130px]">
                                                 @csrf
                                                 <button type="submit"
-                                                    class="px-2 py-1 bg-green-500 text-white text-xs rounded">Approve</button>
+                                                    class="w-full px-3 py-1.5 bg-green-500 text-white text-xs rounded text-center shadow hover:bg-green-600 transition">
+                                                    Approve
+                                                </button>
                                             </form>
                                             <!-- Reject -->
-                                            <form action="{{ route('pegawai.peminjaman.reject', $p->idpeminjaman) }}"
-                                                method="POST">
-                                                @csrf
-                                                <button type="submit"
-                                                    class="px-2 py-1 bg-red-500 text-white text-xs rounded w-full">Reject</button>
-                                            </form>
+                                            <button type="button"
+                                                class="flex-1 min-w-[130px] w-full px-3 py-1.5 bg-red-500 text-white text-xs rounded text-center shadow hover:bg-red-600 transition open-reject-modal"
+                                                data-action="{{ route('pegawai.peminjaman.reject', $p->idpeminjaman) }}"
+                                                data-barang="{{ $p->barang->nama_barang }}"
+                                                data-peminjam="{{ $p->user->nama ?? $p->user->username ?? $p->user->email ?? '-' }}">
+                                                Reject
+                                            </button>
                                         @elseif($p->status == 'dipinjam')
                                             <form action="{{ route('pegawai.peminjaman.return', $p->idpeminjaman) }}"
                                                 method="POST" class="space-y-2">
@@ -141,7 +157,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="px-6 py-12 text-center text-sm text-gray-500">
+                                <td colspan="12" class="px-6 py-12 text-center text-sm text-gray-500">
                                     <p class="text-lg font-medium">Tidak ada data peminjaman</p>
                                 </td>
                             </tr>
@@ -165,3 +181,81 @@
         </div>
     </div>
 @endsection
+
+<!-- Modal Reject -->
+<div id="reject-modal" class="hidden fixed inset-0 z-50 items-center justify-center">
+    <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900">Tolak Peminjaman</h2>
+                <p class="text-sm text-gray-500" id="reject-meta"></p>
+            </div>
+            <button type="button" class="text-gray-400 hover:text-gray-600 text-2xl leading-none" id="close-reject-modal">&times;</button>
+        </div>
+        <form id="reject-form" method="POST">
+            @csrf
+            <textarea name="alasan_penolakan" id="alasan-penolakan"
+                class="w-full border-gray-300 rounded-lg focus:border-rose-500 focus:ring-rose-500"
+                rows="4" placeholder="Tuliskan alasan penolakan" required>{{ old('alasan_penolakan') }}</textarea>
+            <div class="mt-4 flex items-center justify-end gap-3">
+                <button type="button" id="cancel-reject"
+                    class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="px-4 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700">
+                    Tolak Permintaan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('reject-modal');
+    const meta = document.getElementById('reject-meta');
+    const textarea = document.getElementById('alasan-penolakan');
+    const form = document.getElementById('reject-form');
+    const closeButtons = [document.getElementById('close-reject-modal'), document.getElementById('cancel-reject')];
+
+    function openModal(action, barang, peminjam) {
+        form.action = action;
+        meta.textContent = `${peminjam ?? '-' } - ${barang ?? '-'}`;
+        textarea.value = '';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        textarea.focus();
+    }
+
+    function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    document.querySelectorAll('.open-reject-modal').forEach(button => {
+        button.addEventListener('click', () => {
+            openModal(
+                button.dataset.action,
+                button.dataset.barang,
+                button.dataset.peminjam
+            );
+        });
+    });
+
+    closeButtons.forEach(btn => btn.addEventListener('click', closeModal));
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+            closeModal();
+        }
+    });
+});
+</script>
+@endpush
