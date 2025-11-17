@@ -77,7 +77,8 @@ class PeminjamanController extends Controller
             'keterangan_kegiatan' => 'required|string|max:255',
             'idruang' => 'required_if:kegiatan,kampus|nullable|exists:ruang,idruang',
             'jumlah' => 'required|integer|min:1',
-            'tgl_kembali_rencana' => 'required|date|after:today',
+            'tgl_pinjam_rencana' => 'required|date|after_or_equal:today',
+            'tgl_kembali_rencana' => 'required|date|after_or_equal:tgl_pinjam_rencana',
             'foto_identitas' => 'required|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -111,6 +112,7 @@ class PeminjamanController extends Controller
             'idruang' => $request->kegiatan === 'kampus' ? $request->idruang : null,
             'jumlah' => $request->jumlah,
             'foto_identitas' => $fotoPath,
+            'tgl_pinjam_rencana' => $request->tgl_pinjam_rencana,
             'tgl_kembali_rencana' => $request->tgl_kembali_rencana,
             'kegiatan' => $request->kegiatan,
             'keterangan_kegiatan' => $request->keterangan_kegiatan,
@@ -131,10 +133,69 @@ class PeminjamanController extends Controller
     public function approve($id)
     {
         $peminjaman = Peminjaman::with('barang')->findOrFail($id);
+
+        if ($peminjaman->status !== 'pending') {
+            return back()->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
+        }
+
+        $barang = $peminjaman->barang;
+
+        $sudahDibooking = Peminjaman::where('idbarang', $peminjaman->idbarang)
+            ->whereIn('status', ['disetujui', 'dipinjam'])
+            ->where('idpeminjaman', '!=', $peminjaman->idpeminjaman)
+            ->sum('jumlah');
+
+        $tersedia = max($barang->stok - $sudahDibooking, 0);
+
+        if ($peminjaman->jumlah > $tersedia) {
+            return back()->with('error', 'Stok barang tidak mencukupi untuk disetujui pada jadwal tersebut.');
+        }
+
+        $peminjaman->update([
+            'status' => 'disetujui',
+            'tgl_pinjam' => null,
+        ]);
+
+        return back()->with('success', 'Peminjaman disetujui dan menunggu pengambilan sesuai jadwal.');
+    }
+
+    /**
+     * Tolak peminjaman (role: pegawai/kabag/admin).
+     */
+    public function reject(Request $request, $id)
+    {
+        $request->validate([
+            'alasan_penolakan' => 'required|string|max:255',
+        ]);
+
+        $peminjaman = Peminjaman::findOrFail($id);
+        $peminjaman->update([
+            'status' => 'ditolak',
+            'alasan_penolakan' => $request->alasan_penolakan,
+        ]);
+
+        return back()->with('success', 'Peminjaman ditolak.');
+    }
+
+    /**
+     * Tandai barang sudah diambil sesuai jadwal (role: pegawai).
+     */
+    public function pickup($id)
+    {
+        $peminjaman = Peminjaman::with('barang')->findOrFail($id);
+
+        if ($peminjaman->status !== 'disetujui') {
+            return back()->with('error', 'Pengajuan ini belum disetujui atau sudah diproses.');
+        }
+
+        if ($peminjaman->tgl_pinjam_rencana && now()->lt($peminjaman->tgl_pinjam_rencana->startOfDay())) {
+            return back()->with('error', 'Belum memasuki jadwal pengambilan barang.');
+        }
+
         $barang = $peminjaman->barang;
 
         if ($barang->stok < $peminjaman->jumlah) {
-            return back()->with('error', 'Stok barang tidak cukup untuk disetujui.');
+            return back()->with('error', 'Stok barang habis, tidak bisa memulai peminjaman.');
         }
 
         $peminjaman->update([
@@ -144,21 +205,7 @@ class PeminjamanController extends Controller
 
         $barang->decrement('stok', $peminjaman->jumlah);
 
-        return back()->with('success', 'Peminjaman disetujui.');
-    }
-
-    /**
-     * Tolak peminjaman (role: pegawai/kabag/admin).
-     */
-    public function reject(Request $request, $id)
-    {
-        $peminjaman = Peminjaman::findOrFail($id);
-        $peminjaman->update([
-            'status' => 'ditolak',
-            'alasan_penolakan' => null,
-        ]);
-
-        return back()->with('success', 'Peminjaman ditolak.');
+        return back()->with('success', 'Barang sudah ditandai diambil.');
     }
 
     /**
@@ -173,6 +220,10 @@ class PeminjamanController extends Controller
 
         $peminjaman = Peminjaman::with('barang')->findOrFail($id);
         $barang = $peminjaman->barang;
+
+        if ($peminjaman->status !== 'dipinjam') {
+            return back()->with('error', 'Barang belum dalam status dipinjam.');
+        }
 
         $peminjaman->update([
             'status' => 'dikembalikan',

@@ -48,6 +48,8 @@
 
         @include('layouts.footer-guest')
     </div>
+
+    @stack('scripts')
 </body>
 
 </html>

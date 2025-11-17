@@ -13,6 +13,7 @@
             <span @class([
                 'px-4 py-2 rounded-xl text-sm font-semibold',
                 'bg-yellow-100 text-yellow-700' => $peminjaman->status === 'pending',
+                'bg-indigo-100 text-indigo-700' => $peminjaman->status === 'disetujui',
                 'bg-blue-100 text-blue-700' => $peminjaman->status === 'dipinjam',
                 'bg-green-100 text-green-700' => $peminjaman->status === 'dikembalikan',
                 'bg-red-100 text-red-700' => $peminjaman->status === 'ditolak',
@@ -20,6 +21,15 @@
                 Status: {{ ucfirst($peminjaman->status) }}
             </span>
         </div>
+
+        @if($peminjaman->status === 'disetujui')
+            <div class="mt-4 p-4 rounded-2xl bg-indigo-50 text-sm text-indigo-700">
+                Pengajuan Anda sudah disetujui. Silakan ambil barang pada {{ $peminjaman->tgl_pinjam_rencana?->format('d M Y') ?? 'jadwal yang ditentukan' }} dan konfirmasi kepada petugas saat pengambilan.
+                @if($peminjaman->tgl_pinjam_rencana && now()->gt($peminjaman->tgl_pinjam_rencana->startOfDay()))
+                    <span class="block text-amber-600 mt-2">Jadwal pengambilan sudah tiba, segera hubungi petugas untuk mengambil barang.</span>
+                @endif
+            </div>
+        @endif
 
         <div class="bg-white rounded-2xl shadow divide-y divide-gray-100">
             <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -44,6 +54,10 @@
                 <div>
                     <p class="text-sm text-gray-500 mb-1">Tanggal Pengajuan</p>
                     <p class="text-lg font-semibold text-gray-900">{{ $peminjaman->created_at?->format('d M Y H:i') ?? '-' }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500 mb-1">Rencana Peminjaman</p>
+                    <p class="text-lg font-semibold text-gray-900">{{ $peminjaman->tgl_pinjam_rencana?->format('d M Y') ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-500 mb-1">Rencana Pengembalian</p>

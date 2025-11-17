@@ -81,10 +81,21 @@
                 </div>
 
                 <div>
+                    <label for="tgl_pinjam_rencana" class="block text-sm font-semibold text-gray-700 mb-2">Rencana Tanggal Peminjaman</label>
+                    <input type="date" name="tgl_pinjam_rencana" id="tgl_pinjam_rencana"
+                        class="w-full rounded-xl border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                        value="{{ old('tgl_pinjam_rencana', now()->format('Y-m-d')) }}" required min="{{ now()->format('Y-m-d') }}">
+                    @error('tgl_pinjam_rencana')
+                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                    <p class="text-xs text-gray-500 mt-2">Tanggal rencana pengambilan/pemakaian barang.</p>
+                </div>
+
+                <div>
                     <label for="tgl_kembali_rencana" class="block text-sm font-semibold text-gray-700 mb-2">Rencana Tanggal Pengembalian</label>
                     <input type="date" name="tgl_kembali_rencana" id="tgl_kembali_rencana"
                         class="w-full rounded-xl border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                        value="{{ old('tgl_kembali_rencana') }}" required min="{{ now()->addDay()->format('Y-m-d') }}">
+                        value="{{ old('tgl_kembali_rencana') }}" required min="{{ old('tgl_pinjam_rencana', now()->format('Y-m-d')) }}">
                     @error('tgl_kembali_rencana')
                         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                     @enderror
@@ -131,6 +142,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const kegiatanSelect = document.getElementById('kegiatan');
     const ruangWrapper = document.getElementById('ruang-wrapper');
     const ruangSelect = document.getElementById('idruang');
+    const tglPinjamInput = document.getElementById('tgl_pinjam_rencana');
+    const tglKembaliInput = document.getElementById('tgl_kembali_rencana');
 
     function toggleRuang() {
         if (kegiatanSelect.value === 'kampus') {
@@ -141,8 +154,20 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function syncTanggalKembali() {
+        if (tglPinjamInput && tglKembaliInput) {
+            tglKembaliInput.min = tglPinjamInput.value || tglKembaliInput.min;
+            if (tglKembaliInput.value && tglKembaliInput.value < tglPinjamInput.value) {
+                tglKembaliInput.value = '';
+            }
+        }
+    }
+
     kegiatanSelect.addEventListener('change', toggleRuang);
+    tglPinjamInput?.addEventListener('change', syncTanggalKembali);
+
     toggleRuang();
+    syncTanggalKembali();
 });
 </script>
 @endsection

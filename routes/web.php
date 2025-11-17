@@ -88,6 +88,7 @@ Route::middleware(['auth', 'role:pegawai,admin'])->prefix('pegawai')->name('pega
     Route::resource('peminjaman', PeminjamanController::class);
     Route::post('peminjaman/{id}/approve', [PeminjamanController::class, 'approve'])->name('peminjaman.approve');
     Route::post('peminjaman/{id}/reject', [PeminjamanController::class, 'reject'])->name('peminjaman.reject');
+    Route::post('peminjaman/{id}/pickup', [PeminjamanController::class, 'pickup'])->name('peminjaman.pickup');
     Route::post('peminjaman/{id}/return', [PeminjamanController::class, 'return'])->name('peminjaman.return');
 });
 

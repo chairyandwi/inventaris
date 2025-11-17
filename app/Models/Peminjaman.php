@@ -22,6 +22,7 @@ class Peminjaman extends Model
         'idruang',
         'jumlah',
         'foto_identitas',
+        'tgl_pinjam_rencana',
         'tgl_pinjam',
         'tgl_kembali_rencana',
         'tgl_kembali',
@@ -32,6 +33,7 @@ class Peminjaman extends Model
     ];
 
     protected $casts = [
+        'tgl_pinjam_rencana' => 'date',
         'tgl_pinjam' => 'datetime',
         'tgl_kembali_rencana' => 'date',
         'tgl_kembali' => 'datetime',
