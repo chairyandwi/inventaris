@@ -46,6 +46,15 @@ class PeminjamanController extends Controller
             abort(403);
         }
 
+        $hasActiveLoan = Peminjaman::where('iduser', $user->id)
+            ->whereIn('status', ['pending', 'dipinjam'])
+            ->exists();
+
+        if ($hasActiveLoan) {
+            return redirect()->route('peminjam.peminjaman.index')
+                ->with('error', 'Anda belum dapat mengajukan peminjaman baru sebelum permintaan sebelumnya selesai dikembalikan.');
+        }
+
         $barang = Barang::withCount('units')->get()->filter(function ($item) {
             return $item->stok > $item->units_count;
         })->map(function ($item) {
@@ -73,6 +82,15 @@ class PeminjamanController extends Controller
         ]);
 
         $barang = Barang::findOrFail($request->idbarang);
+
+        $hasActiveLoan = Peminjaman::where('iduser', Auth::id())
+            ->whereIn('status', ['pending', 'dipinjam'])
+            ->exists();
+
+        if ($hasActiveLoan) {
+            return redirect()->route('peminjam.peminjaman.index')
+                ->with('error', 'Anda belum dapat mengajukan peminjaman baru sebelum pengajuan sebelumnya selesai.');
+        }
 
         $assignedUnits = $barang->units()->count();
         $availableStok = max($barang->stok - $assignedUnits, 0);

@@ -6,6 +6,7 @@ use App\Models\Barang;
 use App\Models\Kategori;
 use App\Models\BarangMasuk;
 use App\Models\Peminjaman;
+use App\Models\AppConfiguration;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
@@ -17,6 +18,9 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\BarangMasukController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\InventarisRuangController;
+use App\Http\Controllers\Admin\AppConfigController;
+use App\Http\Controllers\Admin\LogAktivitasController;
+use App\Models\LogAktivitas;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -34,6 +38,10 @@ Route::get('/', function () {
     return view('home');
 });
 
+Route::get('/dashboard', function () {
+    return redirect('/');
+})->name('dashboard');
+
 Route::middleware('auth')->group(function () {
     // Profile user
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -46,7 +54,7 @@ Route::middleware('auth')->group(function () {
 | Route untuk Pegawai
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')->group(function () {
+Route::middleware(['auth', 'role:pegawai,admin'])->prefix('pegawai')->name('pegawai.')->group(function () {
     Route::get('/', function () {
         $barangKeluar = 10;
         $barangMasuk = BarangMasuk::count();
@@ -122,8 +130,35 @@ Route::middleware(['auth', 'role:peminjam'])->prefix('peminjam')->name('peminjam
 */
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
-        return view('admin.index');
+        $barangKeluar = 10;
+        $barangMasuk = BarangMasuk::count();
+        $barangPinjam = Peminjaman::where('status', 'dipinjam')->count();
+        $user = User::count();
+        $barang = Barang::count();
+        $ruang = Ruang::count();
+        $kategori = Kategori::count();
+
+        $pesanAktivitas = \App\Models\LogAktivitas::latest()->take(5)->get();
+
+        return view('admin.index', compact(
+            'barangKeluar', 'barangMasuk', 'barangPinjam',
+            'user', 'barang', 'ruang', 'kategori', 'pesanAktivitas'
+        ));
     })->name('index');
+
+    Route::resource('kategori', KategoriController::class);
+    Route::resource('ruang', RuangController::class);
+    Route::resource('user', UserController::class);
+    Route::resource('barang', BarangController::class);
+    Route::resource('barang_masuk', BarangMasukController::class);
+    Route::resource('inventaris-ruang', InventarisRuangController::class)->only(['index', 'create', 'store', 'destroy']);
+    Route::resource('peminjaman', PeminjamanController::class);
+    Route::get('peminjaman/laporan', [PeminjamanController::class, 'laporan'])->name('peminjaman.laporan');
+    Route::get('peminjaman/cetak', [PeminjamanController::class, 'cetak'])->name('peminjaman.cetak');
+
+    Route::get('aplikasi', [AppConfigController::class, 'index'])->name('aplikasi.index');
+    Route::put('aplikasi', [AppConfigController::class, 'update'])->name('aplikasi.update');
+    Route::get('logs', [LogAktivitasController::class, 'index'])->name('logs.index');
 });
 
 Route::middleware(['auth', 'role:kabag'])->prefix('kabag')->name('kabag.')->group(function () {

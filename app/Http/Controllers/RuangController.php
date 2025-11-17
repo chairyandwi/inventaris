@@ -6,6 +6,7 @@ use App\Models\Ruang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Support\ActivityLogger;
 
 class RuangController extends Controller
 {
@@ -70,7 +71,9 @@ class RuangController extends Controller
                 ->withInput();
         }
 
-        Ruang::create($request->only(['nama_ruang', 'nama_gedung', 'nama_lantai', 'keterangan']));
+        $ruang = Ruang::create($request->only(['nama_ruang', 'nama_gedung', 'nama_lantai', 'keterangan']));
+
+        ActivityLogger::log('Tambah Ruang', 'Menambahkan ruang ' . $ruang->nama_ruang);
 
         return redirect()->route('pegawai.ruang.index')
             ->with('success', 'Ruang berhasil ditambahkan');
@@ -109,6 +112,8 @@ class RuangController extends Controller
         try {
             $ruang->update($request->only(['nama_ruang', 'nama_gedung', 'nama_lantai', 'keterangan']));
 
+            ActivityLogger::log('Perbarui Ruang', 'Memperbarui ruang ' . $ruang->nama_ruang);
+
             return redirect()->route('pegawai.ruang.index')
                 ->with('success', 'Ruang berhasil diubah');
         } catch (\Exception $e) {
@@ -121,7 +126,10 @@ class RuangController extends Controller
     public function destroy(Ruang $ruang)
     {
         try {
+            $nama = $ruang->nama_ruang;
             $ruang->delete();
+
+            ActivityLogger::log('Hapus Ruang', 'Menghapus ruang ' . $nama);
 
             return redirect()->route('pegawai.ruang.index')
                 ->with('success', 'Ruang berhasil dihapus');

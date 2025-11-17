@@ -52,19 +52,28 @@
 </head>
 
 <body>
+    @php
+        $appConfig = $globalAppConfig ?? null;
+        $usePdfConfig = $appConfig && $appConfig->apply_pdf;
+        $kampusName = $usePdfConfig && $appConfig->nama_kampus ? strtoupper($appConfig->nama_kampus) : 'UNIVERSITAS PROKLAMASI 45';
+        $departemen = $usePdfConfig && $appConfig->profil ? $appConfig->profil : 'BAGIAN UMUM';
+        $alamat = $usePdfConfig && $appConfig->alamat ? $appConfig->alamat : 'Jl. Proklamasi No. 1, Babarsari, Yogyakarta.';
+        $telepon = $usePdfConfig && $appConfig->telepon ? $appConfig->telepon : '(0274) 485535';
+        $email = $usePdfConfig && $appConfig->email ? $appConfig->email : 'itsupport@up45.ac.id';
+        $website = $usePdfConfig && $appConfig->website ? $appConfig->website : 'up45.ac.id';
+        $logoFile = $usePdfConfig && $appConfig && $appConfig->logo
+            ? storage_path('app/public/'.$appConfig->logo)
+            : public_path('images/up.png');
+        $logoBase64 = '';
+        if (file_exists($logoFile)) {
+            $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoFile));
+        }
+    @endphp
     <div class="rangkasurat">
         <!-- Header Section -->
         <table class="header-table">
             <tr>
                 <td class="logo-cell">
-                    @php
-                        $logoPath = public_path('images/up.png');
-                        $logoBase64 = '';
-                        if (file_exists($logoPath)) {
-                            $imageData = base64_encode(file_get_contents($logoPath));
-                            $logoBase64 = 'data:image/png;base64,' . $imageData;
-                        }
-                    @endphp
                     @if ($logoBase64)
                         <img src="{{ $logoBase64 }}" alt="Logo UP45">
                     @else
@@ -75,10 +84,10 @@
                 </td>
 
                 <td class="tengah header-info">
-                    <h2>UNIVERSITAS PROKLAMASI 45</h2>
-                    <h1>BAGIAN UMUM</h1>
-                    <b>Jl. Proklamasi No. 1, Babarsari, Yogyakarta. Telp : (0274) 485535</b>
-                    <p>Fax : (0274) 486008 Email : itsupport@up45.ac.id Website : up45.ac.id Kode Pos : 55281</p>
+                    <h2>{{ $kampusName }}</h2>
+                    <h1>{{ strtoupper($departemen) }}</h1>
+                    <b>{{ $alamat }} Telp : {{ $telepon }}</b>
+                    <p>Email : {{ $email }} Website : {{ $website }}</p>
                 </td>
             </tr>
         </table>

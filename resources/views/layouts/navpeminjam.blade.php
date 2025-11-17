@@ -1,8 +1,14 @@
+@php
+    $appConfig = $globalAppConfig ?? null;
+    $useLayoutConfig = $appConfig && $appConfig->apply_layout;
+    $brandName = $useLayoutConfig && $appConfig->nama_kampus ? $appConfig->nama_kampus : 'Inventaris Kampus';
+    $brandLogo = $useLayoutConfig && $appConfig->logo ? asset('storage/'.$appConfig->logo) : asset('images/inven.png');
+@endphp
 <nav x-data="{ open: false, menu: false }" class="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
         <div class="flex items-center space-x-3">
-            <img src="{{ asset('images/inven.png') }}" class="w-12 h-12 object-contain" alt="Logo">
-            <a href="{{ route('peminjam.index') }}" class="text-xl font-bold text-indigo-600">Inventaris Kampus</a>
+            <img src="{{ $brandLogo }}" class="w-12 h-12 object-contain" alt="Logo">
+            <a href="{{ route('peminjam.index') }}" class="text-xl font-bold text-indigo-600">{{ $brandName }}</a>
         </div>
 
         <div class="md:hidden">
