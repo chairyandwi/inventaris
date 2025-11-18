@@ -104,6 +104,7 @@
                                     <span @class([
                                         'px-2 py-1 text-xs rounded',
                                         'bg-yellow-100 text-yellow-800' => $p->status === 'pending',
+                                        'bg-indigo-100 text-indigo-800' => $p->status === 'disetujui',
                                         'bg-blue-100 text-blue-800' => $p->status === 'dipinjam',
                                         'bg-green-100 text-green-800' => $p->status === 'dikembalikan',
                                         'bg-red-100 text-red-800' => $p->status === 'ditolak',
@@ -112,6 +113,17 @@
                                     </span>
                                     @if($p->status === 'ditolak' && $p->alasan_penolakan)
                                         <p class="text-xs text-rose-600 mt-1">Alasan: {{ $p->alasan_penolakan }}</p>
+                                    @elseif($p->status === 'disetujui')
+                                        <p class="text-xs text-gray-600 mt-1">
+                                            @if($p->tgl_pinjam_rencana)
+                                                Jadwal: {{ $p->tgl_pinjam_rencana->format('d-m-Y') }}
+                                            @else
+                                                Menunggu jadwal penjemputan.
+                                            @endif
+                                        </p>
+                                        @if($p->tgl_pinjam_rencana && now()->gt($p->tgl_pinjam_rencana->startOfDay()))
+                                            <p class="text-xs text-amber-600 mt-1">Sudah lewat jadwal, konfirmasi pengambilan.</p>
+                                        @endif
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-sm font-medium">
@@ -134,6 +146,19 @@
                                                 data-peminjam="{{ $p->user->nama ?? $p->user->username ?? $p->user->email ?? '-' }}">
                                                 Reject
                                             </button>
+                                        @elseif($p->status == 'disetujui')
+                                            @php
+                                                $bolehMulai = !$p->tgl_pinjam_rencana || now()->greaterThanOrEqualTo($p->tgl_pinjam_rencana->startOfDay());
+                                            @endphp
+                                            <form action="{{ route('pegawai.peminjaman.pickup', $p->idpeminjaman) }}"
+                                                method="POST" class="flex-1 min-w-[160px]">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="w-full px-3 py-1.5 text-xs rounded text-center shadow transition {{ $bolehMulai ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-gray-200 text-gray-500 cursor-not-allowed' }}"
+                                                    {{ $bolehMulai ? '' : 'disabled' }}>
+                                                    {{ $bolehMulai ? 'Mulai Peminjaman' : 'Menunggu Jadwal' }}
+                                                </button>
+                                            </form>
                                         @elseif($p->status == 'dipinjam')
                                             <form action="{{ route('pegawai.peminjaman.return', $p->idpeminjaman) }}"
                                                 method="POST" class="space-y-2">
@@ -146,7 +171,7 @@
                                                 </div>
                                                 <label class="flex items-center text-xs text-gray-600 space-x-2">
                                                     <input type="checkbox" name="konfirmasi_pengembalian" required class="text-indigo-600 border-gray-300 rounded">
-                                                    <span>Barang sudah diterima</span>
+                                                    <span>Barang sudah dikembalikan</span>
                                                 </label>
                                                 <button type="submit"
                                                     class="w-full px-2 py-1 bg-blue-500 text-white text-xs rounded">Konfirmasi</button>

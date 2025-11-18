@@ -84,12 +84,21 @@
                                     <span @class([
                                         'px-3 py-1 rounded-full text-xs font-semibold',
                                         'bg-yellow-100 text-yellow-700' => $pinjam->status === 'pending',
+                                        'bg-indigo-100 text-indigo-700' => $pinjam->status === 'disetujui',
                                         'bg-blue-100 text-blue-700' => $pinjam->status === 'dipinjam',
                                         'bg-green-100 text-green-700' => $pinjam->status === 'dikembalikan',
                                         'bg-red-100 text-red-700' => $pinjam->status === 'ditolak',
                                     ])>
                                         {{ ucfirst($pinjam->status) }}
                                     </span>
+                                    @if($pinjam->status === 'disetujui')
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            Silakan ambil barang pada {{ $pinjam->tgl_pinjam_rencana?->format('d M Y') ?? 'jadwal yang ditentukan' }}.
+                                        </p>
+                                        @if($pinjam->tgl_pinjam_rencana && now()->gt($pinjam->tgl_pinjam_rencana->startOfDay()))
+                                            <p class="text-xs text-amber-600 mt-1">Jadwal pengambilan sudah tiba, segera konfirmasi ke petugas.</p>
+                                        @endif
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                                     <a href="{{ route('peminjam.peminjaman.show', $pinjam->idpeminjaman) }}"
