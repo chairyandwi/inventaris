@@ -277,7 +277,7 @@ class PeminjamanController extends Controller
             return view('peminjam.peminjaman.show', compact('peminjaman'));
         }
 
-        return redirect()->route('pegawai.peminjaman.index');
+        return view('pegawai.peminjaman.show', compact('peminjaman'));
     }
 
     private function filteredPeminjaman(Request $request, bool $includeRuang = false)

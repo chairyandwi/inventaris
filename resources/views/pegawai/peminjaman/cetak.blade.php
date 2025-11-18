@@ -104,6 +104,7 @@
                 <th width="20">NO</th>
                 <th>Barang</th>
                 <th>Peminjam</th>
+                <th>Detail Peminjam</th>
                 <th>Kegiatan</th>
                 <th>Jumlah</th>
                 <th>Tgl Pinjam</th>
@@ -119,6 +120,17 @@
                         {{ $p->user->nama ?? $p->user->username ?? $p->user->email ?? '-' }}
                     </td>
                     <td class="text-cell">
+                        Profil: {{ ucfirst($p->user->tipe_peminjam ?? 'Umum') }}<br>
+                        @if($p->user?->tipe_peminjam === 'mahasiswa')
+                            Prodi: {{ $p->user->prodi ?? '-' }}<br>
+                            Angkatan: {{ $p->user->angkatan ?? '-' }}<br>
+                            NIM: {{ $p->user->nim ?? '-' }}<br>
+                        @elseif($p->user?->tipe_peminjam === 'pegawai')
+                            Divisi: {{ $p->user->divisi ?? '-' }}<br>
+                        @endif
+                        Foto: {{ $p->foto_identitas ? 'Tersedia' : 'Belum diunggah' }}
+                    </td>
+                    <td class="text-cell">
                         <b>{{ $p->kegiatan === 'kampus' ? 'Kampus' : 'Luar Kampus' }}</b><br>
                         {{ $p->keterangan_kegiatan ?? '-' }}<br>
                         @if($p->kegiatan === 'kampus')
@@ -132,7 +144,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8" class="empty-state">Tidak ada data peminjaman</td>
+                    <td colspan="9" class="empty-state">Tidak ada data peminjaman</td>
                 </tr>
             @endforelse
         </table>

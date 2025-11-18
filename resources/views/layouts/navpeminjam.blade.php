@@ -36,7 +36,7 @@
                 </button>
                 <div x-show="userMenu" @click.away="userMenu = false"
                     class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg py-2 z-50">
-                    <a href="{{ route('profile.edit') }}"
+                    <a href="{{ route('peminjam.profile.edit') }}"
                         class="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">Profil</a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -55,7 +55,7 @@
             <a href="{{ route('peminjam.index') }}" class="block text-gray-700 hover:text-indigo-600">Dashboard</a>
             <a href="{{ route('peminjam.peminjaman.create') }}" class="block text-gray-700 hover:text-indigo-600">Ajukan Peminjaman</a>
             <a href="{{ route('peminjam.peminjaman.index') }}" class="block text-gray-700 hover:text-indigo-600">Riwayat Peminjaman</a>
-            <a href="{{ route('profile.edit') }}" class="block text-gray-700 hover:text-indigo-600">Profil</a>
+            <a href="{{ route('peminjam.profile.edit') }}" class="block text-gray-700 hover:text-indigo-600">Profil</a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit"

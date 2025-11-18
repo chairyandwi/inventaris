@@ -16,7 +16,7 @@ class ProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'nama' => ['required', 'string', 'max:255'],
             'email' => [
                 'required',
                 'string',
@@ -25,6 +25,24 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            'username' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique(User::class, 'username')->ignore($this->user()->id),
+            ],
+            'nohp' => ['nullable', 'string', 'max:20'],
+            'tipe_peminjam' => ['required', Rule::in(['umum', 'mahasiswa', 'pegawai'])],
+            'prodi' => ['nullable', 'string', 'max:100', 'required_if:tipe_peminjam,mahasiswa'],
+            'angkatan' => ['nullable', 'string', 'max:10', 'required_if:tipe_peminjam,mahasiswa'],
+            'nim' => [
+                'nullable',
+                'string',
+                'max:50',
+                'required_if:tipe_peminjam,mahasiswa',
+                Rule::unique(User::class, 'nim')->ignore($this->user()->id),
+            ],
+            'divisi' => ['nullable', 'string', 'max:100', 'required_if:tipe_peminjam,pegawai'],
         ];
     }
 }

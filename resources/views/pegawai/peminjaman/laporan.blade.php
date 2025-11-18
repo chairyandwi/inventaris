@@ -66,12 +66,13 @@
         <!-- Tabel -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="min-w-[1200px] w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Barang</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Peminjam</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Detail Peminjam</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kegiatan</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jumlah</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tgl Pinjam</th>
@@ -85,6 +86,26 @@
                                 <td class="px-6 py-4 text-sm text-gray-900">{{ $peminjaman->firstItem() + $index }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-900">{{ $p->barang->nama_barang ?? '-' }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-900">{{ $p->user->nama ?? $p->user->username ?? $p->user->email ?? '-' }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-700">
+                                    <div class="text-xs space-y-1">
+                                        <p><span class="font-semibold text-gray-900">Profil:</span> {{ ucfirst($p->user->tipe_peminjam ?? 'Umum') }}</p>
+                                        @if($p->user?->tipe_peminjam === 'mahasiswa')
+                                            <p><span class="font-semibold text-gray-900">Prodi:</span> {{ $p->user->prodi ?? '-' }}</p>
+                                            <p><span class="font-semibold text-gray-900">Angkatan:</span> {{ $p->user->angkatan ?? '-' }}</p>
+                                            <p><span class="font-semibold text-gray-900">NIM:</span> {{ $p->user->nim ?? '-' }}</p>
+                                        @elseif($p->user?->tipe_peminjam === 'pegawai')
+                                            <p><span class="font-semibold text-gray-900">Divisi:</span> {{ $p->user->divisi ?? '-' }}</p>
+                                        @endif
+                                        <p>
+                                            <span class="font-semibold text-gray-900">Foto:</span>
+                                            @if($p->foto_identitas)
+                                                <a href="{{ asset('storage/'.$p->foto_identitas) }}" target="_blank" class="text-indigo-600 hover:underline">Lihat</a>
+                                            @else
+                                                <span class="text-gray-400">Belum diunggah</span>
+                                            @endif
+                                        </p>
+                                    </div>
+                                </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
                                     <p class="font-semibold">{{ $p->kegiatan === 'kampus' ? 'Kampus' : 'Luar Kampus' }}</p>
                                     <p class="text-xs text-gray-500">{{ $p->keterangan_kegiatan ?? '-' }}</p>
@@ -111,7 +132,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-6 py-12 text-center text-sm text-gray-500">Tidak ada data</td>
+                                <td colspan="9" class="px-6 py-12 text-center text-sm text-gray-500">Tidak ada data</td>
                             </tr>
                         @endforelse
                     </tbody>

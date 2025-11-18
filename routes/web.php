@@ -90,6 +90,9 @@ Route::middleware(['auth', 'role:pegawai,admin'])->prefix('pegawai')->name('pega
     Route::post('peminjaman/{id}/reject', [PeminjamanController::class, 'reject'])->name('peminjaman.reject');
     Route::post('peminjaman/{id}/pickup', [PeminjamanController::class, 'pickup'])->name('peminjaman.pickup');
     Route::post('peminjaman/{id}/return', [PeminjamanController::class, 'return'])->name('peminjaman.return');
+
+    // Data Peminjam
+    Route::get('peminjam/data', [PegawaiController::class, 'peminjamData'])->name('peminjam.data');
 });
 
 /*
@@ -122,6 +125,11 @@ Route::middleware(['auth', 'role:peminjam'])->prefix('peminjam')->name('peminjam
 
     // Ajukan & lihat status peminjaman
     Route::resource('peminjaman', PeminjamanController::class)->only(['index', 'create', 'store', 'show']);
+
+    // Profil peminjam (akses melalui prefix peminjam)
+    Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 /*

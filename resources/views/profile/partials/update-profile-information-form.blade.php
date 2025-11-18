@@ -1,11 +1,29 @@
+@php
+    $tipeAwal = old('tipe_peminjam', $user->tipe_peminjam ?? 'umum');
+    $isPeminjamProfileRoute = request()->routeIs('peminjam.profile.*');
+    $profileUpdateRouteName = $isPeminjamProfileRoute ? 'peminjam.profile.update' : 'profile.update';
+    $prodiOptions = [
+        'Teknik Industri',
+        'Administrasi Publik',
+        'Manajemen',
+        'Psikologi',
+        'Hukum',
+        'Teknologi Informasi',
+        'Teknik Lingkungan',
+        'Teknik Perminyakan',
+        'Teknik Mesin',
+    ];
+    $tahunAngkatan = range(date('Y'), date('Y') - 10);
+@endphp
+
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900">
-            {{ __('Profile Information') }}
+            Profil Peminjam
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
-            {{ __("Update your account's profile information and email address.") }}
+            Lengkapi informasi diri Anda sehingga petugas mudah memverifikasi permintaan peminjaman.
         </p>
     </header>
 
@@ -13,42 +31,109 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route($profileUpdateRouteName) }}" class="mt-6 space-y-6" x-data="{ tipe: @js($tipeAwal) }">
         @csrf
         @method('patch')
 
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <x-input-label for="nama" value="Nama Lengkap" />
+                <x-text-input id="nama" name="nama" type="text" class="mt-1 block w-full" :value="old('nama', $user->nama)" required autofocus autocomplete="name" />
+                <x-input-error class="mt-2" :messages="$errors->get('nama')" />
+            </div>
+
+            <div>
+                <x-input-label for="username" value="Username" />
+                <x-text-input id="username" name="username" type="text" class="mt-1 block w-full" :value="old('username', $user->username)" required autocomplete="username" />
+                <x-input-error class="mt-2" :messages="$errors->get('username')" />
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <x-input-label for="email" value="Email" />
+                <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="email" />
+                <x-input-error class="mt-2" :messages="$errors->get('email')" />
+
+                @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+                    <div>
+                        <p class="text-sm mt-2 text-gray-800">
+                            {{ __('Your email address is unverified.') }}
+
+                            <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                {{ __('Click here to re-send the verification email.') }}
+                            </button>
+                        </p>
+
+                        @if (session('status') === 'verification-link-sent')
+                            <p class="mt-2 font-medium text-sm text-green-600">
+                                {{ __('A new verification link has been sent to your email address.') }}
+                            </p>
+                        @endif
+                    </div>
+                @endif
+            </div>
+
+            <div>
+                <x-input-label for="nohp" value="Nomor HP" />
+                <x-text-input id="nohp" name="nohp" type="text" class="mt-1 block w-full" :value="old('nohp', $user->nohp)" autocomplete="tel" placeholder="08xxxxxxxxxx" />
+                <x-input-error class="mt-2" :messages="$errors->get('nohp')" />
+            </div>
         </div>
 
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+            <x-input-label for="tipe_peminjam" value="Profil Peminjam" />
+            <select id="tipe_peminjam" name="tipe_peminjam" x-model="tipe" class="mt-1 block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                <option value="umum" @selected($tipeAwal === 'umum')>Umum</option>
+                <option value="mahasiswa" @selected($tipeAwal === 'mahasiswa')>Mahasiswa</option>
+                <option value="pegawai" @selected($tipeAwal === 'pegawai')>Pegawai Kampus</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">
+                Pilih profil yang sesuai. Mahasiswa perlu melengkapi data studi, sedangkan pegawai kantor perlu mengisi divisi/bagian.
+            </p>
+            <x-input-error class="mt-2" :messages="$errors->get('tipe_peminjam')" />
+        </div>
 
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <div>
-                    <p class="text-sm mt-2 text-gray-800">
-                        {{ __('Your email address is unverified.') }}
+        <div x-show="tipe === 'mahasiswa'" x-cloak class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-2">
+                <x-input-label for="prodi" value="Program Studi" />
+                <select id="prodi" name="prodi" class="mt-1 block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="">-- Pilih Prodi --</option>
+                    @foreach($prodiOptions as $prodi)
+                        <option value="{{ $prodi }}" @selected(old('prodi', $user->prodi) === $prodi)>{{ $prodi }}</option>
+                    @endforeach
+                </select>
+                <x-input-error class="mt-2" :messages="$errors->get('prodi')" />
+            </div>
 
-                        <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            {{ __('Click here to re-send the verification email.') }}
-                        </button>
-                    </p>
+            <div>
+                <x-input-label for="angkatan" value="Angkatan" />
+                <select id="angkatan" name="angkatan" class="mt-1 block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="">-- Pilih Tahun --</option>
+                    @foreach($tahunAngkatan as $tahun)
+                        <option value="{{ $tahun }}" @selected(old('angkatan', $user->angkatan) == $tahun)>{{ $tahun }}</option>
+                    @endforeach
+                </select>
+                <x-input-error class="mt-2" :messages="$errors->get('angkatan')" />
+            </div>
+        </div>
 
-                    @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600">
-                            {{ __('A new verification link has been sent to your email address.') }}
-                        </p>
-                    @endif
-                </div>
-            @endif
+        <div x-show="tipe === 'mahasiswa'" x-cloak>
+            <x-input-label for="nim" value="NIM" />
+            <x-text-input id="nim" name="nim" type="text" class="mt-1 block w-full" :value="old('nim', $user->nim)" maxlength="50" />
+            <p class="text-xs text-gray-500 mt-1">NIM akan membantu petugas memverifikasi identitas peminjam.</p>
+            <x-input-error class="mt-2" :messages="$errors->get('nim')" />
+        </div>
+
+        <div x-show="tipe === 'pegawai'" x-cloak>
+            <x-input-label for="divisi" value="Divisi / Bagian" />
+            <x-text-input id="divisi" name="divisi" type="text" class="mt-1 block w-full" :value="old('divisi', $user->divisi)" maxlength="100" />
+            <p class="text-xs text-gray-500 mt-1">Isi nama divisi atau unit kerja untuk mempermudah validasi.</p>
+            <x-input-error class="mt-2" :messages="$errors->get('divisi')" />
         </div>
 
         <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+            <x-primary-button>Simpan</x-primary-button>
 
             @if (session('status') === 'profile-updated')
                 <p
@@ -57,7 +142,7 @@
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
                     class="text-sm text-gray-600"
-                >{{ __('Saved.') }}</p>
+                >Tersimpan.</p>
             @endif
         </div>
     </form>

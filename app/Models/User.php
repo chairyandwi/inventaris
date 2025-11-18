@@ -24,6 +24,11 @@ class User extends Authenticatable
         'username',
         'nohp',
         'role',
+        'tipe_peminjam',
+        'prodi',
+        'angkatan',
+        'nim',
+        'divisi',
     ];
 
     /**

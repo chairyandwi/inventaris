@@ -23,10 +23,31 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $tipePeminjam = fake()->randomElement(['umum', 'mahasiswa', 'pegawai']);
+        $prodiList = [
+            'Teknik Industri',
+            'Administrasi Publik',
+            'Manajemen',
+            'Psikologi',
+            'Hukum',
+            'Teknologi Informasi',
+            'Teknik Lingkungan',
+            'Teknik Perminyakan',
+            'Teknik Mesin',
+        ];
+
         return [
-            'name' => fake()->name(),
+            'nama' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
+            'username' => fake()->unique()->userName(),
+            'nohp' => fake()->e164PhoneNumber(),
+            'role' => 'peminjam',
+            'tipe_peminjam' => $tipePeminjam,
+            'prodi' => $tipePeminjam === 'mahasiswa' ? fake()->randomElement($prodiList) : null,
+            'angkatan' => $tipePeminjam === 'mahasiswa' ? (string) fake()->numberBetween(2018, 2025) : null,
+            'nim' => $tipePeminjam === 'mahasiswa' ? fake()->unique()->numerify('23#######') : null,
+            'divisi' => $tipePeminjam === 'pegawai' ? fake()->randomElement(['Akademik', 'Keuangan', 'Fasilitas']) : null,
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];

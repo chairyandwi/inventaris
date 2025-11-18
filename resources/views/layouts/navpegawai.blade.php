@@ -74,6 +74,12 @@
                         </svg>                                                                        
                         User
                     </a>
+                    <a href="{{ route('pegawai.peminjam.data') }}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6h5.25m-5.25 6H21m-7.5 6H21M3 5.25a2.25 2.25 0 0 1 2.25-2.25h3A2.25 2.25 0 0 1 10.5 5.25v3A2.25 2.25 0 0 1 8.25 10.5h-3A2.25 2.25 0 0 1 3 8.25zm0 9a2.25 2.25 0 0 1 2.25-2.25h3a2.25 2.25 0 0 1 2.25 2.25v3a2.25 2.25 0 0 1-2.25 2.25h-3A2.25 2.25 0 0 1 3 17.25z" />
+                        </svg>
+                        Data Peminjam
+                    </a>
                 </div>
             </div>
 
@@ -166,6 +172,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                     </svg>  
                     User
+                </a>
+                <a href="{{ route('pegawai.peminjam.data') }}" class="flex items-center text-gray-700 hover:text-indigo-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6h5.25m-5.25 6H21m-7.5 6H21M3 5.25a2.25 2.25 0 0 1 2.25-2.25h3A2.25 2.25 0 0 1 10.5 5.25v3A2.25 2.25 0 0 1 8.25 10.5h-3A2.25 2.25 0 0 1 3 8.25zm0 9a2.25 2.25 0 0 1 2.25-2.25h3a2.25 2.25 0 0 1 2.25 2.25v3a2.25 2.25 0 0 1-2.25 2.25h-3A2.25 2.25 0 0 1 3 17.25z" />
+                    </svg>
+                    Data Peminjam
                 </a>
             </div>
         </div>

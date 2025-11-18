@@ -48,7 +48,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Peminjam</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kegiatan</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jumlah</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Identitas</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Detail Peminjam</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rencana Pinjam</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tgl Pinjam</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rencana Kembali</th>
@@ -82,11 +82,13 @@
                                     {{ $p->jumlah }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
-                                    @if($p->foto_identitas)
-                                        <a href="{{ asset('storage/'.$p->foto_identitas) }}" target="_blank" class="text-indigo-600 hover:underline text-xs">Lihat</a>
-                                    @else
-                                        <span class="text-gray-400 text-xs">-</span>
-                                    @endif
+                                    <a href="{{ route('pegawai.peminjaman.show', $p->idpeminjaman) }}"
+                                        class="inline-flex items-center px-4 py-2 rounded-full text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition">
+                                        Lihat Detail
+                                        <svg class="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </a>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
                                     {{ $p->tgl_pinjam_rencana ? $p->tgl_pinjam_rencana->format('d-m-Y') : '-' }}
