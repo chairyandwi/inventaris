@@ -22,7 +22,6 @@
 - [Getting Started](#getting-started)
 - [Configuration](#configuration)
 - [Usage](#usage)
-- [Testing & QA](#testing--qa)
 - [License](#license)
 
 ---
