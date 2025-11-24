@@ -66,7 +66,7 @@ Ideal for campuses, offices, warehouses, and government institutions.
 
 ### Installation
 ```bash
-git clone https://github.com/username/inventaris.git
+git clone https://github.com/chairyandwi/inventaris.git
 cd inventaris
 
 composer install
