@@ -107,17 +107,12 @@ php artisan serve
 npm run dev
 ```
 ### Login Credentials 
-#### Admin
-Email: admin@example.com
-Password: admin123
-
-#### Auditor
-Email: auditor@example.com   
-Password: auditor123
-
-### Staff
-Email: staff@example.com
-Password: staff123
+| Role     | Email                | Password     |
+|----------|----------------------|--------------|
+| Admin    | admin@example.com    | admin123     |
+| Auditor  | auditor@example.com  | auditor123   |
+| Staff    | staff@example.com    | staff123     |
+| Borrower | borrower@example.com | borrower123  |
 
 ## 📄 License
 MIT License
