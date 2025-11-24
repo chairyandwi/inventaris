@@ -20,54 +20,26 @@
 - [Core Features](#core-features)
 - [Technology Stack](#technology-stack)
 - [Getting Started](#getting-started)
-- [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage](#usage)
-- [Testing](#testing)
-- [Contributing](#contributing)
 - [License](#license)
 
 ---
 
 ## 📌 Overview
-**Inventaris** is an integrated **Inventory & Asset Management System** built with **Laravel 11**.  
-The platform is designed to help organizations monitor, track, and maintain assets efficiently through automation, structured data processing, and real-time visibility.
-
-This system is ideal for:
-- Educational institutions  
-- Offices & corporate environments  
-- Government & public service units  
-- Warehouses & production facilities  
+**Inventaris** is an integrated **Inventory & Asset Management System** built on **Laravel 11** to help organizations track, manage, and maintain assets through automation and real-time visibility.  
+Ideal for campuses, offices, warehouses, and government institutions.
 
 ---
 
 ## ✨ Core Features
-
-### 🔐 Role-Based Access Control (RBAC)
-Granular permission management for:
-- **Admin** – full system access  
-- **Staff/Operator** – asset/data entry  
-- **Auditor** – review & reporting  
-
-### 📦 Asset & Inventory Management
-- CRUD for categories, assets, and inventory items  
-- Status tracking (active, maintenance, broken, disposed)  
-- Barcode/QR Code support  
-- Import/export via Excel/CSV  
-
-### 📊 Reporting & Analytics
-- Real-time dashboard (TailwindCSS + Alpine.js)  
-- Exportable reports (PDF, CSV, XLSX)  
-- Audit logs & activity tracking  
-
-### 🛠 Maintenance & Monitoring
-- Scheduled maintenance reminders  
-- Asset lifecycle history  
-- Notification system ready (email/telegram webhook optional)  
-
-### 🎨 Customizable UI Components
-- Reusable form & table components  
-- Fully responsive mobile-first design  
+- 🔐 **RBAC (Role-Based Access Control)**
+- 📦 **Asset & Inventory CRUD Modules**
+- 🏷 **Barcode & QR Code support**
+- 📊 **Reporting (PDF, CSV, XLSX)**
+- 📈 **Analytics Dashboard**
+- 🛠 **Maintenance Scheduling & Logs**
+- 🧩 **Reusable UI Components (TailwindCSS + Alpine.js)**
 
 ---
 
@@ -79,40 +51,94 @@ Granular permission management for:
 | Frontend | TailwindCSS, Alpine.js, Vite |
 | Database | MySQL / PostgreSQL |
 | Tools | Composer, NPM, Git |
-| Optional | Laravel Socialite, Spatie Permissions, Laravel Excel |
+| Optional | Spatie Permissions, Laravel Excel |
 
 ---
 
 ## ⚙️ Getting Started
 
 ### Prerequisites
-Pastikan perangkat Anda memiliki:
-- **PHP ≥ 8.2**
-- **Composer (latest)**
-- **Node.js & NPM**
-- **MySQL / PostgreSQL**
-- **Git**
+- PHP ≥ 8.2  
+- Composer  
+- Node.js & NPM  
+- MySQL / PostgreSQL  
+- Git
 
----
-
-## 🚀 Installation
-
+### Installation
 ```bash
-# Clone the repository
 git clone https://github.com/username/inventaris.git
-
-# Move into project directory
 cd inventaris
 
-# Install backend dependencies
 composer install
+npm install && npm run build
 
-# Install frontend dependencies
-npm install
-npm run build
-
-# Setup environment file
 cp .env.example .env
-
-# Generate application key
 php artisan key:generate
+```
+
+## 🔧 Configuration
+
+### Configure Database
+edit file .env 
+```bash
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=<<database name>>
+DB_USERNAME=<<username>>
+DB_PASSWORD=<<password>>
+```
+### Run Migration & Seeders
+```bash
+php artisan migrate --seed
+```
+### Link Storage
+```bash
+php artisan storage:link
+```
+
+## ▶️ Usage
+### Start Local Development Server 
+```bash
+php artisan serve
+```
+- New Terminal
+```bash
+npm run dev
+```
+### Login Credentials 
+#### Admin
+Email: admin@example.com
+Password: admin123
+
+#### Auditor
+Email: auditor@example.com   
+Password: auditor123
+
+### Staff
+Email: staff@example.com
+Password: staff123
+
+## 📄 License
+MIT License
+
+Copyright (c) 2025 Chairian
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
