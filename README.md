@@ -6,8 +6,8 @@
 <p align="center"><em>Empowering Innovation, Simplifying Asset Management Efficiently</em></p>
 
 <p align="center">
-  <a href="#"><img src="https://img.shields.io/badge/Laravel-11.x-FF2D20?style=flat-square&logo=laravel&logoColor=white" /></a>
-  <a href="#"><img src="https://img.shields.io/badge/PHP-8.2-777BB4?style=flat-square&logo=php&logoColor=white" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?style=flat-square&logo=laravel&logoColor=white" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/PHP-8.3-777BB4?style=flat-square&logo=php&logoColor=white" /></a>
   <a href="#"><img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" /></a>
   <a href="#"><img src="https://img.shields.io/github/issues/chairyandwi/inventaris?style=flat-square" /></a>
   <a href="#"><img src="https://img.shields.io/github/stars/chairyandwi/inventaris?style=flat-square" /></a>
@@ -22,20 +22,23 @@
 - [Getting Started](#getting-started)
 - [Configuration](#configuration)
 - [Usage](#usage)
+- [Testing & QA](#testing--qa)
 - [License](#license)
 
 ---
 
 ## 📌 Overview
-**Inventaris** is an integrated **Inventory & Asset Management System** built on **Laravel 11** to help organizations track, manage, and maintain assets through automation and real-time visibility.  
-Ideal for campuses, offices, warehouses, and government institutions.
+**Inventaris** is an advanced **Inventory & Asset Management System** built using **Laravel 12** and **PHP 8.3**.  
+Designed to help organizations efficiently track, manage, and maintain assets using automation, structured workflows, and real-time insights.
+
+Suitable for **campuses, offices, warehouses, industries, and government institutions**.
 
 ---
 
 ## ✨ Core Features
 - 🔐 **RBAC (Role-Based Access Control)**
 - 📦 **Asset & Inventory CRUD Modules**
-- 🏷 **Barcode & QR Code support**
+- 🏷 **Barcode & QR Code Support**
 - 📊 **Reporting (PDF, CSV, XLSX)**
 - 📈 **Analytics Dashboard**
 - 🛠 **Maintenance Scheduling & Logs**
@@ -45,23 +48,26 @@ Ideal for campuses, offices, warehouses, and government institutions.
 
 ## 🧱 Technology Stack
 
-| Layer | Technology |
-|------|------------|
-| Backend | Laravel 11, PHP 8.2 |
-| Frontend | TailwindCSS, Alpine.js, Vite |
-| Database | MySQL / PostgreSQL |
-| Tools | Composer, NPM, Git |
+| Layer    | Technology                        |
+|----------|-----------------------------------|
+| Backend  | Laravel 12.x, PHP 8.3             |
+| Frontend | TailwindCSS 3, Alpine.js 3, Vite 7|
+| Database | MySQL / PostgreSQL                |
+| Tools    | Composer, NPM, Git                |
 | Optional | Spatie Permissions, Laravel Excel |
+
+> Laravel Version: **12.38.x**  
+> PDF Generator: **barryvdh/laravel-dompdf v3.1.1**
 
 ---
 
 ## ⚙️ Getting Started
 
 ### Prerequisites
-- PHP ≥ 8.2  
-- Composer  
-- Node.js & NPM  
-- MySQL / PostgreSQL  
+- PHP ≥ 8.2 (recommended 8.3)
+- Composer
+- Node.js & NPM
+- MySQL / PostgreSQL
 - Git
 
 ### Installation
@@ -74,6 +80,7 @@ npm install && npm run build
 
 cp .env.example .env
 php artisan key:generate
+
 ```
 
 ## 🔧 Configuration
