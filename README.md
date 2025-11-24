@@ -16,60 +16,103 @@
 ---
 
 ## 🧭 Table of Contents
-
 - [Overview](#overview)
+- [Core Features](#core-features)
+- [Technology Stack](#technology-stack)
 - [Getting Started](#getting-started)
 - [Installation](#installation)
+- [Configuration](#configuration)
 - [Usage](#usage)
 - [Testing](#testing)
+- [Contributing](#contributing)
 - [License](#license)
 
 ---
 
-## 🧩 Overview
+## 📌 Overview
+**Inventaris** is an integrated **Inventory & Asset Management System** built with **Laravel 11**.  
+The platform is designed to help organizations monitor, track, and maintain assets efficiently through automation, structured data processing, and real-time visibility.
 
-**Inventaris** is a comprehensive inventory and asset management platform built on **Laravel**, designed to streamline asset tracking, maintenance, and reporting. It enables organizations to manage resources effectively with automation and real-time monitoring.
+This system is ideal for:
+- Educational institutions  
+- Offices & corporate environments  
+- Government & public service units  
+- Warehouses & production facilities  
 
-### ✨ Key Features
+---
 
-- **Customizable UI Components** — Modular layouts and reusable form elements.
-- **Role-Based Access Control (RBAC)** — Secure management for admins, staff, and auditors.
-- **Asset & Inventory Modules** — Full CRUD functionality with categorization and barcode support.
-- **Reporting & Analytics** — Generate reports in PDF, CSV, or Excel formats.
-- **Responsive Dashboard** — Built using TailwindCSS and Alpine.js for modern UI/UX.
+## ✨ Core Features
+
+### 🔐 Role-Based Access Control (RBAC)
+Granular permission management for:
+- **Admin** – full system access  
+- **Staff/Operator** – asset/data entry  
+- **Auditor** – review & reporting  
+
+### 📦 Asset & Inventory Management
+- CRUD for categories, assets, and inventory items  
+- Status tracking (active, maintenance, broken, disposed)  
+- Barcode/QR Code support  
+- Import/export via Excel/CSV  
+
+### 📊 Reporting & Analytics
+- Real-time dashboard (TailwindCSS + Alpine.js)  
+- Exportable reports (PDF, CSV, XLSX)  
+- Audit logs & activity tracking  
+
+### 🛠 Maintenance & Monitoring
+- Scheduled maintenance reminders  
+- Asset lifecycle history  
+- Notification system ready (email/telegram webhook optional)  
+
+### 🎨 Customizable UI Components
+- Reusable form & table components  
+- Fully responsive mobile-first design  
+
+---
+
+## 🧱 Technology Stack
+
+| Layer | Technology |
+|------|------------|
+| Backend | Laravel 11, PHP 8.2 |
+| Frontend | TailwindCSS, Alpine.js, Vite |
+| Database | MySQL / PostgreSQL |
+| Tools | Composer, NPM, Git |
+| Optional | Laravel Socialite, Spatie Permissions, Laravel Excel |
 
 ---
 
 ## ⚙️ Getting Started
 
 ### Prerequisites
-
-Ensure the following dependencies are installed:
-
-- **PHP:** >= 8.2  
-- **Composer:** Latest  
-- **Node.js & NPM:** For frontend dependencies  
-- **Database:** MySQL / PostgreSQL  
+Pastikan perangkat Anda memiliki:
+- **PHP ≥ 8.2**
+- **Composer (latest)**
+- **Node.js & NPM**
+- **MySQL / PostgreSQL**
+- **Git**
 
 ---
 
 ## 🚀 Installation
 
-Clone this repository and install dependencies.
-
 ```bash
 # Clone the repository
 git clone https://github.com/username/inventaris.git
 
-# Navigate to project directory
+# Move into project directory
 cd inventaris
 
 # Install backend dependencies
 composer install
 
 # Install frontend dependencies
-npm install && npm run build
+npm install
+npm run build
 
-# Copy environment file and configure
+# Setup environment file
 cp .env.example .env
+
+# Generate application key
 php artisan key:generate
