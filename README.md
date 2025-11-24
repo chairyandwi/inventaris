@@ -9,8 +9,8 @@
   <a href="#"><img src="https://img.shields.io/badge/Laravel-11.x-FF2D20?style=flat-square&logo=laravel&logoColor=white" /></a>
   <a href="#"><img src="https://img.shields.io/badge/PHP-8.2-777BB4?style=flat-square&logo=php&logoColor=white" /></a>
   <a href="#"><img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" /></a>
-  <a href="#"><img src="https://img.shields.io/github/issues/username/inventaris?style=flat-square" /></a>
-  <a href="#"><img src="https://img.shields.io/github/stars/username/inventaris?style=flat-square" /></a>
+  <a href="#"><img src="https://img.shields.io/github/issues/chairyandwi/inventaris?style=flat-square" /></a>
+  <a href="#"><img src="https://img.shields.io/github/stars/chairyandwi/inventaris?style=flat-square" /></a>
 </p>
 
 ---
