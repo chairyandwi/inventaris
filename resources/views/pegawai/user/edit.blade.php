@@ -3,11 +3,14 @@
 @section('title', 'Edit User')
 
 @section('content')
+@php
+    $routePrefix = request()->routeIs('admin.*') ? 'admin.' : 'pegawai.';
+@endphp
 <div class="container mx-auto px-4 py-6">
     <!-- Header -->
     <div class="mb-6">
         <div class="flex items-center space-x-4">
-            <a href="{{ route('pegawai.user.index') }}" 
+            <a href="{{ route($routePrefix . 'user.index') }}" 
                class="inline-flex items-center px-3 py-2 text-sm text-gray-600 hover:text-gray-900 transition duration-150 ease-in-out">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -20,7 +23,7 @@
 
     <!-- Card wrapper -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <form action="{{ route('pegawai.user.update', $user->id) }}" method="POST">
+        <form action="{{ route($routePrefix . 'user.update', $user->id) }}" method="POST">
             @csrf
             @method('PUT')
             

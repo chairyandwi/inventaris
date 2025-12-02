@@ -38,16 +38,37 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-white rounded-2xl shadow p-6">
-                <p class="text-sm font-semibold text-gray-500 uppercase">Barang Masuk</p>
-                <p class="text-3xl font-bold text-gray-900">{{ $barangMasuk }}</p>
-            </div>
-            <div class="bg-white rounded-2xl shadow p-6">
                 <p class="text-sm font-semibold text-gray-500 uppercase">Barang Dipinjam</p>
                 <p class="text-3xl font-bold text-gray-900">{{ $barangPinjam }}</p>
             </div>
             <div class="bg-white rounded-2xl shadow p-6">
                 <p class="text-sm font-semibold text-gray-500 uppercase">Barang Keluar</p>
                 <p class="text-3xl font-bold text-gray-900">{{ $barangKeluar }}</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Status Peminjaman</h3>
+                <a href="{{ route('admin.peminjaman.index') }}" class="text-sm text-indigo-600 hover:text-indigo-700">Lihat detail</a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                <div class="p-4 rounded-lg border border-yellow-100 bg-yellow-50">
+                    <p class="text-xs font-semibold text-yellow-700 uppercase">Pending</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $peminjamanPending }}</p>
+                </div>
+                <div class="p-4 rounded-lg border border-blue-100 bg-blue-50">
+                    <p class="text-xs font-semibold text-blue-700 uppercase">Dipinjam</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $peminjamanDipinjam }}</p>
+                </div>
+                <div class="p-4 rounded-lg border border-green-100 bg-green-50">
+                    <p class="text-xs font-semibold text-green-700 uppercase">Dikembalikan</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $peminjamanDikembalikan }}</p>
+                </div>
+                <div class="p-4 rounded-lg border border-red-100 bg-red-50">
+                    <p class="text-xs font-semibold text-red-700 uppercase">Ditolak</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $peminjamanDitolak }}</p>
+                </div>
             </div>
         </div>
 

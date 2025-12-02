@@ -15,7 +15,6 @@ use App\Http\Controllers\BarangController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\KategoriController;
-use App\Http\Controllers\BarangMasukController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\InventarisRuangController;
 use App\Http\Controllers\Admin\AppConfigController;
@@ -71,7 +70,6 @@ Route::middleware(['auth', 'role:pegawai,admin'])->prefix('pegawai')->name('pega
 
     // Laporan
     Route::get('barang/laporan', [BarangController::class, 'laporan'])->name('barang.laporan');
-    Route::get('barang_masuk/laporan', [BarangMasukController::class, 'laporan'])->name('barang_masuk.laporan');
     Route::get('peminjaman/laporan', [PeminjamanController::class, 'laporan'])->name('peminjaman.laporan');
     Route::get('peminjaman/cetak', [PeminjamanController::class, 'cetak'])->name('peminjaman.cetak');
 
@@ -81,7 +79,6 @@ Route::middleware(['auth', 'role:pegawai,admin'])->prefix('pegawai')->name('pega
     Route::resource('ruang', RuangController::class);
     Route::resource('user', UserController::class);
     Route::resource('barang', BarangController::class);
-    Route::resource('barang_masuk', BarangMasukController::class);
     Route::resource('inventaris-ruang', InventarisRuangController::class)->only(['index', 'create', 'store', 'destroy']);
 
     // Manajemen peminjaman (pegawai approve/reject/return)
@@ -146,12 +143,17 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         $barang = Barang::count();
         $ruang = Ruang::count();
         $kategori = Kategori::count();
+        $peminjamanPending = Peminjaman::where('status', 'pending')->count();
+        $peminjamanDipinjam = Peminjaman::where('status', 'dipinjam')->count();
+        $peminjamanDikembalikan = Peminjaman::where('status', 'dikembalikan')->count();
+        $peminjamanDitolak = Peminjaman::where('status', 'ditolak')->count();
 
         $pesanAktivitas = \App\Models\LogAktivitas::latest()->take(5)->get();
 
         return view('admin.index', compact(
             'barangKeluar', 'barangMasuk', 'barangPinjam',
-            'user', 'barang', 'ruang', 'kategori', 'pesanAktivitas'
+            'user', 'barang', 'ruang', 'kategori', 'pesanAktivitas',
+            'peminjamanPending', 'peminjamanDipinjam', 'peminjamanDikembalikan', 'peminjamanDitolak'
         ));
     })->name('index');
 
@@ -159,7 +161,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('ruang', RuangController::class);
     Route::resource('user', UserController::class);
     Route::resource('barang', BarangController::class);
-    Route::resource('barang_masuk', BarangMasukController::class);
     Route::resource('inventaris-ruang', InventarisRuangController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::resource('peminjaman', PeminjamanController::class);
     Route::get('peminjaman/laporan', [PeminjamanController::class, 'laporan'])->name('peminjaman.laporan');

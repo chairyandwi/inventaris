@@ -3,9 +3,12 @@
 @section('title', 'Detail Barang')
 
 @section('content')
+@php
+    $routePrefix = request()->routeIs('admin.*') ? 'admin.' : 'pegawai.';
+@endphp
 <div class="pt-24 container mx-auto px-4 py-6 min-h-screen">
     <div class="mb-6 flex items-center gap-4">
-        <a href="{{ route('pegawai.barang.index') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+        <a href="{{ route($routePrefix . 'barang.index') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
