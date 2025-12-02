@@ -55,6 +55,13 @@
                     <a href="{{ route('admin.logs.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">Log Aktivitas</a>
                 </div>
             </div>
+
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
+                    Logout
+                </button>
+            </form>
         </div>
 
         <div class="md:hidden">
