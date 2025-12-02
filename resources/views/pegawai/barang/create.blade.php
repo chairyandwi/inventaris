@@ -164,7 +164,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 distribusi-item">
                                 <div>
                                     <label class="text-xs text-gray-600">Ruang</label>
-                                    <select name="distribusi_ruang[]" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                                    <select name="distribusi_ruang[]" data-inventaris data-required="true" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                                         <option value="">-- Pilih Ruang --</option>
                                         @foreach($ruang as $r)
                                             <option value="{{ $r->idruang }}" @selected($row['ruang'] == $r->idruang)>{{ $r->nama_ruang }} ({{ $r->nama_gedung }})</option>
@@ -173,12 +173,12 @@
                                 </div>
                                 <div>
                                     <label class="text-xs text-gray-600">Jumlah Unit</label>
-                                    <input type="number" name="distribusi_jumlah[]" min="1" max="500" value="{{ $row['jumlah'] }}" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                                    <input type="number" name="distribusi_jumlah[]" min="1" max="500" value="{{ $row['jumlah'] }}" data-inventaris data-required="true" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                                 </div>
                                 <div>
                                     <label class="text-xs text-gray-600">Catatan</label>
                                     <div class="flex items-center space-x-2">
-                                        <input type="text" name="distribusi_catatan[]" value="{{ $row['catatan'] }}" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Opsional">
+                                        <input type="text" name="distribusi_catatan[]" value="{{ $row['catatan'] }}" data-inventaris class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Opsional">
                                         <button type="button" class="text-red-500 hover:text-red-600 text-xs remove-distribusi" title="Hapus">&times;</button>
                                     </div>
                                 </div>
@@ -215,8 +215,21 @@
         const listDistribusi = document.getElementById('listDistribusi');
         const tambahDistribusi = document.getElementById('tambahDistribusi');
 
-        function toggleInventaris() {
-            inventarisFields.classList.toggle('hidden', jenisSelect.value !== 'tetap');
+        function applyInventarisState() {
+            const aktif = jenisSelect.value === 'tetap';
+            inventarisFields.classList.toggle('hidden', !aktif);
+
+            listDistribusi.querySelectorAll('[data-inventaris]').forEach(el => {
+                if (aktif) {
+                    if (el.dataset.required === 'true') {
+                        el.setAttribute('required', 'required');
+                    }
+                    el.removeAttribute('disabled');
+                } else {
+                    el.removeAttribute('required');
+                    el.setAttribute('disabled', 'disabled');
+                }
+            });
         }
 
         function addDistribusiRow(data = {}) {
@@ -225,7 +238,7 @@
             template.innerHTML = `
                 <div>
                     <label class="text-xs text-gray-600">Ruang</label>
-                    <select name="distribusi_ruang[]" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                    <select name="distribusi_ruang[]" data-inventaris data-required="true" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                         <option value="">-- Pilih Ruang --</option>
                         @foreach($ruang as $r)
                             <option value="{{ $r->idruang }}">{{ $r->nama_ruang }} ({{ $r->nama_gedung }})</option>
@@ -234,13 +247,13 @@
                 </div>
                 <div>
                     <label class="text-xs text-gray-600">Jumlah Unit</label>
-                    <input type="number" name="distribusi_jumlah[]" min="1" max="500" value="1"
-                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                    <input type="number" name="distribusi_jumlah[]" min="1" max="500" value="1" data-inventaris data-required="true"
+                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                 </div>
                 <div>
                     <label class="text-xs text-gray-600">Catatan</label>
                     <div class="flex items-center space-x-2">
-                        <input type="text" name="distribusi_catatan[]" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Opsional">
+                        <input type="text" name="distribusi_catatan[]" data-inventaris class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Opsional">
                         <button type="button" class="text-red-500 hover:text-red-600 text-xs remove-distribusi">&times;</button>
                     </div>
                 </div>
@@ -251,6 +264,8 @@
             if (data.ruang) template.querySelector('select').value = data.ruang;
             if (data.jumlah) template.querySelector('input[name="distribusi_jumlah[]"]').value = data.jumlah;
             if (data.catatan) template.querySelector('input[name="distribusi_catatan[]"]').value = data.catatan;
+
+            applyInventarisState();
         }
 
         listDistribusi.addEventListener('click', function (e) {
@@ -273,8 +288,8 @@
             addDistribusiRow();
         }
 
-        jenisSelect.addEventListener('change', toggleInventaris);
-        toggleInventaris();
+        jenisSelect.addEventListener('change', applyInventarisState);
+        applyInventarisState();
     });
 </script>
 @endsection
