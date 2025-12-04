@@ -4,7 +4,8 @@
 
 @section('content')
     @php
-        $routePrefix = request()->routeIs('admin.*') ? 'admin.' : 'pegawai.';
+        $userRole = auth()->user()->role ?? 'pegawai';
+        $routePrefix = $userRole === 'admin' ? 'admin.' : 'pegawai.';
     @endphp
     <div class="pt-24 container mx-auto px-4 py-6 min-h-screen">
         <!-- Header dengan tombol Tambah -->

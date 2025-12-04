@@ -81,7 +81,7 @@
             <a href="{{ route('admin.barang.index') }}" class="block text-gray-700 hover:text-indigo-600">Barang</a>
             <a href="{{ route('admin.user.index') }}" class="block text-gray-700 hover:text-indigo-600">User</a>
             <a href="{{ route('admin.inventaris-ruang.index') }}" class="block text-gray-700 hover:text-indigo-600">Inventaris Ruang</a>
-            <a href="{{ route('admin.peminjaman.index') }}" class="block text-gray-700 hover:text-indigo-600">Peminjaman</a>
+                             <a href="{{ route('admin.peminjaman.index') }}" class="block text-gray-700 hover:text-indigo-600">Peminjaman</a>
             <a href="{{ route('admin.aplikasi.index') }}" class="block text-gray-700 hover:text-indigo-600">Konfigurasi Aplikasi</a>
             <a href="{{ route('admin.logs.index') }}" class="block text-gray-700 hover:text-indigo-600">Log Aktivitas</a>
             <a href="{{ route('admin.peminjaman.laporan') }}" class="block text-gray-700 hover:text-indigo-600">Laporan</a>

@@ -53,7 +53,7 @@ Route::middleware('auth')->group(function () {
 | Route untuk Pegawai
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:pegawai,admin'])->prefix('pegawai')->name('pegawai.')->group(function () {
+Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')->group(function () {
     Route::get('/', function () {
         $barangKeluar = 10;
         $barangMasuk = BarangMasuk::count();
@@ -160,6 +160,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('kategori', KategoriController::class);
     Route::resource('ruang', RuangController::class);
     Route::resource('user', UserController::class);
+    Route::get('barang/laporan', [BarangController::class, 'laporan'])->name('barang.laporan');
     Route::resource('barang', BarangController::class);
     Route::resource('inventaris-ruang', InventarisRuangController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::resource('peminjaman', PeminjamanController::class);

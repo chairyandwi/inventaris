@@ -182,14 +182,14 @@ class BarangController extends Controller
 
     public function laporan()
     {
-        // Pastikan user login dan role pegawai
+        // Pastikan user login dan role pegawai atau admin
         if (!auth('web')->check()) {
             return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
         }
         
         $user = auth('web')->user();
         
-        if (!$user || $user->role !== 'pegawai') {
+        if (!$user || !in_array($user->role, ['pegawai', 'admin'])) {
             abort(403, 'Anda tidak memiliki akses.');
         }
         
