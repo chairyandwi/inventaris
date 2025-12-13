@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Barang;
 use App\Models\BarangUnit;
+use App\Models\BarangMasuk;
 use App\Models\Kategori;
 use App\Models\Ruang;
 use App\Support\KodeInventarisGenerator;
@@ -19,6 +20,13 @@ class BarangController extends Controller
     public function index(Request $request)
     {
         $query = Barang::with('kategori'); // eager load kategori
+
+        $stats = [
+            'total' => Barang::count(),
+            'totalTetap' => Barang::where('jenis_barang', 'tetap')->count(),
+            'totalPinjam' => Barang::where('jenis_barang', 'pinjam')->count(),
+            'totalStok' => Barang::sum('stok'),
+        ];
 
         // Search
         if ($request->filled('search')) {
@@ -39,7 +47,7 @@ class BarangController extends Controller
 
         $barang = $query->paginate($perPage)->appends($request->all());
 
-        return view('pegawai.barang.index', compact('barang'));
+        return view('pegawai.barang.index', compact('barang', 'stats'));
     }
 
     public function create()
@@ -195,8 +203,12 @@ class BarangController extends Controller
         
 
         $barang = Barang::with('kategori')->orderByDesc('idbarang')->get();
+        $barangMasuk = BarangMasuk::with(['barang.kategori'])
+            ->orderByDesc('tgl_masuk')
+            ->orderByDesc('created_at')
+            ->get();
 
-        $pdf = Pdf::loadView('pegawai.barang.laporan', compact('barang'))
+        $pdf = Pdf::loadView('pegawai.barang.laporan', compact('barang', 'barangMasuk'))
                   ->setPaper('A4', 'portrait');
 
         return $pdf->download('Laporan_Barang.pdf');

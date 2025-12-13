@@ -159,6 +159,41 @@
             font-style: italic;
         }
 
+        .section-title {
+            font-size: 13pt;
+            font-weight: bold;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10pt;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge.baru {
+            background: #e8f5e9;
+            color: #1b5e20;
+            border: 1px solid #a5d6a7;
+        }
+
+        .badge.bekas {
+            background: #fff3e0;
+            color: #e65100;
+            border: 1px solid #ffcc80;
+        }
+
+        .muted {
+            color: #666;
+            font-style: italic;
+        }
+
         @media screen and (max-width: 768px) {
             .rangkasurat {
                 padding: 10px;
@@ -244,6 +279,9 @@
             $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoFile));
         }
     @endphp
+    @php
+        $barangMasukList = $barangMasuk ?? collect();
+    @endphp
     <div class="rangkasurat">
         <!-- Header Section -->
         <table class="header-table">
@@ -271,8 +309,10 @@
 
         <div class="report-title">
             <b>LAPORAN BARANG</b>
+        </div>
 
-            <!-- Table Section -->
+        <div>
+            <div class="section-title">Ringkasan Stok Barang</div>
             <table class="isi">
                 <tr>
                     <th width="20">NO</th>
@@ -301,11 +341,83 @@
                 @endforelse
             </table>
         </div>
+
+        <div style="margin-top: 24px;">
+            <div class="section-title">Rekap Barang Masuk (Aktual)</div>
+            <table class="isi">
+                <tr>
+                    <th width="20">NO</th>
+                    <th>Tgl Masuk</th>
+                    <th>Kode Barang</th>
+                    <th>Nama Barang</th>
+                    <th>Status</th>
+                    <th>Jumlah Masuk</th>
+                    <th>Spesifikasi / Keterangan</th>
+                </tr>
+                @php $urut = 1; @endphp
+                @forelse($barangMasukList as $masuk)
+                    @php
+                        $isPc = $masuk->is_pc || str_contains(strtolower(optional($masuk->barang?->kategori)->nama_kategori ?? ''), 'pc');
+                        $specParts = [];
+                        if ($masuk->ram_capacity_gb) {
+                            $ramBrand = $masuk->ram_brand ? ' (' . $masuk->ram_brand . ')' : '';
+                            $specParts[] = 'RAM ' . $masuk->ram_capacity_gb . 'GB' . $ramBrand;
+                        }
+                        if ($masuk->storage_type && $masuk->storage_capacity_gb) {
+                            $specParts[] = $masuk->storage_type . ' ' . $masuk->storage_capacity_gb . 'GB';
+                        }
+                        if ($masuk->processor) {
+                            $specParts[] = 'CPU ' . $masuk->processor;
+                        }
+                        $specText = $isPc
+                            ? ($specParts ? implode(' | ', $specParts) : 'Spesifikasi PC belum diisi')
+                            : ($masuk->keterangan ?? 'Non-PC / tidak memerlukan detail komponen');
+                        $tanggalMasuk = $masuk->tgl_masuk ?? ($masuk->created_at ? $masuk->created_at->format('Y-m-d') : '-');
+                    @endphp
+                    <tr>
+                        <td class="number-cell" data-label="NO">{{ $urut++ }}</td>
+                        <td data-label="Tgl Masuk">{{ $tanggalMasuk }}</td>
+                        <td class="code-cell" data-label="Kode Barang">{{ $masuk->barang->kode_barang ?? '-' }}</td>
+                        <td data-label="Nama Barang" class="category-cell">{{ $masuk->barang->nama_barang ?? '-' }}</td>
+                        <td class="category-cell" data-label="Status">
+                            <span class="badge {{ $masuk->status_barang === 'bekas' ? 'bekas' : 'baru' }}">
+                                {{ strtoupper($masuk->status_barang ?? 'baru') }}
+                            </span>
+                        </td>
+                        <td class="stock-cell" data-label="Jumlah Masuk">{{ $masuk->jumlah ?? 0 }}</td>
+                        <td data-label="Spesifikasi / Keterangan" class="category-cell">
+                            {{ $specText }}
+                            @if (!$isPc && $masuk->keterangan)
+                                <div class="muted">{{ $masuk->keterangan }}</div>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            Belum ada barang masuk yang tercatat
+                        </td>
+                    </tr>
+                @endforelse
+            </table>
+        </div>
+
+        <div style="margin-top: 24px;">
+            <div class="section-title">Alur Barang Masuk (Lapangan)</div>
+            <ol style="margin-left: 18px; margin-top: 6px; margin-bottom: 0; color: #444; line-height: 1.5;">
+                <li>Penerimaan fisik barang, pencatatan tanggal masuk, dan pengecekan kelengkapan.</li>
+                <li>Penentuan status <strong>baru/bekas</strong> berdasarkan kondisi aktual saat diterima.</li>
+                <li>Khusus PC: catat detail RAM (kapasitas &amp; merek), jenis serta kapasitas storage (SSD/HDD), dan prosesor.</li>
+                <li>Input ke sistem dan stok otomatis bertambah sesuai jumlah yang diterima.</li>
+                <li>Penyimpanan atau distribusi ke ruang yang dituju sesuai kebutuhan operasional.</li>
+            </ol>
+        </div>
     </div>
     @php
     date_default_timezone_set('Asia/Jakarta');
     $currentTime = date('d/m/Y H:i:s');
     $totalBarang = $barang->count();
+    $totalBarangMasuk = $barangMasukList->sum('jumlah');
 @endphp
 
 <!-- Info tambahan di bawah tabel dalam kolom stylish -->
@@ -330,6 +442,21 @@
     ">
         <span style="font-size: 10pt; color: #555;">Total Barang</span>
         <span style="font-size: 10pt; font-weight: 700; color: #1e3a8a;">{{ $totalBarang }} item</span>
+    </div>
+
+    <!-- Total Barang Masuk -->
+    <div style="
+        background-color: #f0f4f8;
+        padding: 12px 18px;
+        border-radius: 10px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        min-width: 200px;
+    ">
+        <span style="font-size: 10pt; color: #555;">Total Barang Masuk</span>
+        <span style="font-size: 10pt; font-weight: 700; color: #1e3a8a;">{{ $totalBarangMasuk }} unit</span>
     </div>
 
     <!-- Dicetak pada -->
