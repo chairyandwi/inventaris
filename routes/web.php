@@ -15,6 +15,7 @@ use App\Http\Controllers\BarangController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\BarangMasukController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\InventarisRuangController;
 use App\Http\Controllers\Admin\AppConfigController;
@@ -72,6 +73,8 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
     Route::get('barang/laporan', [BarangController::class, 'laporan'])->name('barang.laporan');
     Route::get('peminjaman/laporan', [PeminjamanController::class, 'laporan'])->name('peminjaman.laporan');
     Route::get('peminjaman/cetak', [PeminjamanController::class, 'cetak'])->name('peminjaman.cetak');
+    Route::get('inventaris-ruang/laporan', [InventarisRuangController::class, 'laporan'])->name('inventaris-ruang.laporan');
+    Route::get('inventaris-ruang/laporan', [InventarisRuangController::class, 'laporan'])->name('inventaris-ruang.laporan');
 
 
     // Master Data
@@ -79,6 +82,7 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
     Route::resource('ruang', RuangController::class);
     Route::resource('user', UserController::class);
     Route::resource('barang', BarangController::class);
+    Route::resource('barang_masuk', BarangMasukController::class);
     Route::resource('inventaris-ruang', InventarisRuangController::class)->only(['index', 'create', 'store', 'destroy']);
 
     // Manajemen peminjaman (pegawai approve/reject/return)

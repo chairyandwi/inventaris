@@ -25,6 +25,15 @@
             </div>
         </div>
 
+        <!-- Stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white shadow-sm border border-gray-200 rounded-xl p-4">
+                <p class="text-xs font-semibold text-gray-500 uppercase">Total Kategori</p>
+                <p class="text-2xl font-bold text-gray-900 mt-1">{{ $stats['total'] ?? 0 }}</p>
+                <p class="text-xs text-gray-500">Kategori aktif di sistem</p>
+            </div>
+        </div>
+
         <!-- Card wrapper -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <!-- Controls Section -->

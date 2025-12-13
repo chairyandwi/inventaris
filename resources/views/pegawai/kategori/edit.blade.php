@@ -24,41 +24,43 @@
             @csrf
             @method('PUT')
             
-            <div class="px-6 py-4">
-                <!-- Nama Kategori -->
-                <div class="mb-6">
-                    <label for="nama_kategori" class="block text-sm font-medium text-gray-700 mb-2">
-                        Nama Kategori <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" 
-                           id="nama_kategori" 
-                           name="nama_kategori" 
-                           value="{{ old('nama_kategori', $kategori->nama_kategori) }}"
-                           class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+            <div class="px-6 py-4 space-y-4">
+                <div class="border border-dashed border-indigo-200 rounded-xl p-4 bg-indigo-50/40">
+                    <!-- Nama Kategori -->
+                    <div class="mb-4">
+                        <label for="nama_kategori" class="block text-sm font-medium text-gray-700 mb-2">
+                            Nama Kategori <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="nama_kategori" 
+                               name="nama_kategori" 
+                               value="{{ old('nama_kategori', $kategori->nama_kategori) }}"
+                               class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                             {{ $errors->has('nama_kategori') ? 'border-red-500' : 'border-gray-300' }}"
-                           placeholder="Masukkan nama kategori"
-                           maxlength="100"
-                           required>
-                    @error('nama_kategori')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
+                               placeholder="Masukkan nama kategori"
+                               maxlength="100"
+                               required>
+                        @error('nama_kategori')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
 
-                <!-- Keterangan -->
-                <div class="mb-6">
-                    <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-2">
-                        Keterangan
-                    </label>
-                    <textarea id="keterangan" 
-                              name="keterangan" 
-                              rows="4"
-                              class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                    <!-- Keterangan -->
+                    <div class="mb-2">
+                        <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-2">
+                            Keterangan
+                        </label>
+                        <textarea id="keterangan" 
+                                  name="keterangan" 
+                                  rows="4"
+                                  class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                             {{ $errors->has('keterangan') ? 'border-red-500' : 'border-gray-300' }}"
-                              placeholder="Masukkan keterangan kategori (opsional)"
-                              maxlength="255">{{ old('keterangan', $kategori->keterangan) }}</textarea>
-                    @error('keterangan')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                                  placeholder="Masukkan keterangan kategori (opsional)"
+                                  maxlength="255">{{ old('keterangan', $kategori->keterangan) }}</textarea>
+                        @error('keterangan')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
             </div>
 

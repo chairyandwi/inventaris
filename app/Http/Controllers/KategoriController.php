@@ -16,6 +16,9 @@ class KategoriController extends Controller
     public function index(Request $request)
     {
         $query = Kategori::query();
+        $stats = [
+            'total' => Kategori::count(),
+        ];
 
         // Search functionality
         if ($request->has('search') && $request->search != '') {
@@ -44,7 +47,7 @@ class KategoriController extends Controller
 
         $kategori = $query->paginate($perPage)->appends($request->all());
 
-        return view('pegawai.kategori.index', compact('kategori'));
+        return view('pegawai.kategori.index', compact('kategori', 'stats'));
     }
 
     /**

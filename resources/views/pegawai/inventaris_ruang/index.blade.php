@@ -15,7 +15,7 @@
         </a>
     </div>
 
-    <div class="bg-white rounded-xl shadow mb-6">
+        <div class="bg-white rounded-xl shadow mb-6">
         <form method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
             <div>
                 <label class="text-sm font-semibold text-gray-600 mb-2 block">Filter Ruang</label>
@@ -35,10 +35,14 @@
                     @endforeach
                 </select>
             </div>
-            <div class="flex items-end">
+            <div class="flex items-end gap-3">
                 <button type="submit" class="w-full md:w-auto inline-flex items-center justify-center px-4 py-3 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600">
                     Terapkan Filter
                 </button>
+                <a href="{{ route('pegawai.inventaris-ruang.laporan', request()->only(['idruang','idbarang'])) }}"
+                   class="w-full md:w-auto inline-flex items-center justify-center px-4 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700">
+                    Unduh Laporan
+                </a>
             </div>
         </form>
     </div>

@@ -94,6 +94,12 @@
                 </button>
                 <div x-show="open" @click.away="open = false"
                     class="absolute right-0 mt-2 w-56 bg-white border rounded-lg shadow-lg py-2 z-50">
+                    <a href="{{ route('pegawai.barang_masuk.index') }}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
+                        <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        Barang Masuk
+                    </a>
                     <a href="{{route('pegawai.peminjaman.index')}}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
                         <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -109,8 +115,38 @@
                 </div>
             </div>
 
-            <!-- Links -->
-            <a href="#cara" class="text-gray-700 hover:text-indigo-600">Laporan</a>
+            <!-- Laporan -->
+            <div x-data="{ open: false }" class="relative">
+                <button @click="open = !open" class="text-gray-700 hover:text-indigo-600 flex items-center">
+                    Laporan
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <div x-show="open" @click.away="open = false"
+                    class="absolute right-0 mt-2 w-52 bg-white border rounded-lg shadow-lg py-2 z-50">
+                    <a href="{{ route('pegawai.barang.laporan') }}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
+                        <svg class="w-4 h-4 mr-2 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6a2 2 0 012-2h8" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l3-3m0 0l3 3m-3-3v12" />
+                        </svg>
+                        Laporan Barang
+                    </a>
+                    <a href="{{ route('pegawai.inventaris-ruang.laporan') }}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
+                        <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10M4 18h10" />
+                        </svg>
+                        Laporan Inventaris Ruang
+                    </a>
+                    <a href="{{ route('pegawai.peminjaman.laporan') }}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
+                        <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12M8 11h12m-7 4h7M5 7h.01M5 11h.01M5 15h.01" />
+                        </svg>
+                        Laporan Peminjaman
+                    </a>
+                </div>
+            </div>
 
 
             <!-- Logout -->
@@ -194,7 +230,7 @@
             </button>
 
             <div x-show="transaksiOpen" class="mt-2 space-y-1 pl-4">
-                <a href="#" class="flex items-center text-gray-700 hover:text-indigo-600">
+                <a href="{{ route('pegawai.barang_masuk.index') }}" class="flex items-center text-gray-700 hover:text-indigo-600">
                     <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
@@ -215,8 +251,38 @@
             </div>
         </div>
 
-        <!-- Links -->
-        <a href="#cara" class="block text-gray-700 hover:text-indigo-600">Laporan</a>
+        <!-- Laporan (Mobile) -->
+        <div x-data="{ laporanOpen: false }" class="border-b pb-2">
+            <button @click="laporanOpen = !laporanOpen"
+                class="w-full flex justify-between items-center text-gray-700 hover:text-indigo-600">
+                Laporan
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-2 transform transition-transform duration-200"
+                    :class="{ 'rotate-180': laporanOpen }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+            <div x-show="laporanOpen" class="mt-2 space-y-1 pl-4">
+                <a href="{{ route('pegawai.barang.laporan') }}" class="flex items-center text-gray-700 hover:text-indigo-600">
+                    <svg class="w-4 h-4 mr-2 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6a2 2 0 012-2h8" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l3-3m0 0l3 3m-3-3v12" />
+                    </svg>
+                    Laporan Barang
+                </a>
+                <a href="{{ route('pegawai.inventaris-ruang.laporan') }}" class="flex items-center text-gray-700 hover:text-indigo-600">
+                    <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10M4 18h10" />
+                    </svg>
+                    Laporan Inventaris Ruang
+                </a>
+                <a href="{{ route('pegawai.peminjaman.laporan') }}" class="flex items-center text-gray-700 hover:text-indigo-600">
+                    <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12M8 11h12m-7 4h7M5 7h.01M5 11h.01M5 15h.01" />
+                    </svg>
+                    Laporan Peminjaman
+                </a>
+            </div>
+        </div>
 
 
         <!-- Logout -->

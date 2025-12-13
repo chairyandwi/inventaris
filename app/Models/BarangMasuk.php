@@ -14,9 +14,16 @@ class BarangMasuk extends Model
 
     protected $fillable = [
         'idbarang',
+        'tgl_masuk',
         'jumlah',
+        'status_barang',
+        'is_pc',
         'keterangan',
-        'tgl_pengembalian',
+        'ram_brand',
+        'ram_capacity_gb',
+        'storage_type',
+        'storage_capacity_gb',
+        'processor',
     ];
 
     // Relasi ke tabel Barang

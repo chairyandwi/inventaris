@@ -16,6 +16,13 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $query = User::query();
+        $stats = [
+            'total' => User::count(),
+            'admin' => User::where('role', 'admin')->count(),
+            'pegawai' => User::where('role', 'pegawai')->count(),
+            'kabag' => User::where('role', 'kabag')->count(),
+            'peminjam' => User::where('role', 'peminjam')->count(),
+        ];
 
         // Search functionality
         if ($request->has('search') && $request->search != '') {
@@ -47,7 +54,7 @@ class UserController extends Controller
 
         $users = $query->paginate($perPage)->appends($request->all());
 
-        return view('pegawai.user.index', compact('users'));
+        return view('pegawai.user.index', compact('users', 'stats'));
     }
 
 

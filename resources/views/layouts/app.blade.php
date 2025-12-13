@@ -15,7 +15,7 @@
 </head>
 
 <body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100">
+    <div class="min-h-screen bg-gray-100 flex flex-col">
         @auth
             @if (Auth::user()->role === 'admin')
                 @include('layouts.navadmin')
@@ -48,7 +48,7 @@
         @endif
 
         <!-- Page Content -->
-        <main>
+        <main class="flex-1">
             @isset($slot)
                 {{ $slot }}
             @else

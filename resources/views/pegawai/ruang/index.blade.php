@@ -25,6 +25,20 @@
             </div>
         </div>
 
+        <!-- Stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white shadow-sm border border-gray-200 rounded-xl p-4">
+                <p class="text-xs font-semibold text-gray-500 uppercase">Total Ruang</p>
+                <p class="text-2xl font-bold text-gray-900 mt-1">{{ $stats['total'] ?? 0 }}</p>
+                <p class="text-xs text-gray-500">Semua ruang tercatat</p>
+            </div>
+            <div class="bg-white shadow-sm border border-gray-200 rounded-xl p-4">
+                <p class="text-xs font-semibold text-gray-500 uppercase">Total Gedung</p>
+                <p class="text-2xl font-bold text-indigo-700 mt-1">{{ $stats['totalGedung'] ?? 0 }}</p>
+                <p class="text-xs text-gray-500">Gedung unik</p>
+            </div>
+        </div>
+
         <!-- Card wrapper -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <!-- Controls Section -->

@@ -13,6 +13,10 @@ class RuangController extends Controller
     public function index(Request $request)
     {
         $query = Ruang::query();
+        $stats = [
+            'total' => Ruang::count(),
+            'totalGedung' => Ruang::distinct('nama_gedung')->count('nama_gedung'),
+        ];
 
         // Search functionality
         if ($request->has('search') && $request->search != '') {
@@ -43,7 +47,7 @@ class RuangController extends Controller
 
         $ruang = $query->paginate($perPage)->appends($request->all());
 
-        return view('pegawai.ruang.index', compact('ruang'));
+        return view('pegawai.ruang.index', compact('ruang', 'stats'));
     }
 
     public function create()

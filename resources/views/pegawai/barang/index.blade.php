@@ -41,6 +41,30 @@
                 </div>
             </div>
         </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white shadow-sm border border-gray-200 rounded-xl p-4">
+                <p class="text-xs font-semibold text-gray-500 uppercase">Total Barang</p>
+                <p class="text-2xl font-bold text-gray-900 mt-1">{{ $stats['total'] ?? 0 }}</p>
+                <p class="text-xs text-gray-500">Semua jenis barang terdaftar</p>
+            </div>
+            <div class="bg-white shadow-sm border border-gray-200 rounded-xl p-4">
+                <p class="text-xs font-semibold text-gray-500 uppercase">Barang Tetap</p>
+                <p class="text-2xl font-bold text-indigo-700 mt-1">{{ $stats['totalTetap'] ?? 0 }}</p>
+                <p class="text-xs text-gray-500">Inventaris ruang</p>
+            </div>
+            <div class="bg-white shadow-sm border border-gray-200 rounded-xl p-4">
+                <p class="text-xs font-semibold text-gray-500 uppercase">Barang Pinjam</p>
+                <p class="text-2xl font-bold text-amber-700 mt-1">{{ $stats['totalPinjam'] ?? 0 }}</p>
+                <p class="text-xs text-gray-500">Keluar-masuk stok</p>
+            </div>
+            <div class="bg-white shadow-sm border border-gray-200 rounded-xl p-4">
+                <p class="text-xs font-semibold text-gray-500 uppercase">Total Stok</p>
+                <p class="text-2xl font-bold text-green-700 mt-1">{{ $stats['totalStok'] ?? 0 }}</p>
+                <p class="text-xs text-gray-500">Akumulasi unit siap pakai</p>
+            </div>
+        </div>
         
 
         <!-- Card wrapper -->
