@@ -4,148 +4,161 @@
 @php
     $routePrefix = (auth()->check() && auth()->user()->role === 'admin') ? 'admin.peminjaman' : 'pegawai.peminjaman';
 @endphp
-<div class="pt-24 min-h-screen bg-gray-50">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <a href="{{ route($routePrefix . '.index') }}"
-                    class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Kembali
-                </a>
-                <h1 class="text-2xl font-bold text-gray-900">Detail Peminjam</h1>
-            </div>
-            <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold
-                @class([
-                    'bg-yellow-100 text-yellow-700' => $peminjaman->status === 'pending',
-                    'bg-blue-100 text-blue-700' => $peminjaman->status === 'dipinjam',
-                    'bg-green-100 text-green-700' => $peminjaman->status === 'dikembalikan',
-                    'bg-red-100 text-red-700' => $peminjaman->status === 'ditolak',
-                ])">
-                Status: {{ ucfirst($peminjaman->status) }}
-            </span>
-        </div>
+<div class="min-h-screen bg-slate-950 text-white">
+    <div class="relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-indigo-700 via-violet-700 to-sky-600 opacity-80"></div>
+        <div class="absolute -left-16 -top-24 h-72 w-72 bg-white/10 blur-3xl rounded-full"></div>
+        <div class="absolute right-0 top-0 h-64 w-64 bg-indigo-200/30 blur-3xl rounded-full"></div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white rounded-2xl shadow p-6 space-y-4">
-                <h2 class="text-lg font-semibold text-gray-900">Informasi Peminjam</h2>
-                <div class="space-y-3 text-sm text-gray-700">
+        <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-14 space-y-8">
+            <div class="flex items-center justify-between flex-wrap gap-3">
+                <div class="flex items-center gap-3">
+                    <a href="{{ route($routePrefix . '.index') }}"
+                        class="inline-flex items-center px-4 py-2 rounded-xl bg-white text-indigo-700 font-semibold shadow-lg shadow-indigo-500/30 hover:-translate-y-0.5 transition text-sm">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Kembali
+                    </a>
                     <div>
-                        <span class="text-gray-500 block text-xs uppercase">Nama</span>
-                        <p class="text-base font-semibold text-gray-900">{{ $peminjaman->user->nama ?? '-' }}</p>
+                        <p class="text-xs uppercase tracking-[0.25em] text-indigo-100/80">Peminjaman</p>
+                        <h1 class="text-3xl font-bold leading-tight">Detail peminjam & peminjaman</h1>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                </div>
+                <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold
+                    @class([
+                        'bg-yellow-100 text-yellow-700' => $peminjaman->status === 'pending',
+                        'bg-blue-100 text-blue-700' => $peminjaman->status === 'dipinjam',
+                        'bg-green-100 text-green-700' => $peminjaman->status === 'dikembalikan',
+                        'bg-red-100 text-red-700' => $peminjaman->status === 'ditolak',
+                    ])">
+                    Status: {{ ucfirst($peminjaman->status) }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="relative -mt-10 pb-16">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-slate-900/80 border border-white/10 rounded-2xl shadow-xl shadow-indigo-500/15 p-6 space-y-4">
+                    <h2 class="text-lg font-semibold">Informasi Peminjam</h2>
+                    <div class="space-y-3 text-sm text-indigo-100/80">
                         <div>
-                            <span class="text-gray-500 block text-xs uppercase">Email</span>
-                            <p>{{ $peminjaman->user->email ?? '-' }}</p>
+                            <p class="text-xs uppercase tracking-wide text-indigo-200/80">Nama</p>
+                            <p class="text-base font-semibold text-white">{{ $peminjaman->user->nama ?? '-' }}</p>
                         </div>
-                        <div>
-                            <span class="text-gray-500 block text-xs uppercase">No HP</span>
-                            <p>{{ $peminjaman->user->nohp ?? '-' }}</p>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="text-gray-500 block text-xs uppercase">Profil</span>
-                        <p class="font-semibold">{{ ucfirst($peminjaman->user->tipe_peminjam ?? 'umum') }}</p>
-                    </div>
-                    @if($peminjaman->user?->tipe_peminjam === 'mahasiswa')
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
-                                <span class="text-gray-500 block text-xs uppercase">Program Studi</span>
-                                <p>{{ $peminjaman->user->prodi ?? '-' }}</p>
+                                <p class="text-xs uppercase tracking-wide text-indigo-200/80">Email</p>
+                                <p>{{ $peminjaman->user->email ?? '-' }}</p>
                             </div>
                             <div>
-                                <span class="text-gray-500 block text-xs uppercase">Angkatan</span>
-                                <p>{{ $peminjaman->user->angkatan ?? '-' }}</p>
+                                <p class="text-xs uppercase tracking-wide text-indigo-200/80">No HP</p>
+                                <p>{{ $peminjaman->user->nohp ?? '-' }}</p>
                             </div>
                         </div>
                         <div>
-                            <span class="text-gray-500 block text-xs uppercase">NIM</span>
-                            <p>{{ $peminjaman->user->nim ?? '-' }}</p>
+                            <p class="text-xs uppercase tracking-wide text-indigo-200/80">Profil</p>
+                            <p class="font-semibold text-white">{{ ucfirst($peminjaman->user->tipe_peminjam ?? 'umum') }}</p>
                         </div>
-                    @elseif($peminjaman->user?->tipe_peminjam === 'pegawai')
+                        @if($peminjaman->user?->tipe_peminjam === 'mahasiswa')
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <p class="text-xs uppercase tracking-wide text-indigo-200/80">Program Studi</p>
+                                    <p>{{ $peminjaman->user->prodi ?? '-' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs uppercase tracking-wide text-indigo-200/80">Angkatan</p>
+                                    <p>{{ $peminjaman->user->angkatan ?? '-' }}</p>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-xs uppercase tracking-wide text-indigo-200/80">NIM</p>
+                                <p>{{ $peminjaman->user->nim ?? '-' }}</p>
+                            </div>
+                        @elseif($peminjaman->user?->tipe_peminjam === 'pegawai')
+                            <div>
+                                <p class="text-xs uppercase tracking-wide text-indigo-200/80">Divisi</p>
+                                <p>{{ $peminjaman->user->divisi ?? '-' }}</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/80 border border-white/10 rounded-2xl shadow-xl shadow-indigo-500/15 p-6 space-y-4">
+                    <h2 class="text-lg font-semibold">Informasi Peminjaman</h2>
+                    <dl class="space-y-3 text-sm text-indigo-100/80">
                         <div>
-                            <span class="text-gray-500 block text-xs uppercase">Divisi</span>
-                            <p>{{ $peminjaman->user->divisi ?? '-' }}</p>
+                            <dt class="text-xs uppercase tracking-wide text-indigo-200/80">Barang</dt>
+                            <dd class="text-base font-semibold text-white">{{ $peminjaman->barang->nama_barang ?? '-' }}</dd>
                         </div>
-                    @endif
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <dt class="text-xs uppercase tracking-wide text-indigo-200/80">Jumlah</dt>
+                                <dd class="text-white">{{ $peminjaman->jumlah }} unit</dd>
+                            </div>
+                            <div>
+                                <dt class="text-xs uppercase tracking-wide text-indigo-200/80">Kegiatan</dt>
+                                <dd class="text-white">{{ $peminjaman->kegiatan === 'kampus' ? 'Kegiatan Kampus' : 'Kegiatan Luar Kampus' }}</dd>
+                            </div>
+                        </div>
+                        <div>
+                            <dt class="text-xs uppercase tracking-wide text-indigo-200/80">Keterangan Kegiatan</dt>
+                            <dd class="text-indigo-50">{{ $peminjaman->keterangan_kegiatan ?? '-' }}</dd>
+                        </div>
+                        @if($peminjaman->kegiatan === 'kampus')
+                            <div>
+                                <dt class="text-xs uppercase tracking-wide text-indigo-200/80">Lokasi / Ruang</dt>
+                                <dd class="text-white">{{ $peminjaman->ruang->nama_ruang ?? '-' }}</dd>
+                            </div>
+                        @endif
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <dt class="text-xs uppercase tracking-wide text-indigo-200/80">Rencana Pinjam</dt>
+                                <dd class="text-white">{{ $peminjaman->tgl_pinjam_rencana?->format('d M Y') ?? '-' }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-xs uppercase tracking-wide text-indigo-200/80">Rencana Kembali</dt>
+                                <dd class="text-white">{{ $peminjaman->tgl_kembali_rencana?->format('d M Y') ?? '-' }}</dd>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <dt class="text-xs uppercase tracking-wide text-indigo-200/80">Tanggal Pinjam</dt>
+                                <dd class="text-white">{{ $peminjaman->tgl_pinjam?->format('d M Y H:i') ?? '-' }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-xs uppercase tracking-wide text-indigo-200/80">Tanggal Kembali Aktual</dt>
+                                <dd class="text-white">{{ $peminjaman->tgl_kembali?->format('d M Y H:i') ?? '-' }}</dd>
+                            </div>
+                        </div>
+                    </dl>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl shadow p-6 space-y-4">
-                <h2 class="text-lg font-semibold text-gray-900">Informasi Peminjaman</h2>
-                <dl class="space-y-3 text-sm text-gray-700">
-                    <div>
-                        <dt class="text-gray-500 text-xs uppercase">Barang</dt>
-                        <dd class="text-base font-semibold text-gray-900">{{ $peminjaman->barang->nama_barang ?? '-' }}</dd>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <dt class="text-gray-500 text-xs uppercase">Jumlah</dt>
-                            <dd>{{ $peminjaman->jumlah }} unit</dd>
-                        </div>
-                        <div>
-                            <dt class="text-gray-500 text-xs uppercase">Kegiatan</dt>
-                            <dd>{{ $peminjaman->kegiatan === 'kampus' ? 'Kegiatan Kampus' : 'Kegiatan Luar Kampus' }}</dd>
-                        </div>
-                    </div>
-                    <div>
-                        <dt class="text-gray-500 text-xs uppercase">Keterangan Kegiatan</dt>
-                        <dd class="text-gray-800">{{ $peminjaman->keterangan_kegiatan ?? '-' }}</dd>
-                    </div>
-                    @if($peminjaman->kegiatan === 'kampus')
-                        <div>
-                            <dt class="text-gray-500 text-xs uppercase">Lokasi / Ruang</dt>
-                            <dd>{{ $peminjaman->ruang->nama_ruang ?? '-' }}</dd>
-                        </div>
-                    @endif
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <dt class="text-gray-500 text-xs uppercase">Rencana Pinjam</dt>
-                            <dd>{{ $peminjaman->tgl_pinjam_rencana?->format('d M Y') ?? '-' }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-gray-500 text-xs uppercase">Rencana Kembali</dt>
-                            <dd>{{ $peminjaman->tgl_kembali_rencana?->format('d M Y') ?? '-' }}</dd>
+            <div class="bg-slate-900/80 border border-white/10 rounded-2xl shadow-xl shadow-indigo-500/15 p-6">
+                <h2 class="text-lg font-semibold mb-4">Dokumen Identitas</h2>
+                @if($peminjaman->foto_identitas)
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        <img src="{{ asset('storage/'.$peminjaman->foto_identitas) }}" alt="Foto Identitas"
+                            class="w-full sm:w-60 rounded-xl border border-white/10 object-cover bg-white/10">
+                        <div class="text-sm text-indigo-100/80">
+                            <p>Foto identitas peminjam seperti KTP/Kartu mahasiswa.</p>
+                            <a href="{{ asset('storage/'.$peminjaman->foto_identitas) }}" target="_blank"
+                                class="inline-flex items-center mt-3 px-4 py-2 bg-white text-indigo-700 text-xs font-semibold rounded-full hover:-translate-y-0.5 transition shadow-lg shadow-indigo-500/30">
+                                Buka di Tab Baru
+                                <svg class="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 3h7m0 0v7m0-7L10 14" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5v14h14" />
+                                </svg>
+                            </a>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <dt class="text-gray-500 text-xs uppercase">Tanggal Pinjam</dt>
-                            <dd>{{ $peminjaman->tgl_pinjam?->format('d M Y H:i') ?? '-' }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-gray-500 text-xs uppercase">Tanggal Kembali Aktual</dt>
-                            <dd>{{ $peminjaman->tgl_kembali?->format('d M Y H:i') ?? '-' }}</dd>
-                        </div>
-                    </div>
-                </dl>
+                @else
+                    <div class="text-sm text-indigo-100/80">Belum ada foto identitas yang diunggah.</div>
+                @endif
             </div>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Dokumen Identitas</h2>
-            @if($peminjaman->foto_identitas)
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                    <img src="{{ asset('storage/'.$peminjaman->foto_identitas) }}" alt="Foto Identitas"
-                        class="w-full sm:w-60 rounded-xl border border-gray-200 object-cover">
-                    <div class="text-sm text-gray-600">
-                        <p>Foto identitas peminjam seperti KTP/Kartu mahasiswa.</p>
-                        <a href="{{ asset('storage/'.$peminjaman->foto_identitas) }}" target="_blank"
-                            class="inline-flex items-center mt-3 px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-full hover:bg-indigo-700 transition">
-                            Buka di Tab Baru
-                            <svg class="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 3h7m0 0v7m0-7L10 14" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5v14h14" />
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-            @else
-                <div class="text-sm text-gray-500">Belum ada foto identitas yang diunggah.</div>
-            @endif
         </div>
     </div>
 </div>

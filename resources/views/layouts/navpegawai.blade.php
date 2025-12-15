@@ -102,7 +102,7 @@
                         <svg class="w-5 h-5 text-sky-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
                         </svg>
-                        <span>Status Peminjaman</span>
+                        <span>Peminjaman</span>
                     </a>
                     <a href="{{ route('pegawai.peminjaman.create') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-indigo-900/40 transition">
                         <svg class="w-5 h-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -264,7 +264,7 @@
                     <svg class="w-5 h-5 text-sky-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
                     </svg>
-                    Status Peminjaman
+                    Peminjaman
                 </a>
                 <a href="{{ route('pegawai.peminjaman.create') }}" class="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-white/10 transition">
                     <svg class="w-5 h-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">

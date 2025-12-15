@@ -82,156 +82,154 @@
                 @enderror
 
                 <div class="bg-slate-900/80 border border-white/10 rounded-2xl shadow-xl shadow-indigo-500/15 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-white/10">
-                            <thead class="bg-white/5">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">No</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Barang</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Peminjam</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Kegiatan</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Jumlah</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Detail Peminjam</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Rencana Pinjam</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Tgl Pinjam</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Rencana Kembali</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Tgl Kembali Aktual</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-white/5">
-                                @forelse($peminjaman as $index => $p)
-                                    <tr class="hover:bg-white/5 transition">
-                                        <td class="px-6 py-4 text-sm text-indigo-50">
+                    <div class="divide-y divide-white/10">
+                        @forelse($peminjaman as $index => $p)
+                            <div class="p-5 hover:bg-white/5 transition">
+                                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-sm font-semibold text-white">
                                             {{ $peminjaman->firstItem() + $index }}
-                                        </td>
-                                        <td class="px-6 py-4 text-sm font-semibold text-white">
-                                            {{ $p->barang->nama_barang }}
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-indigo-50">
-                                            {{ $p->user->nama ?? $p->user->username ?? $p->user->email ?? '-' }}
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-indigo-100/80">
-                                            <div>
-                                                <p class="font-semibold">{{ $p->kegiatan === 'kampus' ? 'Kegiatan Kampus' : 'Kegiatan Luar Kampus' }}</p>
-                                                <p class="text-xs text-indigo-100/70">{{ $p->keterangan_kegiatan ?? '-' }}</p>
-                                                @if($p->kegiatan === 'kampus')
-                                                    <p class="text-xs text-indigo-100/70">Lokasi: {{ $p->ruang->nama_ruang ?? '-' }}</p>
-                                                @endif
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-indigo-50">
-                                            {{ $p->jumlah }}
-                                        </td>
-                                        <td class="px-6 py-4 text-sm">
-                                            <a href="{{ route($routePrefix . '.show', $p->idpeminjaman) }}"
-                                                class="inline-flex items-center px-4 py-2 rounded-full text-xs font-semibold text-indigo-900 bg-white hover:bg-indigo-50 transition">
-                                                Lihat Detail
-                                                <svg class="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                                </svg>
-                                            </a>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-indigo-50">
-                                            {{ $p->tgl_pinjam_rencana ? $p->tgl_pinjam_rencana->format('d-m-Y') : '-' }}
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-indigo-50">
-                                            {{ $p->tgl_pinjam ? $p->tgl_pinjam->format('d-m-Y H:i') : '-' }}
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-indigo-50">
-                                            {{ $p->tgl_kembali_rencana ? $p->tgl_kembali_rencana->format('d-m-Y') : '-' }}
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-indigo-50">
-                                            {{ $p->tgl_kembali ? $p->tgl_kembali->format('d-m-Y H:i') : '-' }}
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-indigo-50">
-                                            <span @class([
-                                                'px-2 py-1 text-xs rounded',
-                                                'bg-yellow-100 text-yellow-800' => $p->status === 'pending',
-                                                'bg-indigo-100 text-indigo-800' => $p->status === 'disetujui',
-                                                'bg-blue-100 text-blue-800' => $p->status === 'dipinjam',
-                                                'bg-green-100 text-green-800' => $p->status === 'dikembalikan',
-                                                'bg-red-100 text-red-800' => $p->status === 'ditolak',
-                                            ])>
-                                                {{ ucfirst($p->status) }}
-                                            </span>
-                                            @if($p->status === 'ditolak' && $p->alasan_penolakan)
-                                                <p class="text-xs text-rose-300 mt-1">Alasan: {{ $p->alasan_penolakan }}</p>
-                                            @elseif($p->status === 'disetujui')
-                                                <p class="text-xs text-indigo-100/70 mt-1">
-                                                    @if($p->tgl_pinjam_rencana)
-                                                        Jadwal: {{ $p->tgl_pinjam_rencana->format('d-m-Y') }}
-                                                    @else
-                                                        Menunggu jadwal penjemputan.
-                                                    @endif
-                                                </p>
-                                                @if($p->tgl_pinjam_rencana && now()->gt($p->tgl_pinjam_rencana->startOfDay()))
-                                                    <p class="text-xs text-amber-300 mt-1">Sudah lewat jadwal, konfirmasi pengambilan.</p>
-                                                @endif
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-indigo-100/80">Barang</p>
+                                            <p class="text-base font-semibold text-white">{{ $p->barang->nama_barang }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <a href="{{ route($routePrefix . '.show', $p->idpeminjaman) }}"
+                                            class="inline-flex items-center px-4 py-2 rounded-full text-xs font-semibold text-indigo-900 bg-white hover:bg-indigo-50 transition">
+                                            Lihat Detail
+                                            <svg class="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </a>
+                                        <span @class([
+                                            'px-3 py-1 text-xs rounded-full font-semibold',
+                                            'bg-yellow-100 text-yellow-800' => $p->status === 'pending',
+                                            'bg-indigo-100 text-indigo-800' => $p->status === 'disetujui',
+                                            'bg-blue-100 text-blue-800' => $p->status === 'dipinjam',
+                                            'bg-green-100 text-green-800' => $p->status === 'dikembalikan',
+                                            'bg-red-100 text-red-800' => $p->status === 'ditolak',
+                                        ])>
+                                            {{ ucfirst($p->status) }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm text-indigo-100/80">
+                                    <div class="space-y-2">
+                                        <div>
+                                            <p class="text-xs uppercase tracking-wide text-indigo-200/80">Peminjam</p>
+                                            <p class="text-sm font-semibold text-white">{{ $p->user->nama ?? $p->user->username ?? $p->user->email ?? '-' }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs uppercase tracking-wide text-indigo-200/80">Kegiatan</p>
+                                            <p class="text-sm font-semibold text-white">{{ $p->kegiatan === 'kampus' ? 'Kegiatan Kampus' : 'Kegiatan Luar Kampus' }}</p>
+                                            <p class="text-xs text-indigo-100/70">{{ $p->keterangan_kegiatan ?? '-' }}</p>
+                                            @if($p->kegiatan === 'kampus')
+                                                <p class="text-xs text-indigo-100/70">Lokasi: {{ $p->ruang->nama_ruang ?? '-' }}</p>
                                             @endif
-                                        </td>
-                                        <td class="px-6 py-4 text-sm">
-                                            <div class="flex flex-wrap gap-2 w-full">
-                                                @if ($p->status == 'pending')
-                                                    <form action="{{ route($routePrefix . '.approve', $p->idpeminjaman) }}"
-                                                        method="POST" class="flex-1 min-w-[130px]">
-                                                        @csrf
-                                                        <button type="submit"
-                                                            class="w-full px-3 py-1.5 bg-emerald-500 text-white text-xs rounded text-center shadow hover:bg-emerald-600 transition">
-                                                            Approve
-                                                        </button>
-                                                    </form>
-                                                    <button type="button"
-                                                        class="flex-1 min-w-[130px] w-full px-3 py-1.5 bg-rose-500 text-white text-xs rounded text-center shadow hover:bg-rose-600 transition open-reject-modal"
-                                                        data-action="{{ route($routePrefix . '.reject', $p->idpeminjaman) }}"
-                                                        data-barang="{{ $p->barang->nama_barang }}"
-                                                        data-peminjam="{{ $p->user->nama ?? $p->user->username ?? $p->user->email ?? '-' }}">
-                                                        Reject
-                                                    </button>
-                                                @elseif($p->status == 'disetujui')
-                                                    @php
-                                                        $bolehMulai = !$p->tgl_pinjam_rencana || now()->greaterThanOrEqualTo($p->tgl_pinjam_rencana->startOfDay());
-                                                    @endphp
-                                                    <form action="{{ route($routePrefix . '.pickup', $p->idpeminjaman) }}"
-                                                        method="POST" class="flex-1 min-w-[160px]">
-                                                        @csrf
-                                                        <button type="submit"
-                                                            class="w-full px-3 py-1.5 text-xs rounded text-center shadow transition {{ $bolehMulai ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-white/10 text-indigo-100/60 cursor-not-allowed' }}"
-                                                            {{ $bolehMulai ? '' : 'disabled' }}>
-                                                            {{ $bolehMulai ? 'Mulai Peminjaman' : 'Menunggu Jadwal' }}
-                                                        </button>
-                                                    </form>
-                                                @elseif($p->status == 'dipinjam')
-                                                    <form action="{{ route($routePrefix . '.return', $p->idpeminjaman) }}"
-                                                        method="POST" class="space-y-2 bg-white/5 border border-white/10 rounded-xl p-3 flex-1 min-w-[200px]">
-                                                        @csrf
-                                                        <div>
-                                                            <label class="block text-xs font-medium text-indigo-100 mb-1">Tanggal pengembalian aktual</label>
-                                                            <input type="datetime-local" name="tgl_kembali_real"
-                                                                class="w-full rounded-lg bg-slate-800/70 border border-white/10 text-white text-xs focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
-                                                                value="{{ now()->format('Y-m-d\TH:i') }}" required>
-                                                        </div>
-                                                        <label class="flex items-center text-xs text-indigo-100 space-x-2">
-                                                            <input type="checkbox" name="konfirmasi_pengembalian" required class="text-indigo-600 border-white/20 rounded bg-slate-800/70">
-                                                            <span>Barang sudah dikembalikan</span>
-                                                        </label>
-                                                        <button type="submit"
-                                                            class="w-full px-2 py-1.5 bg-emerald-500 text-white text-xs rounded shadow hover:bg-emerald-600 transition">Konfirmasi</button>
-                                                    </form>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <div>
+                                            <p class="text-xs uppercase tracking-wide text-indigo-200/80">Jumlah</p>
+                                            <p class="text-sm font-semibold text-white">{{ $p->jumlah }}</p>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <p class="text-xs uppercase tracking-wide text-indigo-200/80">Rencana Pinjam</p>
+                                                <p class="text-sm text-white">{{ $p->tgl_pinjam_rencana ? $p->tgl_pinjam_rencana->format('d-m-Y') : '-' }}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs uppercase tracking-wide text-indigo-200/80">Rencana Kembali</p>
+                                                <p class="text-sm text-white">{{ $p->tgl_kembali_rencana ? $p->tgl_kembali_rencana->format('d-m-Y') : '-' }}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs uppercase tracking-wide text-indigo-200/80">Tgl Pinjam</p>
+                                                <p class="text-sm text-white">{{ $p->tgl_pinjam ? $p->tgl_pinjam->format('d-m-Y H:i') : '-' }}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs uppercase tracking-wide text-indigo-200/80">Tgl Kembali Aktual</p>
+                                                <p class="text-sm text-white">{{ $p->tgl_kembali ? $p->tgl_kembali->format('d-m-Y H:i') : '-' }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-3">
+                                        @if($p->status === 'ditolak' && $p->alasan_penolakan)
+                                            <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-400/30 text-rose-50 text-xs">
+                                                Alasan ditolak: {{ $p->alasan_penolakan }}
+                                            </div>
+                                        @elseif($p->status === 'disetujui')
+                                            <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-400/30 text-amber-50 text-xs">
+                                                @if($p->tgl_pinjam_rencana)
+                                                    Jadwal: {{ $p->tgl_pinjam_rencana->format('d-m-Y') }}
+                                                @else
+                                                    Menunggu jadwal penjemputan.
+                                                @endif
+                                                @if($p->tgl_pinjam_rencana && now()->gt($p->tgl_pinjam_rencana->startOfDay()))
+                                                    <br><span class="text-amber-200/90">Sudah lewat jadwal, konfirmasi pengambilan.</span>
                                                 @endif
                                             </div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="12" class="px-6 py-12 text-center text-sm text-indigo-100/80">
-                                            <p class="text-lg font-semibold">Tidak ada data peminjaman</p>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                        @endif
+
+                                        <div class="flex flex-wrap gap-2">
+                                            @if ($p->status == 'pending')
+                                                <form action="{{ route($routePrefix . '.approve', $p->idpeminjaman) }}"
+                                                    method="POST" class="inline">
+                                                    @csrf
+                                                    <button type="submit"
+                                                        class="px-3 py-2 bg-emerald-500 text-white text-xs rounded text-center shadow hover:bg-emerald-600 transition">
+                                                        Approve
+                                                    </button>
+                                                </form>
+                                                <button type="button"
+                                                    class="px-3 py-2 bg-rose-500 text-white text-xs rounded text-center shadow hover:bg-rose-600 transition open-reject-modal"
+                                                    data-action="{{ route($routePrefix . '.reject', $p->idpeminjaman) }}"
+                                                    data-barang="{{ $p->barang->nama_barang }}"
+                                                    data-peminjam="{{ $p->user->nama ?? $p->user->username ?? $p->user->email ?? '-' }}">
+                                                    Reject
+                                                </button>
+                                            @elseif($p->status == 'disetujui')
+                                                @php
+                                                    $bolehMulai = !$p->tgl_pinjam_rencana || now()->greaterThanOrEqualTo($p->tgl_pinjam_rencana->startOfDay());
+                                                @endphp
+                                                <form action="{{ route($routePrefix . '.pickup', $p->idpeminjaman) }}"
+                                                    method="POST" class="inline">
+                                                    @csrf
+                                                    <button type="submit"
+                                                        class="px-3 py-2 text-xs rounded text-center shadow transition {{ $bolehMulai ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-white/10 text-indigo-100/60 cursor-not-allowed' }}"
+                                                        {{ $bolehMulai ? '' : 'disabled' }}>
+                                                        {{ $bolehMulai ? 'Mulai Peminjaman' : 'Menunggu Jadwal' }}
+                                                    </button>
+                                                </form>
+                                            @elseif($p->status == 'dipinjam')
+                                                <form action="{{ route($routePrefix . '.return', $p->idpeminjaman) }}"
+                                                    method="POST" class="space-y-2 bg-white/5 border border-white/10 rounded-xl p-3 w-full max-w-xs">
+                                                    @csrf
+                                                    <div>
+                                                        <label class="block text-xs font-medium text-indigo-100 mb-1">Tanggal pengembalian aktual</label>
+                                                        <input type="datetime-local" name="tgl_kembali_real"
+                                                            class="w-full rounded-lg bg-slate-800/70 border border-white/10 text-white text-xs focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+                                                            value="{{ now()->format('Y-m-d\TH:i') }}" required>
+                                                    </div>
+                                                    <label class="flex items-center text-xs text-indigo-100 space-x-2">
+                                                        <input type="checkbox" name="konfirmasi_pengembalian" required class="text-indigo-600 border-white/20 rounded bg-slate-800/70">
+                                                        <span>Barang sudah dikembalikan</span>
+                                                    </label>
+                                                    <button type="submit"
+                                                        class="w-full px-2 py-1.5 bg-emerald-500 text-white text-xs rounded shadow hover:bg-emerald-600 transition">Konfirmasi</button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="p-8 text-center text-sm text-indigo-100/80">
+                                <p class="text-lg font-semibold">Tidak ada data peminjaman</p>
+                            </div>
+                        @endforelse
                     </div>
 
                     <div class="px-6 py-4 bg-white/5 border-t border-white/10 text-indigo-100 flex items-center justify-between">

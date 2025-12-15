@@ -6,217 +6,147 @@
     @php
         $routePrefix = ($routePrefix ?? null) ?: (request()->routeIs('admin.*') ? 'admin' : 'pegawai');
     @endphp
-    <div class="pt-24 container mx-auto px-4 py-6 min-h-screen">
-        <!-- Header dengan tombol Tambah -->
-        <div class="mb-6">
-            <div class="flex items-center">
-                <a href="{{ route($homeRoute ?? 'pegawai.index') }}" 
-                    class="inline-flex items-center px-3 py-2 text-sm text-gray-600 hover:text-gray-900 transition duration-150 ease-in-out">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                    Kembali
-                </a>
-                <h1 class="text-2xl font-bold text-gray-800">Kategori</h1>
-                <a href="{{ route(($routePrefix ?? 'pegawai') . '.kategori.create') }}"
-                    class="ml-auto inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg shadow-sm transition duration-150 ease-in-out">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    Tambah
-                </a>
-            </div>
-        </div>
+    <div class="min-h-screen bg-slate-950 text-white">
+        <div class="relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-r from-indigo-700 via-violet-700 to-sky-600 opacity-80"></div>
+            <div class="absolute -left-12 -top-20 h-72 w-72 bg-white/10 blur-3xl rounded-full"></div>
+            <div class="absolute right-0 top-0 h-64 w-64 bg-indigo-200/30 blur-3xl rounded-full"></div>
 
-        <!-- Stats -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white shadow-sm border border-gray-200 rounded-xl p-4">
-                <p class="text-xs font-semibold text-gray-500 uppercase">Total Kategori</p>
-                <p class="text-2xl font-bold text-gray-900 mt-1">{{ $stats['total'] ?? 0 }}</p>
-                <p class="text-xs text-gray-500">Kategori aktif di sistem</p>
-            </div>
-        </div>
-
-        <!-- Card wrapper -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <!-- Controls Section -->
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex justify-between items-center">
-                    <!-- Show entries dropdown -->
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-700">Show</span>
-                        <select
-                            class="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-16">
-                            <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
-                            <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
-                            <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
-                            <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
-                        </select>
-                        <span class="text-sm text-gray-700">entries</span>
+            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.25em] text-indigo-100/80">Kategori Barang</p>
+                        <h1 class="text-3xl sm:text-4xl font-bold leading-tight mt-2">Klasifikasi rapi dalam satu layar</h1>
+                        <p class="mt-3 text-indigo-50/90 max-w-2xl">Kelola nama kategori dan catatan singkat dengan tampilan futuristik yang konsisten.</p>
                     </div>
+                    <a href="{{ route(($routePrefix ?? 'pegawai') . '.kategori.create') }}"
+                        class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-indigo-700 font-semibold shadow-lg shadow-indigo-500/30 hover:-translate-y-0.5 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m-6-6h12" />
+                        </svg>
+                        Tambah Kategori
+                    </a>
+                </div>
 
-                    <!-- Search -->
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-700">Search:</span>
-                        <input type="text"
-                            class="border border-gray-300 rounded px-3 py-1 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Cari kategori..." value="{{ request('search') }}" id="searchInput">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
+                    <div class="relative overflow-hidden rounded-2xl border border-white/10 bg-white/10 backdrop-blur p-5 shadow-lg shadow-indigo-500/20">
+                        <div class="absolute inset-0 bg-gradient-to-br from-emerald-400/30 to-teal-500/40 opacity-70"></div>
+                        <div class="relative">
+                            <p class="text-xs uppercase tracking-[0.25em] text-white/70">Total Kategori</p>
+                            <p class="text-3xl font-bold mt-2">{{ $stats['total'] ?? 0 }}</p>
+                            <p class="text-sm text-indigo-100/80 mt-1">Kategori aktif di sistem</p>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Table -->
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hover:bg-gray-100">
-                                <a href="{{ route(($routePrefix ?? 'pegawai') . '.kategori.index', [
-                                    'sort_by' => 'idkategori',
-                                    'sort_direction' => request('sort_direction') === 'asc' ? 'desc' : 'asc'
-                                ]) }}" class="flex items-center space-x-1">
-                                    <span>No</span>
+        <div class="relative -mt-10 pb-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                <div class="bg-slate-900/70 border border-white/10 rounded-2xl shadow-lg shadow-indigo-500/10 backdrop-blur">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6">
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm text-indigo-100">Show</span>
+                            <select id="perPage" class="rounded-xl bg-slate-800/60 border border-white/10 text-white px-3 py-2 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 w-24">
+                                <option class="text-slate-900" value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+                                <option class="text-slate-900" value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
+                                <option class="text-slate-900" value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                                <option class="text-slate-900" value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                            </select>
+                            <span class="text-sm text-indigo-100">entries</span>
+                        </div>
 
-                                    {{-- Default (tidak ada sort_by) tampilkan dua panah abu-abu --}}
-                                    @if(request('sort_by') !== 'idkategori')
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
-                                        </svg>
-                                    @elseif(request('sort_direction') === 'asc')
-                                        {{-- Asc: tampilkan panah atas saja --}}
-                                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4"/>
-                                        </svg>
-                                    @else
-                                        {{-- Desc: tampilkan panah bawah saja --}}
-                                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
-                                        </svg>
-                                    @endif
-                                </a>
-                            </th>
+                        <div class="flex items-center gap-3 w-full md:w-auto">
+                            <input type="text" id="searchInput"
+                                class="flex-1 md:flex-none rounded-xl bg-slate-800/60 border border-white/10 text-white px-4 py-2 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+                                placeholder="Cari kategori..." value="{{ request('search') }}">
+                        </div>
+                    </div>
+                </div>
 
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                                <div class="flex items-center space-x-1">
-                                    <span>Nama Kategori</span>
-                                </div>
-                            </th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                                <div class="flex items-center space-x-1">
-                                    <span>Keterangan</span>
-                                </div>
-                            </th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <div class="flex items-center space-x-1">
-                                    <span>Aksi</span>
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse($kategori as $index => $k)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $kategori->firstItem() + $index }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $k->nama_kategori }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $k->keterangan ?? '-' }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div class="flex items-center space-x-2">
-                                        <!-- Edit Button -->
-                                        <a href="{{ route(($routePrefix ?? 'pegawai') . '.kategori.edit', $k->idkategori) }}"
-                                            class="inline-flex items-center px-1 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded transition duration-150 ease-in-out">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                                </path>
-                                            </svg>
+                <div class="bg-slate-900/80 border border-white/10 rounded-2xl shadow-xl shadow-indigo-500/15 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-white/10">
+                            <thead class="bg-white/5">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">
+                                        <a href="{{ route(($routePrefix ?? 'pegawai') . '.kategori.index', [
+                                            'sort_by' => 'idkategori',
+                                            'sort_direction' => request('sort_direction') === 'asc' ? 'desc' : 'asc',
+                                            'search' => request('search'),
+                                            'per_page' => request('per_page')
+                                        ]) }}" class="flex items-center gap-1">
+                                            <span>No</span>
+                                            @if(request('sort_by') !== 'idkategori')
+                                                <svg class="w-4 h-4 text-indigo-200/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4 4 4M17 8v12m0 0 4-4m-4 4-4-4"/>
+                                                </svg>
+                                            @elseif(request('sort_direction') === 'asc')
+                                                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4 4 4"/>
+                                                </svg>
+                                            @else
+                                                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8v12m0 0 4-4m-4 4-4-4"/>
+                                                </svg>
+                                            @endif
                                         </a>
-
-                                        <!-- Delete Button -->
-                                        <button type="button" onclick="confirmDelete({{ $k->idkategori }})"
-                                            class="inline-flex items-center px-1 py-1 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded transition duration-150 ease-in-out">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                                </path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="px-6 py-12 text-center text-sm text-gray-500">
-                                    <div class="flex flex-col items-center">
-                                        <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                            </path>
-                                        </svg>
-                                        <p class="text-lg font-medium text-gray-900 mb-1">Tidak ada data</p>
-                                        <p class="text-gray-500">Belum ada kategori yang ditambahkan</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination Footer -->
-            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                <div class="flex items-center justify-between">
-                    <div class="text-sm text-gray-700">
-                        Showing {{ $kategori->firstItem() ?? 0 }} to {{ $kategori->lastItem() ?? 0 }} of
-                        {{ $kategori->total() }} entries
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Nama Kategori</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Keterangan</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5">
+                                @forelse($kategori as $index => $k)
+                                    <tr class="hover:bg-white/5 transition">
+                                        <td class="px-6 py-4 text-sm text-indigo-50">
+                                            {{ $kategori->firstItem() + $index }}
+                                        </td>
+                                        <td class="px-6 py-4 text-sm font-semibold text-white">
+                                            {{ $k->nama_kategori }}
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-indigo-100/80">
+                                            {{ $k->keterangan ?? '-' }}
+                                        </td>
+                                        <td class="px-6 py-4 text-sm">
+                                            <div class="flex items-center gap-2">
+                                                <a href="{{ route(($routePrefix ?? 'pegawai') . '.kategori.edit', $k->idkategori) }}"
+                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-500/80 hover:bg-indigo-500 text-white shadow-md shadow-indigo-500/30 transition">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.414-9.414a2 2 0 1 1 2.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                    </svg>
+                                                    Edit
+                                                </a>
+                                                <button type="button" onclick="confirmDelete({{ $k->idkategori }})"
+                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-500/80 hover:bg-rose-500 text-white shadow-md shadow-rose-500/30 transition">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                    Hapus
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-12 text-center text-sm text-indigo-100/80">
+                                            <p class="text-lg font-semibold">Tidak ada data kategori</p>
+                                            <p class="text-sm text-indigo-100/70 mt-1">Tambah kategori untuk mulai mengelompokkan barang.</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
 
-                    <div class="flex items-center space-x-1">
-                        <!-- Previous Button -->
-                        @if ($kategori->onFirstPage())
-                            <span
-                                class="px-3 py-2 text-sm text-gray-500 bg-gray-200 rounded cursor-not-allowed">Previous</span>
-                        @else
-                            <a href="{{ $kategori->previousPageUrl() }}"
-                                class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
-                                Previous
-                            </a>
-                        @endif
-
-                        <!-- Page Numbers -->
-                        @foreach ($kategori->getUrlRange(1, $kategori->lastPage()) as $page => $url)
-                            @if ($page == $kategori->currentPage())
-                                <span
-                                    class="px-3 py-2 text-sm text-white bg-blue-500 rounded font-medium">{{ $page }}</span>
-                            @else
-                                <a href="{{ $url }}"
-                                    class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
-                                    {{ $page }}
-                                </a>
-                            @endif
-                        @endforeach
-
-                        <!-- Next Button -->
-                        @if ($kategori->hasMorePages())
-                            <a href="{{ $kategori->nextPageUrl() }}"
-                                class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
-                                Next
-                            </a>
-                        @else
-                            <span
-                                class="px-3 py-2 text-sm text-gray-500 bg-gray-200 rounded cursor-not-allowed">Next</span>
-                        @endif
+                    <div class="px-6 py-4 bg-white/5 border-t border-white/10 text-indigo-100 flex items-center justify-between">
+                        <div>
+                            Menampilkan {{ $kategori->firstItem() ?? 0 }} hingga {{ $kategori->lastItem() ?? 0 }} dari {{ $kategori->total() }} entri
+                        </div>
+                        <div class="text-white">
+                            {{ $kategori->links() }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -231,52 +161,42 @@
 
     <!-- JavaScript -->
     <script>
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const searchTerm = e.target.value;
-            const currentUrl = new URL(window.location);
+        const searchInput = document.getElementById('searchInput');
+        const perPageSelect = document.getElementById('perPage');
 
-            if (searchTerm) {
-                currentUrl.searchParams.set('search', searchTerm);
+        function syncUrl(param, value) {
+            const currentUrl = new URL(window.location);
+            if (value) {
+                currentUrl.searchParams.set(param, value);
             } else {
-                currentUrl.searchParams.delete('search');
+                currentUrl.searchParams.delete(param);
             }
-
-            // Debounce search
-            clearTimeout(window.searchTimeout);
-            window.searchTimeout = setTimeout(() => {
-                window.location.href = currentUrl.toString();
-            }, 500);
-        });
-
-        // Per page change
-        document.querySelector('select').addEventListener('change', function(e) {
-            const perPage = e.target.value;
-            const currentUrl = new URL(window.location);
-            currentUrl.searchParams.set('per_page', perPage);
-            currentUrl.searchParams.delete('page'); // Reset to first page
-            window.location.href = currentUrl.toString();
-        });
-
-        // Delete confirmation
-        function confirmDelete(id) {
-        if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
-            const form = document.getElementById('deleteForm');
-            form.action = "{{ route(($routePrefix ?? 'pegawai').'.kategori.destroy', ':id') }}".replace(':id', id); // arahkan ke route destroy
-            form.submit();
+            currentUrl.searchParams.delete('page');
+            return currentUrl.toString();
         }
-    }
 
-        // Auto-hide alerts
-        document.addEventListener('DOMContentLoaded', function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                setTimeout(() => {
-                    alert.style.transition = 'opacity 0.5s';
-                    alert.style.opacity = '0';
-                    setTimeout(() => alert.remove(), 500);
-                }, 3000);
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const url = syncUrl('search', e.target.value);
+                clearTimeout(window.searchTimeout);
+                window.searchTimeout = setTimeout(() => {
+                    window.location.href = url;
+                }, 400);
             });
-        });
+        }
+
+        if (perPageSelect) {
+            perPageSelect.addEventListener('change', function(e) {
+                window.location.href = syncUrl('per_page', e.target.value);
+            });
+        }
+
+        function confirmDelete(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
+                const form = document.getElementById('deleteForm');
+                form.action = "{{ route(($routePrefix ?? 'pegawai').'.kategori.destroy', ':id') }}".replace(':id', id);
+                form.submit();
+            }
+        }
     </script>
 @endsection

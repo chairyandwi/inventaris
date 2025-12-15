@@ -6,187 +6,199 @@
 @php
     $routePrefix = ($routePrefix ?? null) ?: (request()->routeIs('admin.*') ? 'admin' : 'pegawai');
 @endphp
-<div class="pt-24 container mx-auto px-4 py-6 min-h-screen">
-    <div class="mb-6 flex items-center">
-        @php
-            $backRoute = (auth()->check() && auth()->user()->role === 'admin') ? 'admin.index' : 'pegawai.index';
-        @endphp
-        <a href="{{ route($backRoute) }}"
-            class="inline-flex items-center px-3 py-2 text-sm text-gray-600 hover:text-gray-900 transition duration-150 ease-in-out">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-            </svg>
-            Dashboard
-        </a>
-        <h1 class="text-2xl font-bold text-gray-800 ml-4">Barang Masuk</h1>
+<div class="min-h-screen bg-slate-950 text-white">
+    <div class="relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-indigo-700 via-violet-700 to-sky-600 opacity-80"></div>
+        <div class="absolute -left-12 -top-20 h-72 w-72 bg-white/10 blur-3xl rounded-full"></div>
+        <div class="absolute right-0 top-0 h-64 w-64 bg-indigo-200/30 blur-3xl rounded-full"></div>
 
-        <div class="ml-auto flex items-center space-x-2">
-            <a href="{{ route(($routePrefix ?? 'pegawai') . '.barang_masuk.create') }}"
-                class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg shadow-sm transition duration-150 ease-in-out">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Tambah Barang Masuk
-            </a>
-        </div>
-    </div>
-
-    <!-- Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white shadow-sm border border-gray-200 rounded-xl p-4">
-            <p class="text-xs font-semibold text-gray-500 uppercase">Total Entri</p>
-            <p class="text-2xl font-bold text-gray-900 mt-1">{{ $stats['totalEntry'] ?? 0 }}</p>
-            <p class="text-xs text-gray-500">Jumlah baris barang masuk</p>
-        </div>
-        <div class="bg-white shadow-sm border border-gray-200 rounded-xl p-4">
-            <p class="text-xs font-semibold text-gray-500 uppercase">Total Unit Masuk</p>
-            <p class="text-2xl font-bold text-indigo-700 mt-1">{{ $stats['totalQty'] ?? 0 }}</p>
-            <p class="text-xs text-gray-500">Akumulasi stok bertambah</p>
-        </div>
-        <div class="bg-white shadow-sm border border-gray-200 rounded-xl p-4">
-            <p class="text-xs font-semibold text-gray-500 uppercase">Barang Baru</p>
-            <p class="text-2xl font-bold text-green-700 mt-1">{{ $stats['totalBaru'] ?? 0 }}</p>
-            <p class="text-xs text-gray-500">Unit berstatus baru</p>
-        </div>
-        <div class="bg-white shadow-sm border border-gray-200 rounded-xl p-4">
-            <p class="text-xs font-semibold text-gray-500 uppercase">Barang Bekas</p>
-            <p class="text-2xl font-bold text-amber-700 mt-1">{{ $stats['totalBekas'] ?? 0 }}</p>
-            <p class="text-xs text-gray-500">Unit berstatus bekas</p>
-        </div>
-        <div class="bg-white shadow-sm border border-gray-200 rounded-xl p-4">
-            <p class="text-xs font-semibold text-gray-500 uppercase">Unit PC Masuk</p>
-            <p class="text-2xl font-bold text-blue-700 mt-1">{{ $stats['totalPc'] ?? 0 }}</p>
-            <p class="text-xs text-gray-500">PC/Laptop dengan detail komponen</p>
-        </div>
-    </div>
-
-    <!-- Card wrapper -->
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <!-- Controls Section -->
-        <div class="px-6 py-4 border-b border-gray-200">
-            <div class="flex flex-wrap gap-4 justify-between items-center">
-                <div class="flex items-center space-x-2">
-                    <span class="text-sm text-gray-700">Show</span>
-                    <select
-                        class="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-16"
-                        onchange="handlePerPageChange(this.value)">
-                        <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
-                        <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
-                        <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
-                        <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
-                    </select>
-                    <span class="text-sm text-gray-700">entries</span>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.25em] text-indigo-100/80">Barang Masuk</p>
+                    <h1 class="text-3xl sm:text-4xl font-bold leading-tight mt-2">Catat stok masuk dengan detail</h1>
+                    <p class="mt-3 text-indigo-50/90 max-w-2xl">Pantau unit masuk, status baru/bekas, dan spesifikasi PC agar stok selalu akurat.</p>
                 </div>
+                <a href="{{ route(($routePrefix ?? 'pegawai') . '.barang_masuk.create') }}"
+                    class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-indigo-700 font-semibold shadow-lg shadow-indigo-500/30 hover:-translate-y-0.5 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m-6-6h12" />
+                    </svg>
+                    Tambah Barang Masuk
+                </a>
+            </div>
 
-                <div class="flex items-center space-x-2">
-                    <span class="text-sm text-gray-700">Search:</span>
-                    <input type="text"
-                        class="border border-gray-300 rounded px-3 py-1 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Cari kode/nama/keterangan..." value="{{ request('search') }}" id="searchInput">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-8">
+                <div class="relative overflow-hidden rounded-2xl border border-white/10 bg-white/10 backdrop-blur p-5 shadow-lg shadow-indigo-500/20">
+                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-400/30 to-teal-500/40 opacity-70"></div>
+                    <div class="relative">
+                        <p class="text-xs uppercase tracking-[0.25em] text-white/70">Total Entri</p>
+                        <p class="text-3xl font-bold mt-2">{{ $stats['totalEntry'] ?? 0 }}</p>
+                        <p class="text-sm text-indigo-100/80 mt-1">Baris barang masuk</p>
+                    </div>
+                </div>
+                <div class="relative overflow-hidden rounded-2xl border border-white/10 bg-white/10 backdrop-blur p-5 shadow-lg shadow-indigo-500/20">
+                    <div class="absolute inset-0 bg-gradient-to-br from-sky-400/30 to-indigo-500/40 opacity-70"></div>
+                    <div class="relative">
+                        <p class="text-xs uppercase tracking-[0.25em] text-white/70">Total Unit</p>
+                        <p class="text-3xl font-bold mt-2">{{ $stats['totalQty'] ?? 0 }}</p>
+                        <p class="text-sm text-indigo-100/80 mt-1">Stok bertambah</p>
+                    </div>
+                </div>
+                <div class="relative overflow-hidden rounded-2xl border border-white/10 bg-white/10 backdrop-blur p-5 shadow-lg shadow-indigo-500/20">
+                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-400/30 to-lime-500/40 opacity-70"></div>
+                    <div class="relative">
+                        <p class="text-xs uppercase tracking-[0.25em] text-white/70">Barang Baru</p>
+                        <p class="text-3xl font-bold mt-2">{{ $stats['totalBaru'] ?? 0 }}</p>
+                        <p class="text-sm text-indigo-100/80 mt-1">Status baru</p>
+                    </div>
+                </div>
+                <div class="relative overflow-hidden rounded-2xl border border-white/10 bg-white/10 backdrop-blur p-5 shadow-lg shadow-indigo-500/20">
+                    <div class="absolute inset-0 bg-gradient-to-br from-amber-400/30 to-orange-500/40 opacity-70"></div>
+                    <div class="relative">
+                        <p class="text-xs uppercase tracking-[0.25em] text-white/70">Barang Bekas</p>
+                        <p class="text-3xl font-bold mt-2">{{ $stats['totalBekas'] ?? 0 }}</p>
+                        <p class="text-sm text-indigo-100/80 mt-1">Status bekas</p>
+                    </div>
+                </div>
+                <div class="relative overflow-hidden rounded-2xl border border-white/10 bg-white/10 backdrop-blur p-5 shadow-lg shadow-indigo-500/20">
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-400/30 to-indigo-500/40 opacity-70"></div>
+                    <div class="relative">
+                        <p class="text-xs uppercase tracking-[0.25em] text-white/70">Unit PC</p>
+                        <p class="text-3xl font-bold mt-2">{{ $stats['totalPc'] ?? 0 }}</p>
+                        <p class="text-sm text-indigo-100/80 mt-1">Dengan spesifikasi</p>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Table -->
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tgl Masuk</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kode Barang</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Barang</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jumlah</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Spesifikasi</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Keterangan</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($barangMasuk as $index => $bm)
-                        @php
-                            $rowNumber = ($barangMasuk->currentPage() - 1) * $barangMasuk->perPage() + $index + 1;
-                            $isPc = $bm->is_pc || str_contains(strtolower(optional($bm->barang?->kategori)->nama_kategori ?? ''), 'pc');
-                            $specParts = [];
-                            if ($bm->ram_capacity_gb) {
-                                $brand = $bm->ram_brand ? ' (' . $bm->ram_brand . ')' : '';
-                                $specParts[] = 'RAM ' . $bm->ram_capacity_gb . 'GB' . $brand;
-                            }
-                            if ($bm->storage_type && $bm->storage_capacity_gb) {
-                                $specParts[] = $bm->storage_type . ' ' . $bm->storage_capacity_gb . 'GB';
-                            }
-                            if ($bm->processor) {
-                                $specParts[] = 'CPU ' . $bm->processor;
-                            }
-                            $specText = $specParts ? implode(' • ', $specParts) : ($isPc ? 'Spesifikasi PC belum lengkap' : '-');
-                        @endphp
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 text-sm text-gray-900">{{ $rowNumber }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900">
-                                {{ $bm->tgl_masuk ?? ($bm->created_at?->format('Y-m-d')) }}
-                            </td>
-                            <td class="px-6 py-4 text-sm font-mono text-gray-900">
-                                {{ $bm->barang->kode_barang ?? '-' }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-900">
-                                {{ $bm->barang->nama_barang ?? '-' }}
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $bm->status_barang === 'bekas' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700' }}">
-                                    {{ strtoupper($bm->status_barang ?? 'BARU') }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-sm font-semibold text-gray-900">
-                                {{ $bm->jumlah }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-700">
-                                {{ $specText }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-500">
-                                {{ $bm->keterangan ?? '-' }}
-                            </td>
-                            <td class="px-6 py-4 text-sm font-medium">
-                                <div class="flex items-center space-x-2">
-                        <a href="{{ route(($routePrefix ?? 'pegawai') . '.barang_masuk.edit', $bm->idbarang_masuk) }}"
-                                        class="inline-flex items-center px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded transition">
-                                        Edit
-                                    </a>
-                                    <button type="button" onclick="confirmDelete({{ $bm->idbarang_masuk }})"
-                                        class="inline-flex items-center px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded transition">
-                                        Hapus
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="9" class="px-6 py-12 text-center text-sm text-gray-500">
-                                <p class="text-lg font-medium">Belum ada data barang masuk</p>
-                                <p class="text-gray-500">Tambah entri barang masuk untuk mulai mencatat pergerakan stok.</p>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+    <div class="relative -mt-10 pb-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+            <div class="bg-slate-900/70 border border-white/10 rounded-2xl shadow-lg shadow-indigo-500/10 backdrop-blur">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6">
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm text-indigo-100">Show</span>
+                        <select id="perPage" class="rounded-xl bg-slate-800/60 border border-white/10 text-white px-3 py-2 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 w-24" onchange="handlePerPageChange(this.value)">
+                            <option class="text-slate-900" value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+                            <option class="text-slate-900" value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
+                            <option class="text-slate-900" value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                            <option class="text-slate-900" value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                        </select>
+                        <span class="text-sm text-indigo-100">entries</span>
+                    </div>
 
-        <!-- Pagination -->
-        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
-            <div class="flex items-center justify-between">
-                <div class="text-sm text-gray-700">
-                    Showing {{ $barangMasuk->firstItem() ?? 0 }} to {{ $barangMasuk->lastItem() ?? 0 }} of
-                    {{ $barangMasuk->total() }} entries
+                    <div class="flex items-center gap-3 w-full md:w-auto">
+                        <input type="text" id="searchInput"
+                            class="flex-1 md:flex-none rounded-xl bg-slate-800/60 border border-white/10 text-white px-4 py-2 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+                            placeholder="Cari kode / nama / keterangan..." value="{{ request('search') }}">
+                    </div>
                 </div>
-                <div>
-                    {{ $barangMasuk->links() }}
+            </div>
+
+            <div class="bg-slate-900/80 border border-white/10 rounded-2xl shadow-xl shadow-indigo-500/15 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-white/10">
+                        <thead class="bg-white/5">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">No</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Tgl Masuk</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Kode Barang</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Nama Barang</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Jumlah</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Spesifikasi</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Keterangan</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            @forelse($barangMasuk as $index => $bm)
+                                @php
+                                    $rowNumber = ($barangMasuk->currentPage() - 1) * $barangMasuk->perPage() + $index + 1;
+                                    $isPc = $bm->is_pc || str_contains(strtolower(optional($bm->barang?->kategori)->nama_kategori ?? ''), 'pc');
+                                    $specParts = [];
+                                    if ($bm->ram_capacity_gb) {
+                                        $brand = $bm->ram_brand ? ' (' . $bm->ram_brand . ')' : '';
+                                        $specParts[] = 'RAM ' . $bm->ram_capacity_gb . 'GB' . $brand;
+                                    }
+                                    if ($bm->storage_type && $bm->storage_capacity_gb) {
+                                        $specParts[] = $bm->storage_type . ' ' . $bm->storage_capacity_gb . 'GB';
+                                    }
+                                    if ($bm->processor) {
+                                        $specParts[] = 'CPU ' . $bm->processor;
+                                    }
+                                    $specText = $specParts ? implode(' • ', $specParts) : ($isPc ? 'Spesifikasi PC belum lengkap' : '-');
+                                @endphp
+                                <tr class="hover:bg-white/5 transition">
+                                    <td class="px-6 py-4 text-sm text-indigo-50">{{ $rowNumber }}</td>
+                                    <td class="px-6 py-4 text-sm text-indigo-50">
+                                        {{ $bm->tgl_masuk ?? ($bm->created_at?->format('Y-m-d')) }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm font-mono text-white">
+                                        {{ $bm->barang->kode_barang ?? '-' }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-white">
+                                        {{ $bm->barang->nama_barang ?? '-' }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $bm->status_barang === 'bekas' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700' }}">
+                                            {{ strtoupper($bm->status_barang ?? 'BARU') }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm font-semibold text-indigo-50">
+                                        {{ $bm->jumlah }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-indigo-100/80">
+                                        {{ $specText }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-indigo-100/80">
+                                        {{ $bm->keterangan ?? '-' }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <div class="flex items-center gap-2">
+                                            <a href="{{ route(($routePrefix ?? 'pegawai') . '.barang_masuk.edit', $bm->idbarang_masuk) }}"
+                                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-500/80 hover:bg-indigo-500 text-white shadow-md shadow-indigo-500/30 transition">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.414-9.414a2 2 0 1 1 2.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                                Edit
+                                            </a>
+                                            <button type="button" onclick="confirmDelete({{ $bm->idbarang_masuk }})"
+                                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-500/80 hover:bg-rose-500 text-white shadow-md shadow-rose-500/30 transition">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16"/>
+                                                </svg>
+                                                Hapus
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="9" class="px-6 py-12 text-center text-sm text-indigo-100/80">
+                                        <p class="text-lg font-semibold">Belum ada data barang masuk</p>
+                                        <p class="text-sm text-indigo-100/70 mt-1">Tambah entri barang masuk untuk mulai mencatat pergerakan stok.</p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="px-6 py-4 bg-white/5 border-t border-white/10 text-indigo-100 flex items-center justify-between">
+                    <div>
+                        Menampilkan {{ $barangMasuk->firstItem() ?? 0 }} - {{ $barangMasuk->lastItem() ?? 0 }} dari {{ $barangMasuk->total() }} entri
+                    </div>
+                    <div class="text-white">
+                        {{ $barangMasuk->links() }}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Hidden Delete Form -->
 <form id="deleteForm" method="POST" style="display:none;">
     @csrf
     @method('DELETE')

@@ -16,7 +16,7 @@
                 </div>
                 <form method="GET" class="flex gap-2">
                     <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama / email..."
-                        class="rounded-xl bg-white/90 text-slate-900 focus:ring-2 focus:ring-indigo-400 px-4 py-2 w-60">
+                        class="rounded-xl bg-white/90 text-stone-900 focus:ring-2 focus:ring-indigo-400 px-4 py-2 w-60">
                     <button type="submit"
                         class="px-4 py-2 rounded-xl bg-white text-indigo-700 font-semibold shadow-lg shadow-indigo-500/30 hover:-translate-y-0.5 transition">Cari</button>
                 </form>

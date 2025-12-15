@@ -28,7 +28,13 @@ class InventarisRuangController extends Controller
         $ruang = Ruang::orderBy('nama_ruang')->get();
         $barang = Barang::orderBy('nama_barang')->get();
 
-        return view('pegawai.inventaris_ruang.index', compact('units', 'ruang', 'barang'));
+        $summary = [
+            'totalUnits' => BarangUnit::count(),
+            'ruangTerisi' => BarangUnit::distinct('idruang')->count('idruang'),
+            'barangTetap' => Barang::where('jenis_barang', 'tetap')->count(),
+        ];
+
+        return view('pegawai.inventaris_ruang.index', compact('units', 'ruang', 'barang', 'summary'));
     }
 
     public function create()

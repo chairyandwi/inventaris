@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
             data: {
                 labels: ['Total', 'Pending', 'Dipinjam', 'Selesai', 'Ditolak'],
                 datasets: [{
-                    label: 'Status Peminjaman',
+                    label: 'Peminjaman',
                     data: [total, pending, dipinjam, selesai, ditolak],
                     backgroundColor: [
                         'rgba(99, 102, 241, 0.7)',
