@@ -59,13 +59,14 @@
     <div class="relative -mt-20 pb-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
             <!-- Highlight cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
                 @php
                     $cards = [
                         ['title' => 'Kategori', 'value' => $kategori ?? 0, 'color' => 'from-lime-500 to-emerald-500', 'route' => route('admin.kategori.index')],
                         ['title' => 'Ruang', 'value' => $ruang ?? 0, 'color' => 'from-violet-500 to-fuchsia-500', 'route' => route('admin.ruang.index')],
                         ['title' => 'Barang', 'value' => $barang ?? 0, 'color' => 'from-sky-500 to-indigo-500', 'route' => route('admin.barang.index')],
                         ['title' => 'User', 'value' => $user ?? 0, 'color' => 'from-amber-500 to-orange-500', 'route' => route('admin.user.index')],
+                        ['title' => 'Barang Masuk', 'value' => $barangMasuk ?? 0, 'color' => 'from-emerald-500 to-teal-500', 'route' => route('admin.barang_masuk.create')],
                     ];
                 @endphp
                 @foreach ($cards as $card)

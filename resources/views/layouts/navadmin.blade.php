@@ -85,6 +85,12 @@
                     </svg>
                 </button>
                 <div x-show="open" @click.away="open = false" class="absolute right-0 mt-3 w-56 rounded-xl bg-slate-900/95 border border-indigo-500/30 shadow-xl shadow-indigo-500/20 backdrop-blur p-2 space-y-1">
+                    <a href="{{ route('admin.barang_masuk.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-indigo-900/40 transition">
+                        <svg class="w-5 h-5 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-6-6h12" />
+                        </svg>
+                        <span>Barang Masuk</span>
+                    </a>
                     <a href="{{ route('admin.peminjaman.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-indigo-900/40 transition">
                         <svg class="w-5 h-5 text-emerald-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-6-6h12" />
