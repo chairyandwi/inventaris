@@ -3,9 +3,12 @@
 @section('title', 'Tambah Inventaris Ruang')
 
 @section('content')
+@php
+    $routePrefix = ($routePrefix ?? null) ?: (request()->routeIs('admin.*') ? 'admin' : 'pegawai');
+@endphp
 <div class="pt-24 container mx-auto px-4 py-6 min-h-screen">
     <div class="mb-6 flex items-center gap-4">
-        <a href="{{ route('pegawai.inventaris-ruang.index') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+        <a href="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.index') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
@@ -15,7 +18,7 @@
     </div>
 
     <div class="bg-white rounded-2xl shadow-lg p-8 max-w-4xl">
-        <form action="{{ route('pegawai.inventaris-ruang.store') }}" method="POST" class="space-y-6">
+        <form action="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.store') }}" method="POST" class="space-y-6">
             @csrf
 
             <div>
@@ -68,7 +71,7 @@
             </div>
 
             <div class="flex justify-end gap-3">
-                <a href="{{ route('pegawai.inventaris-ruang.index') }}" class="px-5 py-3 border border-gray-300 rounded-xl text-sm text-gray-600 hover:bg-gray-50">
+                <a href="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.index') }}" class="px-5 py-3 border border-gray-300 rounded-xl text-sm text-gray-600 hover:bg-gray-50">
                     Batal
                 </a>
                 <button type="submit" class="px-5 py-3 bg-indigo-600 text-white rounded-xl shadow hover:bg-indigo-700">

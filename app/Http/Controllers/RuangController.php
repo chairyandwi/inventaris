@@ -57,6 +57,7 @@ class RuangController extends Controller
 
     public function store(Request $request)
     {
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         $validator = Validator::make($request->all(), [
             'nama_ruang'   => 'required|string|max:100|unique:ruang,nama_ruang',
             'nama_gedung'  => 'required|string|max:100',
@@ -79,7 +80,7 @@ class RuangController extends Controller
 
         ActivityLogger::log('Tambah Ruang', 'Menambahkan ruang ' . $ruang->nama_ruang);
 
-        return redirect()->route('pegawai.ruang.index')
+        return redirect()->route($routePrefix . '.ruang.index')
             ->with('success', 'Ruang berhasil ditambahkan');
     }
 
@@ -95,6 +96,7 @@ class RuangController extends Controller
 
     public function update(Request $request, Ruang $ruang)
     {
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         $validator = Validator::make($request->all(), [
             'nama_ruang'   => [
                 'required',
@@ -118,7 +120,7 @@ class RuangController extends Controller
 
             ActivityLogger::log('Perbarui Ruang', 'Memperbarui ruang ' . $ruang->nama_ruang);
 
-            return redirect()->route('pegawai.ruang.index')
+            return redirect()->route($routePrefix . '.ruang.index')
                 ->with('success', 'Ruang berhasil diubah');
         } catch (\Exception $e) {
             return redirect()->back()
@@ -129,16 +131,17 @@ class RuangController extends Controller
 
     public function destroy(Ruang $ruang)
     {
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         try {
             $nama = $ruang->nama_ruang;
             $ruang->delete();
 
             ActivityLogger::log('Hapus Ruang', 'Menghapus ruang ' . $nama);
 
-            return redirect()->route('pegawai.ruang.index')
+            return redirect()->route($routePrefix . '.ruang.index')
                 ->with('success', 'Ruang berhasil dihapus');
         } catch (\Exception $e) {
-            return redirect()->route('pegawai.ruang.index')
+            return redirect()->route($routePrefix . '.ruang.index')
                 ->with('error', 'Gagal menghapus ruang: ' . $e->getMessage());
         }
     }

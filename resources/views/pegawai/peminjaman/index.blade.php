@@ -3,11 +3,16 @@
 @section('title', 'Peminjaman')
 
 @section('content')
+    @php
+        $homeRoute = $homeRoute ?? (auth()->check() && auth()->user()->role === 'admin' ? 'admin.index' : 'pegawai.index');
+        $routePrefix = $baseRoute ?? ((auth()->check() && auth()->user()->role === 'admin') ? 'admin.peminjaman' : 'pegawai.peminjaman');
+        $laporanRoute = $laporanRoute ?? $routePrefix . '.laporan';
+    @endphp
     <div class="pt-24 container mx-auto px-4 py-6 min-h-screen">
         <!-- Header -->
         <div class="mb-6">
             <div class="flex items-center">
-                <a href="{{ route('pegawai.index') }}"
+                <a href="{{ route($homeRoute) }}"
                     class="inline-flex items-center px-3 py-2 text-sm text-gray-600 hover:text-gray-900 transition">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -17,7 +22,7 @@
                 <h1 class="text-2xl font-bold text-gray-800 ml-4">Status Peminjaman</h1>
                 <div class="ml-auto flex items-center space-x-2">
                     <!-- Export PDF -->
-                    <a href="{{ route('pegawai.peminjaman.laporan') }}"
+                    <a href="{{ route($laporanRoute) }}"
                         class="inline-flex items-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg shadow-sm transition duration-150 ease-in-out">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="w-4 h-4 mr-2">
@@ -82,7 +87,7 @@
                                     {{ $p->jumlah }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
-                                    <a href="{{ route('pegawai.peminjaman.show', $p->idpeminjaman) }}"
+                                    <a href="{{ route($routePrefix . '.show', $p->idpeminjaman) }}"
                                         class="inline-flex items-center px-4 py-2 rounded-full text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition">
                                         Lihat Detail
                                         <svg class="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,7 +137,7 @@
                                     <div class="flex flex-wrap gap-2 w-full">
                                         @if ($p->status == 'pending')
                                             <!-- Approve -->
-                                            <form action="{{ route('pegawai.peminjaman.approve', $p->idpeminjaman) }}"
+                                            <form action="{{ route($routePrefix . '.approve', $p->idpeminjaman) }}"
                                                 method="POST" class="flex-1 min-w-[130px]">
                                                 @csrf
                                                 <button type="submit"
@@ -143,7 +148,7 @@
                                             <!-- Reject -->
                                             <button type="button"
                                                 class="flex-1 min-w-[130px] w-full px-3 py-1.5 bg-red-500 text-white text-xs rounded text-center shadow hover:bg-red-600 transition open-reject-modal"
-                                                data-action="{{ route('pegawai.peminjaman.reject', $p->idpeminjaman) }}"
+                                                data-action="{{ route($routePrefix . '.reject', $p->idpeminjaman) }}"
                                                 data-barang="{{ $p->barang->nama_barang }}"
                                                 data-peminjam="{{ $p->user->nama ?? $p->user->username ?? $p->user->email ?? '-' }}">
                                                 Reject
@@ -152,7 +157,7 @@
                                             @php
                                                 $bolehMulai = !$p->tgl_pinjam_rencana || now()->greaterThanOrEqualTo($p->tgl_pinjam_rencana->startOfDay());
                                             @endphp
-                                            <form action="{{ route('pegawai.peminjaman.pickup', $p->idpeminjaman) }}"
+                                            <form action="{{ route($routePrefix . '.pickup', $p->idpeminjaman) }}"
                                                 method="POST" class="flex-1 min-w-[160px]">
                                                 @csrf
                                                 <button type="submit"
@@ -162,7 +167,7 @@
                                                 </button>
                                             </form>
                                         @elseif($p->status == 'dipinjam')
-                                            <form action="{{ route('pegawai.peminjaman.return', $p->idpeminjaman) }}"
+                                            <form action="{{ route($routePrefix . '.return', $p->idpeminjaman) }}"
                                                 method="POST" class="space-y-2">
                                                 @csrf
                                                 <div>

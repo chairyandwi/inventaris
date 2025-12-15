@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="mb-6">
         <div class="flex items-center space-x-4">
-            <a href="{{ route('pegawai.kategori.index') }}" 
+            <a href="{{ route(($routePrefix ?? 'pegawai') . '.kategori.index') }}" 
                class="inline-flex items-center px-3 py-2 text-sm text-gray-600 hover:text-gray-900 transition duration-150 ease-in-out">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -20,7 +20,7 @@
 
     <!-- Card wrapper -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <form action="{{ route('pegawai.kategori.store') }}" method="POST">
+        <form action="{{ route(($routePrefix ?? 'pegawai') . '.kategori.store') }}" method="POST">
             @csrf
             
             <div class="px-6 py-4 space-y-4">
@@ -67,7 +67,7 @@
             <!-- Form Actions -->
             <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
                 <div class="flex items-center justify-end space-x-3">
-                    <a href="{{ route('pegawai.kategori.index') }}" 
+                    <a href="{{ route(($routePrefix ?? 'pegawai') . '.kategori.index') }}" 
                        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
                         Batal
                     </a>

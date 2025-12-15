@@ -3,9 +3,12 @@
 @section('title', 'Edit Barang Masuk')
 
 @section('content')
+@php
+    $routePrefix = ($routePrefix ?? null) ?: (request()->routeIs('admin.*') ? 'admin' : 'pegawai');
+@endphp
 <div class="pt-24 container mx-auto px-4 py-6 min-h-screen">
     <div class="mb-6 flex items-center gap-4">
-        <a href="{{ route('pegawai.barang_masuk.index') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+        <a href="{{ route(($routePrefix ?? 'pegawai') . '.barang_masuk.index') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
@@ -15,7 +18,7 @@
     </div>
 
     <div class="bg-white rounded-2xl shadow p-6">
-        <form action="{{ route('pegawai.barang_masuk.update', $barangMasuk->idbarang_masuk) }}" method="POST" class="space-y-6">
+        <form action="{{ route(($routePrefix ?? 'pegawai') . '.barang_masuk.update', $barangMasuk->idbarang_masuk) }}" method="POST" class="space-y-6">
             @csrf
             @method('PUT')
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -146,7 +149,7 @@
             </div>
 
             <div class="flex items-center justify-end gap-3">
-                <a href="{{ route('pegawai.barang_masuk.index') }}" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+                <a href="{{ route(($routePrefix ?? 'pegawai') . '.barang_masuk.index') }}" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
                     Batal
                 </a>
                 <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow">

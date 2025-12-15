@@ -111,7 +111,8 @@ class InventarisRuangController extends Controller
 
         BarangUnit::insert($records);
 
-        return redirect()->route('pegawai.inventaris-ruang.index')
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        return redirect()->route($routePrefix . '.inventaris-ruang.index')
             ->with('success', $request->jumlah . ' unit barang berhasil dicatat untuk ruang ini.');
     }
 
@@ -119,7 +120,8 @@ class InventarisRuangController extends Controller
     {
         $inventaris_ruang->delete();
 
-        return redirect()->route('pegawai.inventaris-ruang.index')
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        return redirect()->route($routePrefix . '.inventaris-ruang.index')
             ->with('success', 'Unit barang berhasil dihapus.');
     }
 

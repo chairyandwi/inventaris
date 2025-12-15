@@ -1,11 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $routePrefix = (auth()->check() && auth()->user()->role === 'admin') ? 'admin.peminjaman' : 'pegawai.peminjaman';
+@endphp
 <div class="pt-24 min-h-screen bg-gray-50">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <a href="{{ route('pegawai.peminjaman.index') }}"
+                <a href="{{ route($routePrefix . '.index') }}"
                     class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />

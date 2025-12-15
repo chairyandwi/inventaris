@@ -3,10 +3,14 @@
 @section('title', 'Laporan Peminjaman')
 
 @section('content')
+    @php
+        $routePrefix = (auth()->check() && auth()->user()->role === 'admin') ? 'admin.peminjaman' : 'pegawai.peminjaman';
+        $homeRoute = (auth()->check() && auth()->user()->role === 'admin') ? 'admin.index' : 'pegawai.index';
+    @endphp
     <div class="pt-24 container mx-auto px-4 py-6 min-h-screen">
         <!-- Header -->
         <div class="mb-6 flex items-center">
-            <a href="{{ route('pegawai.index') }}"
+            <a href="{{ route($homeRoute) }}"
                 class="inline-flex items-center px-3 py-2 text-sm text-gray-600 hover:text-gray-900 transition">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -16,7 +20,7 @@
             <h1 class="text-2xl font-bold text-gray-800 ml-4">Laporan Peminjaman</h1>
             <div class="ml-auto flex items-center space-x-2">
                 <!-- Filter -->
-                <form method="GET" action="{{ route('pegawai.peminjaman.laporan') }}" class="mb-6 flex flex-wrap gap-4">
+                <form method="GET" action="{{ route($routePrefix . '.laporan') }}" class="mb-6 flex flex-wrap gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Status</label>
                         <select name="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm">
@@ -46,7 +50,7 @@
                             Filter
                         </button>
                         <button type="submit"
-                            formaction="{{ route('pegawai.peminjaman.cetak') }}"
+                            formaction="{{ route($routePrefix . '.cetak') }}"
                             formtarget="_blank"
                             class="inline-flex items-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg shadow-sm transition duration-150 ease-in-out">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"

@@ -27,12 +27,17 @@ class PeminjamanController extends Controller
             return view('peminjam.peminjaman.index', compact('peminjaman'));
         }
 
+        $rolePrefix = ($user && $user->role === 'admin') ? 'admin' : 'pegawai';
+        $homeRoute = $rolePrefix . '.index';
+        $baseRoute = $rolePrefix . '.peminjaman';
+        $laporanRoute = $baseRoute . '.laporan';
+
         // gunakan paginate biar bisa pakai firstItem(), lastItem(), total()
         $peminjaman = Peminjaman::with(['barang', 'user', 'ruang'])
             ->latest()
             ->paginate(10);
 
-        return view('pegawai.peminjaman.index', compact('peminjaman'));
+        return view('pegawai.peminjaman.index', compact('peminjaman', 'homeRoute', 'baseRoute', 'laporanRoute'));
     }
 
     /**
@@ -119,9 +124,11 @@ class PeminjamanController extends Controller
             'status' => 'pending',
         ]);
 
-        $redirectRoute = Auth::user() && Auth::user()->role === 'peminjam'
-            ? 'peminjam.peminjaman.index'
-            : 'pegawai.peminjaman.index';
+        $redirectRoute = 'peminjam.peminjaman.index';
+        if (Auth::user() && Auth::user()->role !== 'peminjam') {
+            $redirectPrefix = Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
+            $redirectRoute = $redirectPrefix . '.peminjaman.index';
+        }
 
         return redirect()->route($redirectRoute)
             ->with('success', 'Permintaan peminjaman berhasil diajukan.');

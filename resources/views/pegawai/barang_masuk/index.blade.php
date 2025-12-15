@@ -3,9 +3,15 @@
 @section('title', 'Barang Masuk')
 
 @section('content')
+@php
+    $routePrefix = ($routePrefix ?? null) ?: (request()->routeIs('admin.*') ? 'admin' : 'pegawai');
+@endphp
 <div class="pt-24 container mx-auto px-4 py-6 min-h-screen">
     <div class="mb-6 flex items-center">
-        <a href="{{ route('pegawai.index') }}"
+        @php
+            $backRoute = (auth()->check() && auth()->user()->role === 'admin') ? 'admin.index' : 'pegawai.index';
+        @endphp
+        <a href="{{ route($backRoute) }}"
             class="inline-flex items-center px-3 py-2 text-sm text-gray-600 hover:text-gray-900 transition duration-150 ease-in-out">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -15,7 +21,7 @@
         <h1 class="text-2xl font-bold text-gray-800 ml-4">Barang Masuk</h1>
 
         <div class="ml-auto flex items-center space-x-2">
-            <a href="{{ route('pegawai.barang_masuk.create') }}"
+            <a href="{{ route(($routePrefix ?? 'pegawai') . '.barang_masuk.create') }}"
                 class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg shadow-sm transition duration-150 ease-in-out">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -142,7 +148,7 @@
                             </td>
                             <td class="px-6 py-4 text-sm font-medium">
                                 <div class="flex items-center space-x-2">
-                                    <a href="{{ route('pegawai.barang_masuk.edit', $bm->idbarang_masuk) }}"
+                        <a href="{{ route(($routePrefix ?? 'pegawai') . '.barang_masuk.edit', $bm->idbarang_masuk) }}"
                                         class="inline-flex items-center px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded transition">
                                         Edit
                                     </a>
@@ -214,7 +220,7 @@
     function confirmDelete(id) {
         if (confirm('Apakah Anda yakin ingin menghapus entri barang masuk ini?')) {
             const form = document.getElementById('deleteForm');
-            form.action = "{{ route('pegawai.barang_masuk.destroy', ':id') }}".replace(':id', id);
+            form.action = "{{ route(($routePrefix ?? 'pegawai').'.barang_masuk.destroy', ':id') }}".replace(':id', id);
             form.submit();
         }
     }

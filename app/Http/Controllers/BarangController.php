@@ -59,12 +59,12 @@ class BarangController extends Controller
 
     public function store(Request $request)
     {
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         $validator = Validator::make($request->all(), [
             'idkategori'   => 'required|exists:kategori,idkategori',
             'kode_barang'  => 'required|string|max:20|unique:barang,kode_barang',
             'nama_barang'  => 'required|string|max:100',
             'jenis_barang' => 'required|in:pinjam,tetap',
-            'stok'         => 'nullable|integer|min:0',
             'keterangan'   => 'nullable|string|max:500',
             'distribusi_ruang' => 'required_if:jenis_barang,tetap|array|min:1',
             'distribusi_ruang.*' => 'required_with:distribusi_jumlah.*|exists:ruang,idruang',
@@ -90,13 +90,14 @@ class BarangController extends Controller
 
         $validated = $validator->validated();
         $barangData = Arr::except($validated, ['ruang_tetap', 'jumlah_tetap', 'keterangan_inventaris']);
+        $barangData['stok'] = 0; // stok dikalkulasi dari transaksi (barang masuk / peminjaman)
 
         DB::transaction(function () use ($barangData, $request) {
             $barang = Barang::create($barangData);
             $this->syncInventarisUnits($barang, $request);
         });
 
-        return redirect()->route('pegawai.barang.index')->with('success', 'Barang berhasil ditambahkan');
+        return redirect()->route($routePrefix . '.barang.index')->with('success', 'Barang berhasil ditambahkan');
     }
 
     public function edit(Barang $barang)
@@ -122,12 +123,12 @@ class BarangController extends Controller
 
     public function update(Request $request, Barang $barang)
     {
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         $validator = Validator::make($request->all(), [
             'idkategori'   => 'required|exists:kategori,idkategori',
             'kode_barang'  => ['required', 'string', 'max:20', Rule::unique('barang', 'kode_barang')->ignore($barang->idbarang, 'idbarang')],
             'nama_barang'  => 'required|string|max:100',
             'jenis_barang' => 'required|in:pinjam,tetap',
-            'stok'         => 'nullable|integer|min:0',
             'keterangan'   => 'nullable|string|max:500',
             'distribusi_ruang' => 'required_if:jenis_barang,tetap|array|min:1',
             'distribusi_ruang.*' => 'required_with:distribusi_jumlah.*|exists:ruang,idruang',
@@ -142,23 +143,24 @@ class BarangController extends Controller
         }
 
         $validated = $validator->validated();
-        $barangData = Arr::except($validated, ['ruang_tetap', 'jumlah_tetap', 'keterangan_inventaris']);
+        $barangData = Arr::except($validated, ['ruang_tetap', 'jumlah_tetap', 'keterangan_inventaris', 'stok']);
 
         DB::transaction(function () use ($barangData, $barang, $request) {
             $barang->update($barangData);
             $this->syncInventarisUnits($barang, $request);
         });
 
-        return redirect()->route('pegawai.barang.index')->with('success', 'Barang berhasil diubah');
+        return redirect()->route($routePrefix . '.barang.index')->with('success', 'Barang berhasil diubah');
     }
 
     public function destroy(Barang $barang)
     {
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         try {
             $barang->delete();
-            return redirect()->route('pegawai.barang.index')->with('success', 'Barang berhasil dihapus');
+            return redirect()->route($routePrefix . '.barang.index')->with('success', 'Barang berhasil dihapus');
         } catch (\Exception $e) {
-            return redirect()->route('pegawai.barang.index')->with('error', 'Gagal menghapus barang: ' . $e->getMessage());
+            return redirect()->route($routePrefix . '.barang.index')->with('error', 'Gagal menghapus barang: ' . $e->getMessage());
         }
     }
 

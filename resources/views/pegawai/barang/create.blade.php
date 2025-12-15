@@ -80,23 +80,11 @@
                     @enderror
                 </div>
 
-                <!-- Stok -->
+                <!-- Stok otomatis -->
                 <div class="mb-6">
-                    <label for="stok" class="block text-sm font-medium text-gray-700 mb-2">
-                        Stok <span class="text-red-500">*</span>
-                    </label>
-                    <input type="number" 
-                           id="stok" 
-                           name="stok" 
-                           value="{{ old('stok', 0) }}"
-                           class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                            {{ $errors->has('stok') ? 'border-red-500' : 'border-gray-300' }}"
-                           placeholder="Masukkan jumlah stok"
-                           min="0"
-                           required>
-                    @error('stok')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                    <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-100 text-sm text-indigo-700">
+                        Stok akan dihitung otomatis dari transaksi <strong>Barang Masuk</strong> dan peminjaman. Tidak perlu mengisi stok di sini.
+                    </div>
                 </div>
 
                 <!-- Kategori -->
@@ -194,7 +182,7 @@
             <!-- Form Actions -->
             <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
                 <div class="flex items-center justify-end space-x-3">
-                    <a href="{{ route('pegawai.barang.index') }}" 
+                    <a href="{{ route($routePrefix . 'barang.index') }}" 
                        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
                         Batal
                     </a>

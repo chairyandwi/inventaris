@@ -55,6 +55,7 @@ class BarangMasukController extends Controller
 
     public function store(Request $request)
     {
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         $validator = Validator::make($request->all(), [
             'idbarang'    => 'required|exists:barang,idbarang',
             'tgl_masuk'   => 'required|date',
@@ -106,7 +107,7 @@ class BarangMasukController extends Controller
             $barangLocked->increment('stok', $validated['jumlah']);
         });
 
-        return redirect()->route('pegawai.barang_masuk.index')->with('success', 'Data barang masuk berhasil ditambahkan');
+        return redirect()->route($routePrefix . '.barang_masuk.index')->with('success', 'Data barang masuk berhasil ditambahkan');
     }
 
     public function edit(BarangMasuk $barangMasuk)
@@ -117,6 +118,7 @@ class BarangMasukController extends Controller
 
     public function update(Request $request, BarangMasuk $barangMasuk)
     {
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         $validator = Validator::make($request->all(), [
             'idbarang'    => 'required|exists:barang,idbarang',
             'tgl_masuk'   => 'required|date',
@@ -178,11 +180,12 @@ class BarangMasukController extends Controller
             }
         });
 
-        return redirect()->route('pegawai.barang_masuk.index')->with('success', 'Data barang masuk berhasil diubah');
+        return redirect()->route($routePrefix . '.barang_masuk.index')->with('success', 'Data barang masuk berhasil diubah');
     }
 
     public function destroy(BarangMasuk $barangMasuk)
     {
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         try {
             DB::transaction(function () use ($barangMasuk) {
                 $barang = Barang::lockForUpdate()->find($barangMasuk->idbarang);
@@ -192,9 +195,9 @@ class BarangMasukController extends Controller
 
                 $barangMasuk->delete();
             });
-            return redirect()->route('pegawai.barang_masuk.index')->with('success', 'Data barang masuk berhasil dihapus');
+            return redirect()->route($routePrefix . '.barang_masuk.index')->with('success', 'Data barang masuk berhasil dihapus');
         } catch (\Exception $e) {
-            return redirect()->route('pegawai.barang_masuk.index')->with('error', 'Gagal menghapus data: ' . $e->getMessage());
+            return redirect()->route($routePrefix . '.barang_masuk.index')->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
     }
 

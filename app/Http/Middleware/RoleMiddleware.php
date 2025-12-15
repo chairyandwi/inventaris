@@ -21,6 +21,19 @@ class RoleMiddleware
             ->all();
 
         if (!empty($allowedRoles) && !in_array(Auth::user()->role, $allowedRoles, true)) {
+            // Alihkan pengguna ke beranda sesuai rolenya agar tidak terjebak di route yang salah
+            $roleHome = match (Auth::user()->role) {
+                'admin' => 'admin.index',
+                'kabag' => 'kabag.index',
+                'pegawai' => 'pegawai.index',
+                'peminjam' => 'peminjam.index',
+                default => null,
+            };
+
+            if ($roleHome) {
+                return redirect()->route($roleHome);
+            }
+
             abort(403, 'Unauthorized.');
         }
 

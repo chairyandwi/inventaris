@@ -3,13 +3,16 @@
 @section('title', 'Inventaris Ruang')
 
 @section('content')
+@php
+    $routePrefix = ($routePrefix ?? null) ?: (request()->routeIs('admin.*') ? 'admin' : 'pegawai');
+@endphp
 <div class="pt-24 container mx-auto px-4 py-6 min-h-screen">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Inventaris Ruang</h1>
             <p class="text-sm text-gray-500">Monitoring barang tetap yang tercatat pada setiap ruang.</p>
         </div>
-        <a href="{{ route('pegawai.inventaris-ruang.create') }}"
+        <a href="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.create') }}"
            class="inline-flex items-center px-5 py-3 bg-indigo-600 text-white rounded-xl shadow hover:bg-indigo-700 transition">
             Tambah Inventaris
         </a>
@@ -39,7 +42,7 @@
                 <button type="submit" class="w-full md:w-auto inline-flex items-center justify-center px-4 py-3 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600">
                     Terapkan Filter
                 </button>
-                <a href="{{ route('pegawai.inventaris-ruang.laporan', request()->only(['idruang','idbarang'])) }}"
+                <a href="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.laporan', request()->only(['idruang','idbarang'])) }}"
                    class="w-full md:w-auto inline-flex items-center justify-center px-4 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700">
                     Unduh Laporan
                 </a>
@@ -69,7 +72,7 @@
                             <td class="px-6 py-4 text-gray-700">{{ $unit->nomor_unit }}</td>
                             <td class="px-6 py-4 text-gray-500 text-sm">{{ $unit->keterangan ?? '-' }}</td>
                             <td class="px-6 py-4 text-sm">
-                                <form action="{{ route('pegawai.inventaris-ruang.destroy', $unit) }}" method="POST" onsubmit="return confirm('Hapus unit ini?');">
+                                <form action="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.destroy', $unit) }}" method="POST" onsubmit="return confirm('Hapus unit ini?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-600 hover:underline">Hapus</button>

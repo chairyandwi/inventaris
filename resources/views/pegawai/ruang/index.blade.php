@@ -3,11 +3,14 @@
 @section('title', 'Ruang')
 
 @section('content')
+    @php
+        $routePrefix = ($routePrefix ?? null) ?: (request()->routeIs('admin.*') ? 'admin' : 'pegawai');
+    @endphp
     <div class="pt-24 container mx-auto px-4 py-6 min-h-screen">
         <!-- Header dengan tombol Tambah -->
         <div class="mb-6">
             <div class="flex items-center">
-                <a href="{{ route('pegawai.index') }}" 
+                <a href="{{ route($homeRoute ?? 'pegawai.index') }}" 
                     class="inline-flex items-center px-3 py-2 text-sm text-gray-600 hover:text-gray-900 transition duration-150 ease-in-out">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -15,7 +18,7 @@
                     Kembali
                 </a>
                 <h1 class="text-2xl font-bold text-gray-800">Ruang</h1>
-                <a href="{{ route('pegawai.ruang.create') }}"
+                <a href="{{ route(($routePrefix ?? 'pegawai') . '.ruang.create') }}"
                     class="ml-auto inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg shadow-sm transition duration-150 ease-in-out">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -74,7 +77,7 @@
                         <tr>
                             <th scope="col"
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hover:bg-gray-100">
-                                <a href="{{ route('pegawai.ruang.index', [
+                                <a href="{{ route(($routePrefix ?? 'pegawai') . '.ruang.index', [
                                     'sort_by' => 'idruang',
                                     'sort_direction' => request('sort_direction') === 'asc' ? 'desc' : 'asc'
                                 ]) }}" class="flex items-center space-x-1">
@@ -125,7 +128,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center space-x-2">
                                         <!-- Edit Button -->
-                                        <a href="{{ route('pegawai.ruang.edit', $r->idruang) }}"
+                                        <a href="{{ route(($routePrefix ?? 'pegawai') . '.ruang.edit', $r->idruang) }}"
                                             class="inline-flex items-center px-1 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded transition duration-150 ease-in-out">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -248,7 +251,7 @@
         function confirmDelete(id) {
             if (confirm('Apakah Anda yakin ingin menghapus ruang ini?')) {
                 const form = document.getElementById('deleteForm');
-                form.action = "{{ route('pegawai.ruang.destroy', ':id') }}".replace(':id', id);
+                form.action = "{{ route(($routePrefix ?? 'pegawai').'.ruang.destroy', ':id') }}".replace(':id', id);
                 form.submit();
             }
         }

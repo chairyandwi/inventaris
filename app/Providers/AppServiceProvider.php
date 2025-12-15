@@ -26,22 +26,27 @@ class AppServiceProvider extends ServiceProvider
     {
         if (!Schema::hasTable('app_configurations')) {
             View::share('globalAppConfig', null);
-            return;
+        } else {
+            $appConfig = Cache::remember('app_config', 3600, function () {
+                return AppConfiguration::first();
+            });
+
+            View::share('globalAppConfig', $appConfig);
+
+            if ($appConfig && $appConfig->apply_email) {
+                if (!empty($appConfig->email)) {
+                    Config::set('mail.from.address', $appConfig->email);
+                }
+                if (!empty($appConfig->nama_kampus)) {
+                    Config::set('mail.from.name', $appConfig->nama_kampus);
+                }
+            }
         }
 
-        $appConfig = Cache::remember('app_config', 3600, function () {
-            return AppConfiguration::first();
+        View::composer('pegawai::*', function ($view) {
+            $homeRoute = (auth()->check() && auth()->user()->role === 'admin') ? 'admin.index' : 'pegawai.index';
+            $routePrefix = (auth()->check() && auth()->user()->role === 'admin') ? 'admin' : 'pegawai';
+            $view->with(compact('homeRoute', 'routePrefix'));
         });
-
-        View::share('globalAppConfig', $appConfig);
-
-        if ($appConfig && $appConfig->apply_email) {
-            if (!empty($appConfig->email)) {
-                Config::set('mail.from.address', $appConfig->email);
-            }
-            if (!empty($appConfig->nama_kampus)) {
-                Config::set('mail.from.name', $appConfig->nama_kampus);
-            }
-        }
     }
 }

@@ -71,6 +71,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         $validator = Validator::make($request->all(), [
             'nama'      => 'required|string|max:255',
             'username'  => 'required|string|max:100|unique:users,username',
@@ -102,7 +103,7 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('pegawai.user.index')->with('success', 'User berhasil ditambahkan');
+        return redirect()->route($routePrefix . '.user.index')->with('success', 'User berhasil ditambahkan');
     }
 
     /**
@@ -118,6 +119,7 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         $validator = Validator::make($request->all(), [
             'nama'      => 'required|string|max:255',
             'username'  => [
@@ -147,7 +149,7 @@ class UserController extends Controller
 
         $user->update($data);
 
-        return redirect()->route('pegawai.user.index')->with('success', 'User berhasil diubah');
+        return redirect()->route($routePrefix . '.user.index')->with('success', 'User berhasil diubah');
     }
 
     /**
@@ -155,11 +157,12 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         try {
             $user->delete();
-            return redirect()->route('pegawai.user.index')->with('success', 'User berhasil dihapus');
+            return redirect()->route($routePrefix . '.user.index')->with('success', 'User berhasil dihapus');
         } catch (\Exception $e) {
-            return redirect()->route('pegawai.user.index')->with('error', 'Gagal menghapus user: ' . $e->getMessage());
+            return redirect()->route($routePrefix . '.user.index')->with('error', 'Gagal menghapus user: ' . $e->getMessage());
         }
     }
 

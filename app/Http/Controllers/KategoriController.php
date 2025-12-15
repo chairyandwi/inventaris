@@ -63,6 +63,7 @@ class KategoriController extends Controller
      */
     public function store(Request $request)
     {
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         $validator = Validator::make($request->all(), [
             'nama_kategori' => 'required|string|max:255|unique:kategori,nama_kategori',
             'keterangan' => 'nullable|string|max:500'
@@ -84,7 +85,7 @@ class KategoriController extends Controller
             'keterangan' => $request->keterangan
         ]);
 
-        return redirect()->route('pegawai.kategori.index')
+        return redirect()->route($routePrefix . '.kategori.index')
             ->with('success', 'Kategori berhasil ditambahkan');
     }
 
@@ -109,6 +110,7 @@ class KategoriController extends Controller
      */
     public function update(Request $request, Kategori $kategori)
     {
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         $validator = Validator::make($request->all(), [
             'nama_kategori' => [
                 'required',
@@ -136,7 +138,7 @@ class KategoriController extends Controller
                 'keterangan'    => $request->keterangan
             ]);
 
-            return redirect()->route('pegawai.kategori.index')
+            return redirect()->route($routePrefix . '.kategori.index')
                 ->with('success', 'Kategori berhasil diubah');
         } catch (\Exception $e) {
             return redirect()->back()
@@ -150,13 +152,14 @@ class KategoriController extends Controller
      */
     public function destroy(Kategori $kategori)
     {
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         try {
             $kategori->delete();
     
-            return redirect()->route('pegawai.kategori.index')
+            return redirect()->route($routePrefix . '.kategori.index')
                 ->with('success', 'Kategori berhasil dihapus');
         } catch (\Exception $e) {
-            return redirect()->route('pegawai.kategori.index')
+            return redirect()->route($routePrefix . '.kategori.index')
                 ->with('error', 'Gagal menghapus kategori: ' . $e->getMessage());
         }
     }
