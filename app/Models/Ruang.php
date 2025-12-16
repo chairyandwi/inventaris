@@ -25,6 +25,7 @@ class Ruang extends Model
      */
     protected $fillable = [
         'nama_ruang',
+        'kode_ruang',
         'nama_gedung',
         'nama_lantai',
         'keterangan',
