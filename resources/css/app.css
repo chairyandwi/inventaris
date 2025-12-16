@@ -11,6 +11,12 @@
         @apply text-slate-50;
     }
 
+    input,
+    select,
+    textarea {
+        @apply text-slate-900 placeholder-slate-400;
+    }
+
     main {
         @apply text-slate-50;
     }
