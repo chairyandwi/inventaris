@@ -68,6 +68,9 @@ class BarangMasukController extends Controller
             'storage_type' => 'nullable|in:SSD,HDD',
             'storage_capacity_gb' => 'nullable|integer|min:1|max:10000',
             'processor'   => 'nullable|string|max:150',
+            'monitor_brand' => 'nullable|string|max:120',
+            'monitor_model' => 'nullable|string|max:150',
+            'monitor_size_inch' => 'nullable|numeric|min:10|max:60',
         ], [
             'idbarang.required'   => 'Barang wajib dipilih',
             'idbarang.exists'     => 'Barang tidak valid',
@@ -89,6 +92,10 @@ class BarangMasukController extends Controller
 
                 if ($missingSpec) {
                     $validator->errors()->add('spesifikasi', 'Spesifikasi PC (RAM, storage, dan prosesor) wajib diisi untuk perangkat PC.');
+                }
+
+                if (! $request->filled('monitor_size_inch')) {
+                    $validator->errors()->add('monitor_size_inch', 'Ukuran monitor (inci) wajib diisi untuk perangkat PC.');
                 }
             }
         });
@@ -131,6 +138,9 @@ class BarangMasukController extends Controller
             'storage_type' => 'nullable|in:SSD,HDD',
             'storage_capacity_gb' => 'nullable|integer|min:1|max:10000',
             'processor'   => 'nullable|string|max:150',
+            'monitor_brand' => 'nullable|string|max:120',
+            'monitor_model' => 'nullable|string|max:150',
+            'monitor_size_inch' => 'nullable|numeric|min:10|max:60',
         ]);
 
         $barang = Barang::with('kategori')->find($request->idbarang);
@@ -146,6 +156,10 @@ class BarangMasukController extends Controller
 
                 if ($missingSpec) {
                     $validator->errors()->add('spesifikasi', 'Spesifikasi PC (RAM, storage, dan prosesor) wajib diisi untuk perangkat PC.');
+                }
+
+                if (! $request->filled('monitor_size_inch')) {
+                    $validator->errors()->add('monitor_size_inch', 'Ukuran monitor (inci) wajib diisi untuk perangkat PC.');
                 }
             }
         });

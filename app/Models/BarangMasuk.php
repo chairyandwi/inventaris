@@ -24,6 +24,9 @@ class BarangMasuk extends Model
         'storage_type',
         'storage_capacity_gb',
         'processor',
+        'monitor_brand',
+        'monitor_model',
+        'monitor_size_inch',
     ];
 
     // Relasi ke tabel Barang

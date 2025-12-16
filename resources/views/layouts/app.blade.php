@@ -14,8 +14,8 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100 flex flex-col">
+<body class="font-sans antialiased bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+    <div class="min-h-screen flex flex-col">
         @auth
             @if (Auth::user()->role === 'admin')
                 @include('layouts.navadmin')
