@@ -47,7 +47,9 @@ class InventarisRuangController extends Controller
             });
         }
 
-        $units = $query->paginate(15)->appends($request->only('idruang', 'idbarang', 'gedung', 'lantai'));
+        $perPage = in_array((int)$request->get('per_page', 15), [10, 15, 25, 50, 100]) ? (int)$request->get('per_page', 15) : 15;
+
+        $units = $query->paginate($perPage)->appends($request->only('idruang', 'idbarang', 'gedung', 'lantai', 'per_page'));
         $ruangAll = Ruang::orderBy('nama_ruang')->get();
         $ruang = Ruang::when($gedungFilter !== '', function ($q) use ($gedungFilter) {
                 $q->where('nama_gedung', $gedungFilter);

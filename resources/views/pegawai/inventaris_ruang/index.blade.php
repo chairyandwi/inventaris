@@ -60,26 +60,27 @@
     <div class="relative -mt-10 pb-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <div class="bg-slate-900/70 border border-white/10 rounded-2xl shadow-lg shadow-indigo-500/10 backdrop-blur">
-                <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4 p-6">
-                    <div>
-                        <label class="text-sm font-semibold text-indigo-100 mb-2 block">Filter Gedung</label>
-                        <select name="gedung" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
-                            <option class="text-slate-900" value="">Semua Gedung</option>
-                            @foreach($gedungList ?? [] as $g)
+                <form method="GET" class="p-6 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label class="text-sm font-semibold text-indigo-100 mb-2 block">Filter Gedung</label>
+                            <select name="gedung" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
+                                <option class="text-slate-900" value="">Semua Gedung</option>
+                                @foreach($gedungList ?? [] as $g)
                                 <option class="text-slate-900" value="{{ $g }}" @selected(request('gedung') == $g)>{{ $g }}</option>
                             @endforeach
-                        </select>
-                    </div>
-                    <div>
+                            </select>
+                        </div>
+                        <div>
                         <label class="text-sm font-semibold text-indigo-100 mb-2 block">Filter Lantai</label>
                         <select name="lantai" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
                             <option class="text-slate-900" value="">Semua Lantai</option>
                             @foreach($lantaiList ?? [] as $l)
                                 <option class="text-slate-900" value="{{ $l }}" @selected(request('lantai') == $l)>{{ $l }}</option>
                             @endforeach
-                        </select>
-                    </div>
-                    <div>
+                            </select>
+                        </div>
+                        <div>
                         <label class="text-sm font-semibold text-indigo-100 mb-2 block">Filter Ruang</label>
                         <select name="idruang" id="ruangSelect" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
                             <option class="text-slate-900" value="">Semua Ruang</option>
@@ -95,27 +96,40 @@
                                     {{ $r->nama_ruang }}
                                 </option>
                             @endforeach
-                        </select>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-indigo-100 mb-2 block">Filter Barang</label>
+                            <select name="idbarang" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
+                                <option class="text-slate-900" value="">Semua Barang</option>
+                                @foreach($barang as $b)
+                                    <option class="text-slate-900" value="{{ $b->idbarang }}" @selected(request('idbarang') == $b->idbarang)>{{ $b->nama_barang }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label class="text-sm font-semibold text-indigo-100 mb-2 block">Filter Barang</label>
-                        <select name="idbarang" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
-                            <option class="text-slate-900" value="">Semua Barang</option>
-                            @foreach($barang as $b)
-                                <option class="text-slate-900" value="{{ $b->idbarang }}" @selected(request('idbarang') == $b->idbarang)>{{ $b->nama_barang }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="flex items-end gap-3">
-                        <button type="submit" class="w-full md:w-auto inline-flex items-center justify-center px-4 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 font-semibold shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 transition">
-                            Terapkan Filter
-                        </button>
-                        <a href="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.laporan', request()->only(['idruang','idbarang','gedung','lantai'])) }}"
-                           class="w-full md:w-auto inline-flex items-center justify-center px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-900 font-semibold shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition">
-                            Unduh Laporan
-                        </a>
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 bg-slate-800/60 border border-white/10 rounded-xl px-3 py-2">
+                            <label class="text-sm font-semibold text-indigo-100">Tampil</label>
+                            <select name="per_page" class="select-perpage rounded-lg bg-slate-900/60 border border-white/10 text-white px-2 py-1 pr-7 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
+                                @foreach([10,15,25,50,100] as $pp)
+                                    <option class="text-slate-900" value="{{ $pp }}" @selected(request('per_page',15)==$pp)>{{ $pp }}</option>
+                                @endforeach
+                            </select>
+                            <span class="text-sm text-indigo-100/80">barang</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 font-semibold shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 transition">
+                                Terapkan
+                            </button>
+                            <a href="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.laporan', request()->only(['idruang','idbarang','gedung','lantai'])) }}"
+                               class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-900 font-semibold shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition">
+                                Unduh
+                            </a>
+                        </div>
                     </div>
                 </form>
+            </div>
 
                 @if(request('idruang') || request('idbarang') || request('gedung') || request('lantai'))
                     <div class="px-6 pb-4 flex flex-wrap gap-2 text-sm text-indigo-100">
@@ -254,13 +268,45 @@
                     @endforelse
                 </div>
                 <div class="px-6 py-4 bg-white/5 border-t border-white/10 text-indigo-100">
-                    {{ $units->links() }}
+                    <div class="pagination-wrapper">
+                        {{ $units->links() }}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 @endsection
+
+@push('styles')
+<style>
+    .pagination-wrapper nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+    .pagination-wrapper nav a,
+    .pagination-wrapper nav span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .pagination-wrapper nav svg {
+        width: 14px;
+        height: 14px;
+    }
+    .select-perpage {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        padding-right: 2.5rem;
+        background-image: url("data:image/svg+xml,%3Csvg fill='none' stroke='%23cbd5e1' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.65rem center;
+        background-size: 0.9rem;
+    }
+</style>
+@endpush
 
 @push('scripts')
 <script>
