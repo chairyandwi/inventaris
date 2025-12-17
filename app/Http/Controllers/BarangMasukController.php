@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BarangMasuk;
 use App\Models\Barang;
+use App\Models\Kategori;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Validation\Rule;
@@ -15,6 +16,7 @@ class BarangMasukController extends Controller
     public function index(Request $request)
     {
         $query = BarangMasuk::with('barang'); // eager load relasi barang
+        $barangList = Barang::orderBy('nama_barang')->get();
         $stats = [
             'totalEntry' => BarangMasuk::count(),
             'totalQty' => BarangMasuk::sum('jumlah'),
@@ -33,6 +35,27 @@ class BarangMasukController extends Controller
             ->orWhere('keterangan', 'like', "%{$searchTerm}%");
         }
 
+        // Filters
+        if ($request->filled('idbarang')) {
+            $query->where('idbarang', $request->idbarang);
+        }
+
+        if ($request->filled('status_barang')) {
+            $query->where('status_barang', $request->status_barang);
+        }
+
+        if ($request->has('is_pc') && $request->is_pc !== '') {
+            $query->where('is_pc', (bool)$request->is_pc);
+        }
+
+        if ($request->filled('tgl_masuk_from')) {
+            $query->whereDate('tgl_masuk', '>=', $request->tgl_masuk_from);
+        }
+
+        if ($request->filled('tgl_masuk_to')) {
+            $query->whereDate('tgl_masuk', '<=', $request->tgl_masuk_to);
+        }
+
         // Sorting
         $sortBy = $request->get('sort_by', 'idbarang_masuk');
         $sortDirection = $request->get('sort_direction', 'asc');
@@ -44,13 +67,14 @@ class BarangMasukController extends Controller
 
         $barangMasuk = $query->paginate($perPage)->appends($request->all());
 
-        return view('pegawai.barang_masuk.index', compact('barangMasuk', 'stats'));
+        return view('pegawai.barang_masuk.index', compact('barangMasuk', 'stats', 'barangList'));
     }
 
     public function create()
     {
         $barang = Barang::with('kategori')->orderBy('nama_barang')->get();
-        return view('pegawai.barang_masuk.create', compact('barang'));
+        $kategori = Kategori::orderBy('nama_kategori')->get();
+        return view('pegawai.barang_masuk.create', compact('barang', 'kategori'));
     }
 
     public function store(Request $request)
@@ -119,8 +143,9 @@ class BarangMasukController extends Controller
 
     public function edit(BarangMasuk $barangMasuk)
     {
-        $barang = Barang::orderBy('nama_barang')->get();
-        return view('pegawai.barang_masuk.edit', compact('barangMasuk', 'barang'));
+        $barang = Barang::with('kategori')->orderBy('nama_barang')->get();
+        $kategori = Kategori::orderBy('nama_kategori')->get();
+        return view('pegawai.barang_masuk.edit', compact('barangMasuk', 'barang', 'kategori'));
     }
 
     public function update(Request $request, BarangMasuk $barangMasuk)

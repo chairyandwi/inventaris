@@ -30,14 +30,27 @@
                 <form action="{{ route(($routePrefix ?? 'pegawai') . '.barang_masuk.update', $barangMasuk->idbarang_masuk) }}" method="POST" class="p-6 space-y-6">
                     @csrf
                     @method('PUT')
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
+                            <label class="block text-sm font-semibold text-indigo-100 mb-2" for="idkategori">Kategori</label>
+                            <select id="idkategori" class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus-border-transparent">
+                                <option value="">-- Semua Kategori --</option>
+                                @foreach($kategori as $kat)
+                                    <option value="{{ $kat->idkategori }}" @selected(old('idkategori', optional($barangMasuk->barang)->idkategori) == $kat->idkategori)>{{ $kat->nama_kategori }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-2">
                             <label class="block text-sm font-semibold text-indigo-100 mb-2" for="idbarang">Pilih Barang</label>
                             <select name="idbarang" id="idbarang" required
                                 class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus-border-transparent {{ $errors->has('idbarang') ? 'border-rose-400' : '' }}">
                                 <option value="">-- Pilih Barang --</option>
                                 @foreach($barang as $item)
-                                    <option value="{{ $item->idbarang }}" data-jenis="{{ $item->jenis_barang ?? 'pinjam' }}" @selected(old('idbarang', $barangMasuk->idbarang) == $item->idbarang)>
+                                    <option value="{{ $item->idbarang }}"
+                                            data-jenis="{{ $item->jenis_barang ?? 'pinjam' }}"
+                                            data-kategori="{{ $item->idkategori }}"
+                                            @selected(old('idbarang', $barangMasuk->idbarang) == $item->idbarang)>
                                         {{ $item->kode_barang }} - {{ $item->nama_barang }} ({{ $item->kategori->nama_kategori ?? '-' }})
                                     </option>
                                 @endforeach
@@ -47,7 +60,7 @@
                             @enderror
                         </div>
 
-                        <div>
+                        <div class="md:col-span-1">
                             <label class="block text-sm font-semibold text-indigo-100 mb-2" for="jenis_barang">Jenis Barang</label>
                             <select name="jenis_barang" id="jenis_barang"
                                 class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus-border-transparent {{ $errors->has('jenis_barang') ? 'border-rose-400' : '' }}">
@@ -194,6 +207,7 @@
     }
 
     const selectBarang = document.getElementById('idbarang');
+    const selectKategori = document.getElementById('idkategori');
     const jenisBarang = document.getElementById('jenis_barang');
 
     function syncJenisFromBarang() {
@@ -203,7 +217,26 @@
         }
     }
 
+    function filterBarangByKategori() {
+        const selectedKategori = selectKategori?.value || '';
+        Array.from(selectBarang.options).forEach(opt => {
+            if (!opt.value) return;
+            const match = !selectedKategori || opt.dataset.kategori === selectedKategori;
+            opt.hidden = !match;
+            if (!match && opt.selected) {
+                opt.selected = false;
+            }
+        });
+        if (!selectBarang.value) {
+            jenisBarang.value = 'pinjam';
+        } else {
+            syncJenisFromBarang();
+        }
+    }
+
+    filterBarangByKategori();
     syncJenisFromBarang();
     selectBarang?.addEventListener('change', syncJenisFromBarang);
+    selectKategori?.addEventListener('change', filterBarangByKategori);
 </script>
 @endsection

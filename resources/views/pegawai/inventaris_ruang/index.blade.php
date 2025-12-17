@@ -60,13 +60,40 @@
     <div class="relative -mt-10 pb-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <div class="bg-slate-900/70 border border-white/10 rounded-2xl shadow-lg shadow-indigo-500/10 backdrop-blur">
-                <form method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
+                <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4 p-6">
+                    <div>
+                        <label class="text-sm font-semibold text-indigo-100 mb-2 block">Filter Gedung</label>
+                        <select name="gedung" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
+                            <option class="text-slate-900" value="">Semua Gedung</option>
+                            @foreach($gedungList ?? [] as $g)
+                                <option class="text-slate-900" value="{{ $g }}" @selected(request('gedung') == $g)>{{ $g }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-indigo-100 mb-2 block">Filter Lantai</label>
+                        <select name="lantai" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
+                            <option class="text-slate-900" value="">Semua Lantai</option>
+                            @foreach($lantaiList ?? [] as $l)
+                                <option class="text-slate-900" value="{{ $l }}" @selected(request('lantai') == $l)>{{ $l }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div>
                         <label class="text-sm font-semibold text-indigo-100 mb-2 block">Filter Ruang</label>
-                        <select name="idruang" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
+                        <select name="idruang" id="ruangSelect" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
                             <option class="text-slate-900" value="">Semua Ruang</option>
-                            @foreach($ruang as $r)
-                                <option class="text-slate-900" value="{{ $r->idruang }}" @selected(request('idruang') == $r->idruang)>{{ $r->nama_ruang }}</option>
+                            @php
+                                $ruangOptions = ($ruang->count() ? $ruang : ($ruangAll ?? collect()));
+                            @endphp
+                            @foreach($ruangOptions as $r)
+                                <option class="text-slate-900"
+                                        data-gedung="{{ $r->nama_gedung }}"
+                                        data-lantai="{{ $r->nama_lantai }}"
+                                        value="{{ $r->idruang }}"
+                                        @selected(request('idruang') == $r->idruang)>
+                                    {{ $r->nama_ruang }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -83,16 +110,22 @@
                         <button type="submit" class="w-full md:w-auto inline-flex items-center justify-center px-4 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 font-semibold shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 transition">
                             Terapkan Filter
                         </button>
-                        <a href="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.laporan', request()->only(['idruang','idbarang'])) }}"
+                        <a href="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.laporan', request()->only(['idruang','idbarang','gedung','lantai'])) }}"
                            class="w-full md:w-auto inline-flex items-center justify-center px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-900 font-semibold shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition">
                             Unduh Laporan
                         </a>
                     </div>
                 </form>
 
-                @if(request('idruang') || request('idbarang'))
+                @if(request('idruang') || request('idbarang') || request('gedung') || request('lantai'))
                     <div class="px-6 pb-4 flex flex-wrap gap-2 text-sm text-indigo-100">
                         <span class="px-3 py-1 rounded-full bg-white/10 border border-white/10">Filter aktif:</span>
+                        @if(request('gedung'))
+                            <span class="px-3 py-1 rounded-full bg-purple-500/30 border border-purple-200/30">Gedung: {{ request('gedung') }}</span>
+                        @endif
+                        @if(request('lantai'))
+                            <span class="px-3 py-1 rounded-full bg-fuchsia-500/30 border border-fuchsia-200/30">Lantai: {{ request('lantai') }}</span>
+                        @endif
                         @if(request('idruang'))
                             <span class="px-3 py-1 rounded-full bg-indigo-500/30 border border-indigo-200/30">Ruang: {{ $ruang->firstWhere('idruang', request('idruang'))?->nama_ruang ?? 'Dipilih' }}</span>
                         @endif
@@ -111,6 +144,12 @@
                             $barang = $unit->barang;
                             $ruangItem = $unit->ruang;
                             $latestMasuk = $barang?->barangMasuk->first();
+                            $hasSpec = $latestMasuk && (
+                                $latestMasuk->processor ||
+                                $latestMasuk->ram_capacity_gb ||
+                                $latestMasuk->storage_capacity_gb ||
+                                $latestMasuk->monitor_brand
+                            );
                         @endphp
                         <div class="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-slate-800/70 backdrop-blur shadow-lg shadow-indigo-500/15">
                             <div class="absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.25),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(14,165,233,0.25),transparent_35%)]"></div>
@@ -135,53 +174,60 @@
                                     </div>
                                 </div>
 
-                                <div class="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <p class="text-xs font-semibold text-indigo-100 uppercase tracking-wide">Detail Spesifikasi</p>
-                                        @if($latestMasuk?->tgl_masuk)
-                                            <span class="text-[11px] px-2 py-1 rounded-full bg-white/5 border border-white/10 text-indigo-100/80">Datang {{ \Carbon\Carbon::parse($latestMasuk->tgl_masuk)->format('d M Y') }}</span>
+                                @if($hasSpec)
+                                    <div class="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <p class="text-xs font-semibold text-indigo-100 uppercase tracking-wide">Detail Spesifikasi</p>
+                                            @if($latestMasuk?->tgl_masuk)
+                                                <span class="text-[11px] px-2 py-1 rounded-full bg-white/5 border border-white/10 text-indigo-100/80">Datang {{ \Carbon\Carbon::parse($latestMasuk->tgl_masuk)->format('d M Y') }}</span>
+                                            @endif
+                                        </div>
+                                        <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-indigo-100/80">
+                                            <div>
+                                                <dt class="text-[11px] uppercase tracking-[0.15em] text-indigo-200/70">Prosesor</dt>
+                                                <dd class="font-semibold text-white">{{ $latestMasuk?->processor ?? '—' }}</dd>
+                                            </div>
+                                            <div>
+                                                <dt class="text-[11px] uppercase tracking-[0.15em] text-indigo-200/70">RAM</dt>
+                                                <dd class="font-semibold text-white">
+                                                    @if($latestMasuk?->ram_capacity_gb)
+                                                        {{ $latestMasuk->ram_capacity_gb }} GB {{ $latestMasuk->ram_brand ? '('.$latestMasuk->ram_brand.')' : '' }}
+                                                    @else
+                                                        —
+                                                    @endif
+                                                </dd>
+                                            </div>
+                                            <div>
+                                                <dt class="text-[11px] uppercase tracking-[0.15em] text-indigo-200/70">Penyimpanan</dt>
+                                                <dd class="font-semibold text-white">
+                                                    @if($latestMasuk?->storage_capacity_gb)
+                                                        {{ $latestMasuk->storage_capacity_gb }} GB {{ $latestMasuk->storage_type ?? '' }}
+                                                    @else
+                                                        —
+                                                    @endif
+                                                </dd>
+                                            </div>
+                                            <div>
+                                                <dt class="text-[11px] uppercase tracking-[0.15em] text-indigo-200/70">Monitor</dt>
+                                                <dd class="font-semibold text-white">
+                                                    @if($latestMasuk?->monitor_brand)
+                                                        {{ $latestMasuk->monitor_brand }} {{ $latestMasuk->monitor_model }} {{ $latestMasuk->monitor_size_inch ? $latestMasuk->monitor_size_inch . '”' : '' }}
+                                                    @else
+                                                        —
+                                                    @endif
+                                                </dd>
+                                            </div>
+                                        </dl>
+                                        @if($unit->keterangan)
+                                            <p class="mt-3 text-sm text-indigo-100/80"><span class="font-semibold text-indigo-100">Catatan:</span> {{ $unit->keterangan }}</p>
                                         @endif
                                     </div>
-                                    <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-indigo-100/80">
-                                        <div>
-                                            <dt class="text-[11px] uppercase tracking-[0.15em] text-indigo-200/70">Processor</dt>
-                                            <dd class="font-semibold text-white">{{ $latestMasuk?->processor ?? '—' }}</dd>
-                                        </div>
-                                        <div>
-                                            <dt class="text-[11px] uppercase tracking-[0.15em] text-indigo-200/70">RAM</dt>
-                                            <dd class="font-semibold text-white">
-                                                @if($latestMasuk?->ram_capacity_gb)
-                                                    {{ $latestMasuk->ram_capacity_gb }} GB {{ $latestMasuk->ram_brand ? '('.$latestMasuk->ram_brand.')' : '' }}
-                                                @else
-                                                    —
-                                                @endif
-                                            </dd>
-                                        </div>
-                                        <div>
-                                            <dt class="text-[11px] uppercase tracking-[0.15em] text-indigo-200/70">Storage</dt>
-                                            <dd class="font-semibold text-white">
-                                                @if($latestMasuk?->storage_capacity_gb)
-                                                    {{ $latestMasuk->storage_capacity_gb }} GB {{ $latestMasuk->storage_type ?? '' }}
-                                                @else
-                                                    —
-                                                @endif
-                                            </dd>
-                                        </div>
-                                        <div>
-                                            <dt class="text-[11px] uppercase tracking-[0.15em] text-indigo-200/70">Monitor</dt>
-                                            <dd class="font-semibold text-white">
-                                                @if($latestMasuk?->monitor_brand)
-                                                    {{ $latestMasuk->monitor_brand }} {{ $latestMasuk->monitor_model }} {{ $latestMasuk->monitor_size_inch ? $latestMasuk->monitor_size_inch . '”' : '' }}
-                                                @else
-                                                    —
-                                                @endif
-                                            </dd>
-                                        </div>
-                                    </dl>
-                                    @if($unit->keterangan)
-                                        <p class="mt-3 text-sm text-indigo-100/80"><span class="font-semibold text-indigo-100">Catatan:</span> {{ $unit->keterangan }}</p>
-                                    @endif
-                                </div>
+                                @elseif($unit->keterangan)
+                                    <div class="rounded-xl border border-white/10 bg-white/5 p-4">
+                                        <p class="text-xs font-semibold text-indigo-100 uppercase tracking-wide mb-1">Catatan</p>
+                                        <p class="text-sm text-indigo-100/80">{{ $unit->keterangan }}</p>
+                                    </div>
+                                @endif
 
                                 <div class="flex items-center justify-between pt-1">
                                     <div class="text-xs text-indigo-100/70">
@@ -215,3 +261,66 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const gedungSelect = document.querySelector('select[name="gedung"]');
+    const lantaiSelect = document.querySelector('select[name="lantai"]');
+    const ruangSelect = document.getElementById('ruangSelect');
+    if (!gedungSelect || !ruangSelect) return;
+
+    @php
+        $allRuangJson = ($ruangAll ?? collect())->map(function($r) {
+            return [
+                'value' => $r->idruang,
+                'label' => $r->nama_ruang,
+                'gedung' => $r->nama_gedung,
+                'lantai' => $r->nama_lantai,
+            ];
+        })->values();
+    @endphp
+    const allRuang = @json($allRuangJson).map(r => ({
+        ...r,
+        gedung: (r.gedung || '').trim(),
+        lantai: (r.lantai || '').trim(),
+    }));
+
+    const rebuildRuang = () => {
+        const selectedGedung = gedungSelect.value || '';
+        const selectedLantai = (lantaiSelect && lantaiSelect.value) ? lantaiSelect.value : '';
+        const current = ruangSelect.value;
+
+        ruangSelect.innerHTML = '<option class="text-slate-900" value="">Semua Ruang</option>';
+
+        const filtered = allRuang.filter(r => {
+            const matchGedung = selectedGedung ? r.gedung === selectedGedung : true;
+            const matchLantai = selectedLantai ? (r.lantai === selectedLantai) : true;
+            return matchGedung && matchLantai;
+        });
+
+        filtered.forEach(r => {
+            const opt = document.createElement('option');
+            opt.className = 'text-slate-900';
+            opt.value = r.value;
+            opt.textContent = r.label;
+            if (r.value === current) {
+                opt.selected = true;
+            }
+            ruangSelect.appendChild(opt);
+        });
+
+        if (ruangSelect.value === '' && current) {
+            // if previous selection no longer valid, keep empty
+        }
+    };
+
+    gedungSelect.addEventListener('change', rebuildRuang);
+    if (lantaiSelect) {
+        lantaiSelect.addEventListener('change', rebuildRuang);
+    }
+
+    rebuildRuang();
+});
+</script>
+@endpush

@@ -18,6 +18,7 @@ class BarangSeeder extends Seeder
             'PLT' => 'Peralatan',
             'ELK' => 'Elektronik',
             'PKP' => 'Perlengkapan',
+            'ALT' => 'Alat',
         ];
 
         $items = [
@@ -129,6 +130,13 @@ class BarangSeeder extends Seeder
             ],
             'PKP' => [
                 ['kode' => '01', 'nama' => 'Penghapus'],
+            ],
+            'ALT' => [
+                ['kode' => '01', 'nama' => 'Treadmill'],
+                ['kode' => '02', 'nama' => 'Sepeda Statis'],
+                ['kode' => '03', 'nama' => 'Tensimeter'],
+                ['kode' => '04', 'nama' => 'Oximeter'],
+                ['kode' => '05', 'nama' => 'Goniometer'],
             ],
         ];
 

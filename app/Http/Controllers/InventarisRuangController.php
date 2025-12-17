@@ -13,7 +13,18 @@ class InventarisRuangController extends Controller
 {
     public function index(Request $request)
     {
-        $query = BarangUnit::with(['barang', 'ruang'])
+        $gedungFilter = trim((string) $request->get('gedung', ''));
+        $lantaiFilter = trim((string) $request->get('lantai', ''));
+
+        $query = BarangUnit::with([
+                'barang',
+                'ruang',
+                'barang.barangMasuk' => function ($q) {
+                    $q->orderByDesc('tgl_masuk')
+                      ->orderByDesc('created_at')
+                      ->take(1);
+                },
+            ])
             ->orderBy('kode_unit');
 
         if ($request->filled('idruang')) {
@@ -24,9 +35,31 @@ class InventarisRuangController extends Controller
             $query->where('idbarang', $request->idbarang);
         }
 
-        $units = $query->paginate(15)->appends($request->only('idruang', 'idbarang'));
-        $ruang = Ruang::orderBy('nama_ruang')->get();
+        if ($gedungFilter !== '') {
+            $query->whereHas('ruang', function ($q) use ($request) {
+                $q->where('nama_gedung', trim($request->gedung));
+            });
+        }
+
+        if ($lantaiFilter !== '') {
+            $query->whereHas('ruang', function ($q) use ($request) {
+                $q->where('nama_lantai', trim($request->lantai));
+            });
+        }
+
+        $units = $query->paginate(15)->appends($request->only('idruang', 'idbarang', 'gedung', 'lantai'));
+        $ruangAll = Ruang::orderBy('nama_ruang')->get();
+        $ruang = Ruang::when($gedungFilter !== '', function ($q) use ($gedungFilter) {
+                $q->where('nama_gedung', $gedungFilter);
+            })
+            ->when($lantaiFilter !== '', function ($q) use ($lantaiFilter) {
+                $q->where('nama_lantai', $lantaiFilter);
+            })
+            ->orderBy('nama_ruang')
+            ->get();
         $barang = Barang::orderBy('nama_barang')->get();
+        $gedungList = Ruang::select('nama_gedung')->distinct()->orderBy('nama_gedung')->pluck('nama_gedung')->filter()->values();
+        $lantaiList = Ruang::select('nama_lantai')->distinct()->orderBy('nama_lantai')->pluck('nama_lantai')->filter()->values();
 
         $summary = [
             'totalUnits' => BarangUnit::count(),
@@ -34,7 +67,7 @@ class InventarisRuangController extends Controller
             'barangTetap' => Barang::where('jenis_barang', 'tetap')->count(),
         ];
 
-        return view('pegawai.inventaris_ruang.index', compact('units', 'ruang', 'barang', 'summary'));
+        return view('pegawai.inventaris_ruang.index', compact('units', 'ruang', 'ruangAll', 'barang', 'summary', 'gedungList', 'lantaiList'));
     }
 
     public function create()

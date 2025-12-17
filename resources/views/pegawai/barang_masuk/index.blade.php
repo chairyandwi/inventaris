@@ -76,24 +76,71 @@
     <div class="relative -mt-10 pb-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <div class="bg-slate-900/70 border border-white/10 rounded-2xl shadow-lg shadow-indigo-500/10 backdrop-blur">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6">
-                    <div class="flex items-center gap-3">
-                        <span class="text-sm text-indigo-100">Show</span>
-                        <select id="perPage" class="rounded-xl bg-slate-800/60 border border-white/10 text-white px-3 py-2 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 w-24" onchange="handlePerPageChange(this.value)">
-                            <option class="text-slate-900" value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
-                            <option class="text-slate-900" value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
-                            <option class="text-slate-900" value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
-                            <option class="text-slate-900" value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
-                        </select>
-                        <span class="text-sm text-indigo-100">entries</span>
+                <form method="GET" class="p-6 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <div>
+                            <label class="text-sm font-semibold text-indigo-100 mb-2 block">Barang</label>
+                            <select name="idbarang" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
+                                <option class="text-slate-900" value="">Semua Barang</option>
+                                @foreach($barangList ?? [] as $b)
+                                    <option class="text-slate-900" value="{{ $b->idbarang }}" @selected(request('idbarang') == $b->idbarang)>{{ $b->nama_barang }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-indigo-100 mb-2 block">Status</label>
+                            <select name="status_barang" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
+                                <option class="text-slate-900" value="">Semua Status</option>
+                                <option class="text-slate-900" value="baru" @selected(request('status_barang') === 'baru')>Baru</option>
+                                <option class="text-slate-900" value="bekas" @selected(request('status_barang') === 'bekas')>Bekas</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-indigo-100 mb-2 block">Jenis</label>
+                            <select name="is_pc" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
+                                <option class="text-slate-900" value="">Semua</option>
+                                <option class="text-slate-900" value="1" @selected(request('is_pc') === '1')>PC / dengan spesifikasi</option>
+                                <option class="text-slate-900" value="0" @selected(request('is_pc') === '0')>Non PC</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-indigo-100 mb-2 block">Tanggal dari</label>
+                            <input type="date" name="tgl_masuk_from" value="{{ request('tgl_masuk_from') }}"
+                                   class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-indigo-100 mb-2 block">Tanggal sampai</label>
+                            <input type="date" name="tgl_masuk_to" value="{{ request('tgl_masuk_to') }}"
+                                   class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
+                        </div>
                     </div>
 
-                    <div class="flex items-center gap-3 w-full md:w-auto">
-                        <input type="text" id="searchInput"
-                            class="flex-1 md:flex-none rounded-xl bg-slate-800/60 border border-white/10 text-white px-4 py-2 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
-                            placeholder="Cari kode / nama / keterangan..." value="{{ request('search') }}">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm text-indigo-100">Show</span>
+                            <select name="per_page" class="rounded-xl bg-slate-800/60 border border-white/10 text-white px-3 py-2 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 w-24">
+                                @foreach([10,25,50,100] as $pp)
+                                    <option class="text-slate-900" value="{{ $pp }}" @selected(request('per_page',10)==$pp)>{{ $pp }}</option>
+                                @endforeach
+                            </select>
+                            <span class="text-sm text-indigo-100">entries</span>
+                        </div>
+                        <div class="flex items-center gap-3 w-full md:w-auto">
+                            <input type="text" name="search" id="searchInput"
+                                class="flex-1 md:flex-none rounded-xl bg-slate-800/60 border border-white/10 text-white px-4 py-2 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+                                placeholder="Cari kode / nama / keterangan..." value="{{ request('search') }}">
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <a href="{{ route(($routePrefix ?? 'pegawai') . '.barang_masuk.index') }}"
+                               class="px-4 py-2 rounded-xl border border-white/15 text-sm font-semibold text-indigo-50 hover:bg-white/10 transition">
+                                Reset
+                            </a>
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 font-semibold shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 transition">
+                                Terapkan Filter
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
 
             <div class="bg-slate-900/80 border border-white/10 rounded-2xl shadow-xl shadow-indigo-500/15 overflow-hidden">
@@ -206,12 +253,6 @@
 
 <script>
     const searchInput = document.getElementById('searchInput');
-    function handlePerPageChange(value) {
-        const currentUrl = new URL(window.location);
-        currentUrl.searchParams.set('per_page', value);
-        currentUrl.searchParams.delete('page');
-        window.location.href = currentUrl.toString();
-    }
     if (searchInput) {
         searchInput.addEventListener('input', function (e) {
             const searchTerm = e.target.value;
