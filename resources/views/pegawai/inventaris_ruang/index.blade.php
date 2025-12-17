@@ -105,51 +105,107 @@
             </div>
 
             <div class="bg-slate-900/80 border border-white/10 rounded-2xl shadow-xl shadow-indigo-500/15 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-white/10">
-                        <thead class="bg-white/5">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Kode Unit</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Barang</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Ruang</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">No. Unit</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Keterangan</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-white/5">
-                            @forelse($units as $unit)
-                                <tr class="hover:bg-white/5 transition">
-                                    <td class="px-6 py-4 text-sm font-semibold text-white">
-                                        <span class="px-3 py-1 rounded-lg bg-white/10 border border-white/10 inline-block">{{ $unit->kode_unit }}</span>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-indigo-50">{{ $unit->barang->nama_barang ?? '-' }}</td>
-                                    <td class="px-6 py-4 text-sm text-indigo-50">{{ $unit->ruang->nama_ruang ?? '-' }}</td>
-                                    <td class="px-6 py-4 text-sm text-indigo-50">Unit ke-{{ $unit->nomor_unit }}</td>
-                                    <td class="px-6 py-4 text-sm text-indigo-100/80">{{ $unit->keterangan ?? '-' }}</td>
-                                    <td class="px-6 py-4 text-sm">
-                                        <form action="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.destroy', $unit) }}" method="POST" onsubmit="return confirm('Hapus unit ini?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rose-500/80 hover:bg-rose-500 text-white shadow-md shadow-rose-500/30 transition">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V5a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v2H5m14 0H5" />
-                                                </svg>
-                                                Hapus
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="px-6 py-12 text-center text-sm text-indigo-100/80">
-                                        <p class="text-lg font-semibold">Belum ada data inventaris ruang</p>
-                                        <p class="text-sm text-indigo-100/70 mt-1">Catat unit baru untuk mulai memetakan aset per ruang.</p>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                <div class="grid gap-6 p-6 md:grid-cols-2 xl:grid-cols-3">
+                    @forelse($units as $unit)
+                        @php
+                            $barang = $unit->barang;
+                            $ruangItem = $unit->ruang;
+                            $latestMasuk = $barang?->barangMasuk->first();
+                        @endphp
+                        <div class="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-slate-800/70 backdrop-blur shadow-lg shadow-indigo-500/15">
+                            <div class="absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.25),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(14,165,233,0.25),transparent_35%)]"></div>
+                            <div class="relative p-5 space-y-4">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                        <p class="text-xs uppercase tracking-[0.3em] text-indigo-100/70">Unit {{ str_pad($unit->nomor_unit, 3, '0', STR_PAD_LEFT) }}</p>
+                                        <h3 class="text-xl font-bold text-white mt-1 leading-tight">{{ $barang->nama_barang ?? '-' }}</h3>
+                                        <p class="text-sm text-indigo-100/80">{{ $ruangItem->nama_ruang ?? '-' }} • {{ $ruangItem->nama_gedung ?? '' }}{{ $ruangItem->nama_lantai ? ' Lt. '.$ruangItem->nama_lantai : '' }}</p>
+                                    </div>
+                                    <span class="px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-semibold text-indigo-50">{{ $unit->kode_unit }}</span>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3 text-sm text-indigo-100/80">
+                                    <div class="rounded-xl border border-white/5 bg-white/5 p-3">
+                                        <p class="text-[11px] uppercase tracking-[0.2em] text-indigo-200/70">Kategori</p>
+                                        <p class="text-sm font-semibold text-white mt-1">{{ $barang?->kategori?->nama_kategori ?? '-' }}</p>
+                                    </div>
+                                    <div class="rounded-xl border border-white/5 bg-white/5 p-3">
+                                        <p class="text-[11px] uppercase tracking-[0.2em] text-indigo-200/70">Status</p>
+                                        <p class="text-sm font-semibold text-emerald-300 mt-1">Aktif</p>
+                                    </div>
+                                </div>
+
+                                <div class="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <p class="text-xs font-semibold text-indigo-100 uppercase tracking-wide">Detail Spesifikasi</p>
+                                        @if($latestMasuk?->tgl_masuk)
+                                            <span class="text-[11px] px-2 py-1 rounded-full bg-white/5 border border-white/10 text-indigo-100/80">Datang {{ \Carbon\Carbon::parse($latestMasuk->tgl_masuk)->format('d M Y') }}</span>
+                                        @endif
+                                    </div>
+                                    <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-indigo-100/80">
+                                        <div>
+                                            <dt class="text-[11px] uppercase tracking-[0.15em] text-indigo-200/70">Processor</dt>
+                                            <dd class="font-semibold text-white">{{ $latestMasuk?->processor ?? '—' }}</dd>
+                                        </div>
+                                        <div>
+                                            <dt class="text-[11px] uppercase tracking-[0.15em] text-indigo-200/70">RAM</dt>
+                                            <dd class="font-semibold text-white">
+                                                @if($latestMasuk?->ram_capacity_gb)
+                                                    {{ $latestMasuk->ram_capacity_gb }} GB {{ $latestMasuk->ram_brand ? '('.$latestMasuk->ram_brand.')' : '' }}
+                                                @else
+                                                    —
+                                                @endif
+                                            </dd>
+                                        </div>
+                                        <div>
+                                            <dt class="text-[11px] uppercase tracking-[0.15em] text-indigo-200/70">Storage</dt>
+                                            <dd class="font-semibold text-white">
+                                                @if($latestMasuk?->storage_capacity_gb)
+                                                    {{ $latestMasuk->storage_capacity_gb }} GB {{ $latestMasuk->storage_type ?? '' }}
+                                                @else
+                                                    —
+                                                @endif
+                                            </dd>
+                                        </div>
+                                        <div>
+                                            <dt class="text-[11px] uppercase tracking-[0.15em] text-indigo-200/70">Monitor</dt>
+                                            <dd class="font-semibold text-white">
+                                                @if($latestMasuk?->monitor_brand)
+                                                    {{ $latestMasuk->monitor_brand }} {{ $latestMasuk->monitor_model }} {{ $latestMasuk->monitor_size_inch ? $latestMasuk->monitor_size_inch . '”' : '' }}
+                                                @else
+                                                    —
+                                                @endif
+                                            </dd>
+                                        </div>
+                                    </dl>
+                                    @if($unit->keterangan)
+                                        <p class="mt-3 text-sm text-indigo-100/80"><span class="font-semibold text-indigo-100">Catatan:</span> {{ $unit->keterangan }}</p>
+                                    @endif
+                                </div>
+
+                                <div class="flex items-center justify-between pt-1">
+                                    <div class="text-xs text-indigo-100/70">
+                                        <p>{{ $barang?->kode_barang ?? '-' }} • Unit ke-{{ $unit->nomor_unit }}</p>
+                                    </div>
+                                    <form action="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.destroy', $unit) }}" method="POST" onsubmit="return confirm('Hapus unit ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rose-500/80 hover:bg-rose-500 text-white shadow-md shadow-rose-500/30 transition">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V5a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v2H5m14 0H5" />
+                                            </svg>
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-span-full text-center py-12 text-indigo-100/80">
+                            <p class="text-lg font-semibold">Belum ada data inventaris ruang</p>
+                            <p class="text-sm text-indigo-100/70 mt-1">Catat unit baru untuk mulai memetakan aset per ruang.</p>
+                        </div>
+                    @endforelse
                 </div>
                 <div class="px-6 py-4 bg-white/5 border-t border-white/10 text-indigo-100">
                     {{ $units->links() }}
