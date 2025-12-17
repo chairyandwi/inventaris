@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Barang;
 use App\Models\BarangUnit;
+use App\Models\BarangUnitKerusakan;
 use App\Models\Ruang;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Support\KodeInventarisGenerator;
@@ -15,6 +16,7 @@ class InventarisRuangController extends Controller
     {
         $gedungFilter = trim((string) $request->get('gedung', ''));
         $lantaiFilter = trim((string) $request->get('lantai', ''));
+        $statusFilter = $request->get('status', '');
 
         $query = BarangUnit::with([
                 'barang',
@@ -24,8 +26,25 @@ class InventarisRuangController extends Controller
                       ->orderByDesc('created_at')
                       ->take(1);
                 },
+                'kerusakanAktif',
             ])
             ->orderBy('kode_unit');
+
+        if ($statusFilter === 'rusak') {
+            $query->whereHas('kerusakanAktif');
+        } elseif ($statusFilter === 'baik') {
+            $query->whereDoesntHave('kerusakanAktif')
+                ->where(function ($q) {
+                    $q->whereNull('keterangan')
+                      ->orWhereRaw("LOWER(keterangan) NOT LIKE '%kurang%'");
+                });
+        } elseif ($statusFilter === 'kurang_baik') {
+            $query->whereDoesntHave('kerusakanAktif')
+                ->where(function ($q) {
+                    $q->whereRaw("LOWER(keterangan) LIKE '%kurang%'")
+                      ->orWhereRaw("LOWER(keterangan) LIKE '%kb%'");
+                });
+        }
 
         if ($request->filled('idruang')) {
             $query->where('idruang', $request->idruang);
@@ -49,7 +68,7 @@ class InventarisRuangController extends Controller
 
         $perPage = in_array((int)$request->get('per_page', 15), [10, 15, 25, 50, 100]) ? (int)$request->get('per_page', 15) : 15;
 
-        $units = $query->paginate($perPage)->appends($request->only('idruang', 'idbarang', 'gedung', 'lantai', 'per_page'));
+        $units = $query->paginate($perPage)->appends($request->only('idruang', 'idbarang', 'gedung', 'lantai', 'per_page', 'status'));
         $ruangAll = Ruang::orderBy('nama_ruang')->get();
         $ruang = Ruang::when($gedungFilter !== '', function ($q) use ($gedungFilter) {
                 $q->where('nama_gedung', $gedungFilter);
@@ -112,6 +131,69 @@ class InventarisRuangController extends Controller
             ->setPaper('A4', 'portrait');
 
         return $pdf->download('Laporan_Inventaris_Ruang.pdf');
+    }
+
+    /**
+     * Tandai unit sebagai rusak (admin/pegawai).
+     */
+    public function markRusak(Request $request, BarangUnit $inventaris_ruang)
+    {
+        $request->validate([
+            'deskripsi' => 'nullable|string|max:255',
+        ]);
+
+        $deskripsiInput = trim((string) $request->deskripsi);
+        $deskripsiFinal = $deskripsiInput !== '' ? $deskripsiInput : ($inventaris_ruang->keterangan ?? 'Rusak');
+
+        BarangUnitKerusakan::updateOrCreate(
+            [
+                'barang_unit_id' => $inventaris_ruang->id,
+                'status' => 'rusak',
+            ],
+            [
+                'tgl_rusak' => now()->toDateString(),
+                'deskripsi' => $deskripsiFinal,
+            ]
+        );
+
+        // kosongkan keterangan agar tidak dianggap "kurang baik"
+        $inventaris_ruang->update(['keterangan' => null]);
+
+        return back()->with('success', 'Unit berhasil ditandai sebagai rusak.');
+    }
+
+    /**
+     * Perbarui deskripsi kerusakan unit.
+     */
+    public function updateKerusakan(Request $request, BarangUnit $inventaris_ruang)
+    {
+        $request->validate([
+            'deskripsi' => 'nullable|string|max:255',
+        ]);
+
+        $kerusakan = $inventaris_ruang->kerusakanAktif()->first();
+
+        if (!$kerusakan) {
+            return back()->with('error', 'Unit ini belum ditandai rusak.');
+        }
+
+        $kerusakan->update([
+            'deskripsi' => $request->deskripsi ?: $kerusakan->deskripsi,
+        ]);
+
+        return back()->with('success', 'Deskripsi kerusakan diperbarui.');
+    }
+
+    /**
+     * Pulihkan unit dari status rusak.
+     */
+    public function restoreKerusakan(Request $request, BarangUnit $inventaris_ruang)
+    {
+        $kerusakan = $inventaris_ruang->kerusakanAktif()->first();
+        if ($kerusakan) {
+            $kerusakan->delete();
+        }
+        return back()->with('success', 'Unit dipulihkan ke kondisi baik.');
     }
 
     public function store(Request $request)

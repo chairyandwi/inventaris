@@ -69,6 +69,7 @@ class DatabaseSeeder extends Seeder
             InventarisA302Seeder::class,
             InventarisA303Seeder::class,
             InventarisA304Seeder::class,
+            BarangUnitKerusakanSeeder::class,
         ]);
     }
 }

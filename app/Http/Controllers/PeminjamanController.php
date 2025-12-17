@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Models\Ruang;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
+use App\Models\BarangUnitKerusakan;
+use Illuminate\Support\Facades\DB;
 
 class PeminjamanController extends Controller
 {
@@ -60,10 +62,14 @@ class PeminjamanController extends Controller
                 ->with('error', 'Anda belum dapat mengajukan peminjaman baru sebelum permintaan sebelumnya selesai dikembalikan.');
         }
 
-        $barang = Barang::withCount('units')->get()->filter(function ($item) {
-            return $item->stok > $item->units_count;
-        })->map(function ($item) {
-            $item->available_stok = $item->stok - $item->units_count;
+        $rusakCounts = $this->getRusakCounts();
+
+        $barang = Barang::withCount('units')->get()->filter(function ($item) use ($rusakCounts) {
+            $rusak = $rusakCounts[$item->idbarang] ?? 0;
+            return ($item->stok - $rusak) > $item->units_count;
+        })->map(function ($item) use ($rusakCounts) {
+            $rusak = $rusakCounts[$item->idbarang] ?? 0;
+            $item->available_stok = max(($item->stok - $rusak) - $item->units_count, 0);
             return $item;
         })->values();
         $ruang = Ruang::orderBy('nama_ruang')->get();
@@ -99,7 +105,8 @@ class PeminjamanController extends Controller
         }
 
         $assignedUnits = $barang->units()->count();
-        $availableStok = max($barang->stok - $assignedUnits, 0);
+        $rusak = $this->getRusakCounts([$barang->idbarang])[$barang->idbarang] ?? 0;
+        $availableStok = max(($barang->stok - $rusak) - $assignedUnits, 0);
 
         if ($availableStok <= 0) {
             return back()->with('error', 'Barang ini sedang tidak tersedia untuk dipinjam.');
@@ -152,7 +159,9 @@ class PeminjamanController extends Controller
             ->where('idpeminjaman', '!=', $peminjaman->idpeminjaman)
             ->sum('jumlah');
 
-        $tersedia = max($barang->stok - $sudahDibooking, 0);
+        $rusak = $this->getRusakCounts([$barang->idbarang])[$barang->idbarang] ?? 0;
+
+        $tersedia = max(($barang->stok - $rusak) - $sudahDibooking, 0);
 
         if ($peminjaman->jumlah > $tersedia) {
             return back()->with('error', 'Stok barang tidak mencukupi untuk disetujui pada jadwal tersebut.');
@@ -240,6 +249,27 @@ class PeminjamanController extends Controller
         $barang->increment('stok', $peminjaman->jumlah);
 
         return back()->with('success', 'Barang berhasil dikembalikan.');
+    }
+
+    /**
+     * Ambil jumlah unit rusak aktif per barang.
+     *
+     * @param  array<int>|null  $barangIds
+     * @return \Illuminate\Support\Collection keyed by idbarang
+     */
+    protected function getRusakCounts(array $barangIds = null)
+    {
+        $query = BarangUnitKerusakan::where('status', 'rusak')
+            ->join('barang_units', 'barang_unit_kerusakan.barang_unit_id', '=', 'barang_units.id');
+
+        if ($barangIds) {
+            $query->whereIn('barang_units.idbarang', $barangIds);
+        }
+
+        return $query
+            ->select('barang_units.idbarang', DB::raw('COUNT(*) as jumlah'))
+            ->groupBy('barang_units.idbarang')
+            ->pluck('jumlah', 'idbarang');
     }
     public function laporan(Request $request)
     {

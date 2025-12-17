@@ -214,12 +214,12 @@
             window.location.href = currentUrl.toString();
         }
 
-        function confirmDelete(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus user ini?')) {
-                const form = document.getElementById('deleteForm');
-                form.action = "{{ route($routePrefix . 'user.destroy', ':id') }}".replace(':id', id);
-                form.submit();
-            }
+        async function confirmDelete(id) {
+            const ok = await window.smartConfirm?.('Apakah Anda yakin ingin menghapus user ini?');
+            if (!ok) return;
+            const form = document.getElementById('deleteForm');
+            form.action = "{{ route($routePrefix . 'user.destroy', ':id') }}".replace(':id', id);
+            form.submit();
         }
     </script>
 @endsection

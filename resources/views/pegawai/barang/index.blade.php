@@ -205,12 +205,12 @@
             });
         }
 
-        function confirmDelete(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus barang ini?')) {
-                const form = document.getElementById('deleteForm');
-                form.action = "{{ route($routePrefix . 'barang.destroy', ':id') }}".replace(':id', id);
-                form.submit();
-            }
+        async function confirmDelete(id) {
+            const ok = await window.smartConfirm?.('Apakah Anda yakin ingin menghapus barang ini?');
+            if (!ok) return;
+            const form = document.getElementById('deleteForm');
+            form.action = "{{ route($routePrefix . 'barang.destroy', ':id') }}".replace(':id', id);
+            form.submit();
         }
     </script>
 @endsection

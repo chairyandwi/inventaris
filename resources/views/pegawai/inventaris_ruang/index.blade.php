@@ -107,6 +107,15 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div>
+                            <label class="text-sm font-semibold text-indigo-100 mb-2 block">Filter Kondisi</label>
+                            <select name="status" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
+                                <option class="text-slate-900" value="">Semua Kondisi</option>
+                                <option class="text-slate-900" value="baik" @selected(request('status') === 'baik')>Baik</option>
+                                <option class="text-slate-900" value="kurang_baik" @selected(request('status') === 'kurang_baik')>Kurang Baik</option>
+                                <option class="text-slate-900" value="rusak" @selected(request('status') === 'rusak')>Rusak</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <div class="flex items-center gap-2 bg-slate-800/60 border border-white/10 rounded-xl px-3 py-2">
@@ -131,7 +140,7 @@
                 </form>
             </div>
 
-                @if(request('idruang') || request('idbarang') || request('gedung') || request('lantai'))
+                @if(request('idruang') || request('idbarang') || request('gedung') || request('lantai') || request('status'))
                     <div class="px-6 pb-4 flex flex-wrap gap-2 text-sm text-indigo-100">
                         <span class="px-3 py-1 rounded-full bg-white/10 border border-white/10">Filter aktif:</span>
                         @if(request('gedung'))
@@ -146,6 +155,16 @@
                         @if(request('idbarang'))
                             <span class="px-3 py-1 rounded-full bg-sky-500/30 border border-sky-200/30">Barang: {{ $barang->firstWhere('idbarang', request('idbarang'))?->nama_barang ?? 'Dipilih' }}</span>
                         @endif
+                        @if(request('status'))
+                            @php
+                                $labelStatus = [
+                                    'baik' => 'Kondisi: Baik',
+                                    'kurang_baik' => 'Kondisi: Kurang Baik',
+                                    'rusak' => 'Kondisi: Rusak',
+                                ][request('status')] ?? 'Kondisi dipilih';
+                            @endphp
+                            <span class="px-3 py-1 rounded-full bg-rose-500/30 border border-rose-200/30">{{ $labelStatus }}</span>
+                        @endif
                         <a href="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.index') }}" class="px-3 py-1 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 transition">Reset</a>
                     </div>
                 @endif
@@ -158,6 +177,10 @@
                             $barang = $unit->barang;
                             $ruangItem = $unit->ruang;
                             $latestMasuk = $barang?->barangMasuk->first();
+                            $isRusak = (bool) $unit->kerusakanAktif;
+                            $isKurangBaik = !$isRusak && $unit->keterangan && str_contains(strtolower($unit->keterangan), 'kurang');
+                            $statusLabel = $isRusak ? 'Rusak' : ($isKurangBaik ? 'Kurang Baik' : 'Baik');
+                            $statusClass = $isRusak ? 'text-rose-300' : ($isKurangBaik ? 'text-amber-300' : 'text-emerald-300');
                             $hasSpec = $latestMasuk && (
                                 $latestMasuk->processor ||
                                 $latestMasuk->ram_capacity_gb ||
@@ -184,7 +207,12 @@
                                     </div>
                                     <div class="rounded-xl border border-white/5 bg-white/5 p-3">
                                         <p class="text-[11px] uppercase tracking-[0.2em] text-indigo-200/70">Status</p>
-                                        <p class="text-sm font-semibold text-emerald-300 mt-1">Aktif</p>
+                                        <p class="text-sm font-semibold {{ $statusClass }} mt-1">{{ $statusLabel }}</p>
+                                        @if($isRusak && $unit->kerusakanAktif?->deskripsi)
+                                            <p class="text-xs text-rose-100/80 mt-0.5">{{ $unit->kerusakanAktif->deskripsi }}</p>
+                                        @elseif($isKurangBaik)
+                                            <p class="text-xs text-amber-100/80 mt-0.5">{{ $unit->keterangan }}</p>
+                                        @endif
                                     </div>
                                 </div>
 
@@ -243,21 +271,56 @@
                                     </div>
                                 @endif
 
-                                <div class="flex items-center justify-between pt-1">
+                                <div class="flex items-start justify-between pt-1 flex-wrap gap-3">
                                     <div class="text-xs text-indigo-100/70">
-                                        <p>{{ $barang?->kode_barang ?? '-' }} • Unit ke-{{ $unit->nomor_unit }}</p>
-                                    </div>
-                                    <form action="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.destroy', $unit) }}" method="POST" onsubmit="return confirm('Hapus unit ini?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rose-500/80 hover:bg-rose-500 text-white shadow-md shadow-rose-500/30 transition">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V5a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v2H5m14 0H5" />
-                                            </svg>
-                                            Hapus
-                                        </button>
-                                    </form>
-                                </div>
+        <p>{{ $barang?->kode_barang ?? '-' }} • Unit ke-{{ $unit->nomor_unit }}</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+        <form action="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.destroy', $unit) }}" method="POST" data-confirm="Hapus unit ini?">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rose-500/80 hover:bg-rose-500 text-white shadow-md shadow-rose-500/30 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V5a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v2H5m14 0H5" />
+                </svg>
+                Hapus
+            </button>
+        </form>
+        @unless($isRusak)
+            <form action="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.mark-rusak', $unit) }}" method="POST" data-confirm="Tandai unit ini rusak?" class="inline-flex items-center gap-2">
+                @csrf
+                <button type="submit" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/80 hover:bg-amber-500 text-slate-900 font-semibold shadow-md shadow-amber-500/30 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M4.93 4.93a10 10 0 1 1 14.14 14.14A10 10 0 0 1 4.93 4.93z" />
+                    </svg>
+                    Tandai Rusak
+                </button>
+            </form>
+        @else
+            <form action="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.update-kerusakan', $unit) }}" method="POST" class="flex flex-wrap items-center gap-2">
+                @csrf
+                @method('PATCH')
+                <input type="text" name="deskripsi" value="{{ $unit->kerusakanAktif?->deskripsi }}" placeholder="Catatan kerusakan" class="px-2 py-1 rounded-lg bg-slate-800/60 border border-white/10 text-white text-xs focus:ring-2 focus:ring-amber-400 focus:border-amber-400 w-44 sm:w-56">
+                <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-500/80 hover:bg-amber-500 text-slate-900 font-semibold shadow-md shadow-amber-500/30 transition text-xs">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Simpan
+                </button>
+            </form>
+            <form action="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.restore-kerusakan', $unit) }}" method="POST" data-confirm="Pulihkan unit ini ke kondisi baik?">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/80 hover:bg-emerald-500 text-white font-semibold shadow-md shadow-emerald-500/30 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M10 14h10M10 18h10M4 14h.01M4 18h.01" />
+                    </svg>
+                    Pulihkan
+                </button>
+            </form>
+        @endunless
+    </div>
+</div>
                             </div>
                         </div>
                     @empty

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Barang;
 use App\Models\BarangMasuk;
 use App\Models\BarangUnit;
+use App\Models\BarangUnitKerusakan;
 use App\Models\Kategori;
 use App\Models\Ruang;
 use Carbon\Carbon;
@@ -180,6 +181,7 @@ class InventarisFakTeknikSeeder extends Seeder
 
             $totalUnit = 0;
             $unitRecords = [];
+            $rusakRecords = [];
 
             foreach ($data['ranges'] as $range) {
                 $start = (int) ($range['start'] ?? 1);
@@ -187,11 +189,12 @@ class InventarisFakTeknikSeeder extends Seeder
                 $ket = $range['keterangan'] ?? null;
                 $tglMasuk = $range['tgl_masuk'] ?? null;
                 $timestamp = $tglMasuk ? Carbon::parse($tglMasuk) : now();
+                $ketRusak = $ket && stripos($ket, 'rusak') !== false;
 
                 for ($i = $start; $i <= $end; $i++) {
                     $totalUnit++;
                     $kodeUnit = "{$kodePrefix}/{$kodeBarang}/" . str_pad($i, 3, '0', STR_PAD_LEFT);
-                    $unitRecords[] = [
+                    $record = [
                         'kode_unit' => $kodeUnit,
                         'idbarang' => $barang->idbarang,
                         'idruang' => $ruang->idruang,
@@ -200,6 +203,14 @@ class InventarisFakTeknikSeeder extends Seeder
                         'created_at' => $timestamp,
                         'updated_at' => $timestamp,
                     ];
+                    $unitRecords[] = $record;
+                    if ($ketRusak) {
+                        $rusakRecords[] = [
+                            'kode_unit' => $kodeUnit,
+                            'deskripsi' => $ket,
+                            'tgl_rusak' => $timestamp->toDateString(),
+                        ];
+                    }
                 }
             }
 
@@ -217,10 +228,25 @@ class InventarisFakTeknikSeeder extends Seeder
             );
 
             foreach ($unitRecords as $record) {
-                BarangUnit::updateOrCreate(
+                $unit = BarangUnit::updateOrCreate(
                     ['kode_unit' => $record['kode_unit']],
                     $record
                 );
+                // log kerusakan jika ada
+                foreach ($rusakRecords as $rusak) {
+                    if ($rusak['kode_unit'] === $unit->kode_unit) {
+                        BarangUnitKerusakan::updateOrCreate(
+                            [
+                                'barang_unit_id' => $unit->id,
+                                'status' => 'rusak',
+                            ],
+                            [
+                                'tgl_rusak' => $rusak['tgl_rusak'],
+                                'deskripsi' => $rusak['deskripsi'],
+                            ]
+                        );
+                    }
+                }
             }
 
             $barang->update(['stok' => $barang->units()->count()]);

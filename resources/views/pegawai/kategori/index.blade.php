@@ -191,12 +191,12 @@
             });
         }
 
-        function confirmDelete(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
-                const form = document.getElementById('deleteForm');
-                form.action = "{{ route(($routePrefix ?? 'pegawai').'.kategori.destroy', ':id') }}".replace(':id', id);
-                form.submit();
-            }
+        async function confirmDelete(id) {
+            const ok = await window.smartConfirm?.('Apakah Anda yakin ingin menghapus kategori ini?');
+            if (!ok) return;
+            const form = document.getElementById('deleteForm');
+            form.action = "{{ route(($routePrefix ?? 'pegawai').'.kategori.destroy', ':id') }}".replace(':id', id);
+            form.submit();
         }
     </script>
 @endsection
