@@ -45,17 +45,6 @@
                             <p class="text-sm text-indigo-100/80 mt-1">Lokasi unik</p>
                         </div>
                     </div>
-                    <div class="relative overflow-hidden rounded-2xl border border-white/10 bg-white/10 backdrop-blur p-5 shadow-lg shadow-indigo-500/20">
-                        <div class="absolute inset-0 bg-gradient-to-br from-sky-400/30 to-indigo-500/40 opacity-70"></div>
-                        <div class="relative">
-                            <p class="text-xs uppercase tracking-[0.25em] text-white/70">Aksi Cepat</p>
-                            <p class="text-sm text-indigo-100/80 mt-2">Export / tambah</p>
-                            <div class="mt-3 flex gap-2">
-                                <a href="{{ route(($routePrefix ?? 'pegawai') . '.ruang.create') }}" class="px-3 py-2 rounded-lg bg-white/15 border border-white/20 text-white hover:bg-white/25 transition text-sm">Tambah</a>
-                                <a href="{{ route(($routePrefix ?? 'pegawai') . '.ruang.index') }}" class="px-3 py-2 rounded-lg bg-indigo-500/80 hover:bg-indigo-500 text-white transition text-sm">Refresh</a>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

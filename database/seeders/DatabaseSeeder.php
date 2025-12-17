@@ -54,6 +54,21 @@ class DatabaseSeeder extends Seeder
             InventarisB308Seeder::class,
             InventarisAdminDosenMHSeeder::class,
             InventarisRuangKuliahMHSeeder::class,
+            InventarisAuditoriumSeeder::class,
+            InventarisBPKSeeder::class,
+            InventarisKUISeeder::class,
+            InventarisLabPsikologiSeeder::class,
+            InventarisFakultasPsikologiSeeder::class,
+            InventarisFakTeknikSeeder::class,
+            InventarisKPMSeeder::class,
+            InventarisPusatBahasaSeeder::class,
+            InventarisRektorSeeder::class,
+            InventarisWakilRektorSeeder::class,
+            InventarisSekretariatSeeder::class,
+            InventarisA301Seeder::class,
+            InventarisA302Seeder::class,
+            InventarisA303Seeder::class,
+            InventarisA304Seeder::class,
         ]);
     }
 }

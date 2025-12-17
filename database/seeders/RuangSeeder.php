@@ -21,6 +21,7 @@ class RuangSeeder extends Seeder
             ['nama' => 'BPK', 'kode' => 'BPK'],
             ['nama' => 'Yayasan (KUI)', 'kode' => 'YYSN03'],
             ['nama' => 'Lab Psikologi', 'kode' => 'LAB05'],
+            ['nama' => 'BPK', 'kode' => 'RFO'],
         ];
 
         $Alt2 = [
@@ -31,6 +32,7 @@ class RuangSeeder extends Seeder
             ['nama' => 'Wakil Rektor', 'kode' => 'RWRK'],
             ['nama' => 'Fakultas Psikologi', 'kode' => 'RFPSI'],
             ['nama' => 'KPM', 'kode' => 'KPM'],
+            ['nama' => 'Pusat Bahasa', 'kode' => 'BHS'],
         ];
 
         $Alt3 = [
