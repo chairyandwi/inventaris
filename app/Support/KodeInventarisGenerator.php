@@ -15,7 +15,9 @@ class KodeInventarisGenerator
             $gedungName = $matches[1];
         }
         $gedung = Str::upper(Str::slug($gedungName, ''));
-        $ruangKode = Str::upper(Str::slug($ruang->nama_ruang ?? 'RUANG', ''));
+        // Gunakan kode_ruang jika tersedia agar konsisten dengan label ruang (mis. RKEU)
+        $ruangRaw = trim($ruang->kode_ruang ?: ($ruang->nama_ruang ?? 'RUANG'));
+        $ruangKode = Str::upper(Str::slug($ruangRaw, ''));
         $barangKode = Str::upper(Str::slug($barang->kode_barang ?? 'KODE', ''));
         $nomorFormatted = str_pad($nomor, 3, '0', STR_PAD_LEFT);
 

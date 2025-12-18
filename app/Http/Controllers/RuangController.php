@@ -22,6 +22,7 @@ class RuangController extends Controller
         if ($request->has('search') && $request->search != '') {
             $searchTerm = $request->search;
             $query->where('nama_ruang', 'like', "%{$searchTerm}%")
+                  ->orWhere('kode_ruang', 'like', "%{$searchTerm}%")
                   ->orWhere('nama_gedung', 'like', "%{$searchTerm}%")
                   ->orWhere('nama_lantai', 'like', "%{$searchTerm}%")
                   ->orWhere('keterangan', 'like', "%{$searchTerm}%");
@@ -31,7 +32,7 @@ class RuangController extends Controller
         $sortBy = $request->get('sort_by', 'idruang');
         $sortDirection = $request->get('sort_direction', 'asc');
 
-        $allowedSortFields = ['idruang', 'nama_ruang', 'nama_gedung', 'nama_lantai'];
+        $allowedSortFields = ['idruang', 'nama_ruang', 'kode_ruang', 'nama_gedung', 'nama_lantai'];
         if (in_array($sortBy, $allowedSortFields)) {
             $query->orderBy($sortBy, $sortDirection);
         } else {
@@ -60,12 +61,15 @@ class RuangController extends Controller
         $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         $validator = Validator::make($request->all(), [
             'nama_ruang'   => 'required|string|max:100|unique:ruang,nama_ruang',
+            'kode_ruang'   => 'required|string|max:50|unique:ruang,kode_ruang',
             'nama_gedung'  => 'required|string|max:100',
             'nama_lantai'  => 'required|string|max:100',
             'keterangan'   => 'nullable|string|max:255',
         ], [
             'nama_ruang.required'  => 'Nama ruang wajib diisi',
             'nama_ruang.unique'    => 'Nama ruang sudah ada',
+            'kode_ruang.required'  => 'Kode ruang wajib diisi',
+            'kode_ruang.unique'    => 'Kode ruang sudah ada',
             'nama_gedung.required' => 'Nama gedung wajib diisi',
             'nama_lantai.required' => 'Nama lantai wajib diisi',
         ]);
@@ -76,7 +80,7 @@ class RuangController extends Controller
                 ->withInput();
         }
 
-        $ruang = Ruang::create($request->only(['nama_ruang', 'nama_gedung', 'nama_lantai', 'keterangan']));
+        $ruang = Ruang::create($request->only(['nama_ruang', 'kode_ruang', 'nama_gedung', 'nama_lantai', 'keterangan']));
 
         ActivityLogger::log('Tambah Ruang', 'Menambahkan ruang ' . $ruang->nama_ruang);
 
@@ -104,6 +108,12 @@ class RuangController extends Controller
                 'max:100',
                 Rule::unique('ruang', 'nama_ruang')->ignore($ruang->idruang, 'idruang'),
             ],
+            'kode_ruang'   => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('ruang', 'kode_ruang')->ignore($ruang->idruang, 'idruang'),
+            ],
             'nama_gedung'  => 'required|string|max:100',
             'nama_lantai'  => 'required|string|max:100',
             'keterangan'   => 'nullable|string|max:255',
@@ -116,7 +126,7 @@ class RuangController extends Controller
         }
 
         try {
-            $ruang->update($request->only(['nama_ruang', 'nama_gedung', 'nama_lantai', 'keterangan']));
+            $ruang->update($request->only(['nama_ruang', 'kode_ruang', 'nama_gedung', 'nama_lantai', 'keterangan']));
 
             ActivityLogger::log('Perbarui Ruang', 'Memperbarui ruang ' . $ruang->nama_ruang);
 
@@ -148,7 +158,7 @@ class RuangController extends Controller
 
     public function api()
     {
-        $ruang = Ruang::select('idruang', 'nama_ruang', 'nama_gedung', 'nama_lantai', 'keterangan')
+        $ruang = Ruang::select('idruang', 'nama_ruang', 'kode_ruang', 'nama_gedung', 'nama_lantai', 'keterangan')
             ->orderBy('nama_ruang')
             ->get();
 

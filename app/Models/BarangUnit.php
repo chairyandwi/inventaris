@@ -12,6 +12,7 @@ class BarangUnit extends Model
     protected $fillable = [
         'idbarang',
         'idruang',
+        'barang_masuk_id',
         'nomor_unit',
         'kode_unit',
         'keterangan',

@@ -34,17 +34,30 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label for="nama_ruang" class="block text-sm font-semibold text-indigo-100 mb-2">
-                                    Nama Ruang <span class="text-rose-300">*</span>
-                                </label>
-                                <input type="text" id="nama_ruang" name="nama_ruang"
-                                    value="{{ old('nama_ruang', $ruang->nama_ruang) }}"
-                                    class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent {{ $errors->has('nama_ruang') ? 'border-rose-400' : '' }}"
-                                    placeholder="Masukkan nama ruang" maxlength="100" required>
-                                @error('nama_ruang')
-                                    <p class="mt-1 text-sm text-rose-300">{{ $message }}</p>
-                                @enderror
-                            </div>
+                            <label for="nama_ruang" class="block text-sm font-semibold text-indigo-100 mb-2">
+                                Nama Ruang <span class="text-rose-300">*</span>
+                            </label>
+                            <input type="text" id="nama_ruang" name="nama_ruang"
+                                value="{{ old('nama_ruang', $ruang->nama_ruang) }}"
+                                class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent {{ $errors->has('nama_ruang') ? 'border-rose-400' : '' }}"
+                                placeholder="Masukkan nama ruang" maxlength="100" required>
+                            @error('nama_ruang')
+                                <p class="mt-1 text-sm text-rose-300">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label for="kode_ruang" class="block text-sm font-semibold text-indigo-100 mb-2">
+                                Kode Ruang <span class="text-rose-300">*</span>
+                            </label>
+                            <input type="text" id="kode_ruang" name="kode_ruang"
+                                value="{{ old('kode_ruang', $ruang->kode_ruang) }}"
+                                class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent {{ $errors->has('kode_ruang') ? 'border-rose-400' : '' }}"
+                                placeholder="Contoh: RKEU, RA103, LAB-1" maxlength="50" required>
+                            @error('kode_ruang')
+                                <p class="mt-1 text-sm text-rose-300">{{ $message }}</p>
+                            @enderror
+                            <p class="mt-1 text-xs text-indigo-100/70">Kode unik digunakan di kode inventaris.</p>
+                        </div>
 
                             <div>
                                 <label for="nama_gedung" class="block text-sm font-semibold text-indigo-100 mb-2">

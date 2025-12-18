@@ -152,6 +152,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Tgl Masuk</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Kode Barang</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Nama Barang</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Ruang</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Jumlah</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Spesifikasi</th>
@@ -187,6 +188,13 @@
                                     </td>
                                     <td class="px-6 py-4 text-sm text-white">
                                         {{ $bm->barang->nama_barang ?? '-' }}
+                                    </td>
+                                    @php
+                                        $agg = $ruangAggregates[$bm->idbarang_masuk] ?? null;
+                                        $ruangText = $agg?->kode_list ?: $agg?->ruang_list;
+                                    @endphp
+                                    <td class="px-6 py-4 text-sm text-indigo-100/80">
+                                        {{ $ruangText ?: '-' }}
                                     </td>
                                     <td class="px-6 py-4">
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $bm->status_barang === 'bekas' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700' }}">

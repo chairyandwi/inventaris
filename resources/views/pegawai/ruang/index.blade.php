@@ -100,6 +100,7 @@
                                         </a>
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Nama Ruang</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Kode</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Gedung</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Lantai</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Keterangan</th>
@@ -111,6 +112,7 @@
                                     <tr class="hover:bg-white/5 transition">
                                         <td class="px-6 py-4 text-sm text-indigo-50">{{ $ruang->firstItem() + $index }}</td>
                                         <td class="px-6 py-4 text-sm font-semibold text-white">{{ $r->nama_ruang }}</td>
+                                        <td class="px-6 py-4 text-sm text-indigo-50 font-mono">{{ $r->kode_ruang }}</td>
                                         <td class="px-6 py-4 text-sm text-indigo-50">{{ $r->nama_gedung }}</td>
                                         <td class="px-6 py-4 text-sm text-indigo-50">{{ $r->nama_lantai }}</td>
                                         <td class="px-6 py-4 text-sm text-indigo-100/80">{{ $r->keterangan ?? '-' }}</td>

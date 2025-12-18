@@ -10,11 +10,17 @@ use Illuminate\Validation\Rule;
 
 class KategoriController extends Controller
 {
+    private function getRoutePrefix(): string
+    {
+        return auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        $routePrefix = $this->getRoutePrefix();
         $query = Kategori::query();
         $stats = [
             'total' => Kategori::count(),
@@ -47,7 +53,7 @@ class KategoriController extends Controller
 
         $kategori = $query->paginate($perPage)->appends($request->all());
 
-        return view('pegawai.kategori.index', compact('kategori', 'stats'));
+        return view('pegawai.kategori.index', compact('kategori', 'stats', 'routePrefix'));
     }
 
     /**
@@ -55,7 +61,9 @@ class KategoriController extends Controller
      */
     public function create()
     {
-        return view('pegawai.kategori.create');
+        $routePrefix = $this->getRoutePrefix();
+
+        return view('pegawai.kategori.create', compact('routePrefix'));
     }
 
     /**
@@ -63,7 +71,7 @@ class KategoriController extends Controller
      */
     public function store(Request $request)
     {
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = $this->getRoutePrefix();
         $validator = Validator::make($request->all(), [
             'nama_kategori' => 'required|string|max:255|unique:kategori,nama_kategori',
             'keterangan' => 'nullable|string|max:500'
@@ -94,7 +102,9 @@ class KategoriController extends Controller
      */
     public function show(Kategori $kategori)
     {
-        return view('pegawai.kategori.show', compact('kategori'));
+        $routePrefix = $this->getRoutePrefix();
+
+        return view('pegawai.kategori.show', compact('kategori', 'routePrefix'));
     }
 
     /**
@@ -102,7 +112,9 @@ class KategoriController extends Controller
      */
     public function edit(Kategori $kategori)
     {
-        return view('pegawai.kategori.edit', compact('kategori'));
+        $routePrefix = $this->getRoutePrefix();
+
+        return view('pegawai.kategori.edit', compact('kategori', 'routePrefix'));
     }
 
     /**
@@ -110,7 +122,7 @@ class KategoriController extends Controller
      */
     public function update(Request $request, Kategori $kategori)
     {
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = $this->getRoutePrefix();
         $validator = Validator::make($request->all(), [
             'nama_kategori' => [
                 'required',
@@ -152,7 +164,7 @@ class KategoriController extends Controller
      */
     public function destroy(Kategori $kategori)
     {
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = $this->getRoutePrefix();
         try {
             $kategori->delete();
     

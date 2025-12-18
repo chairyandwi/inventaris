@@ -5,6 +5,29 @@
 @section('content')
 @php
     $routePrefix = ($routePrefix ?? null) ?: (request()->routeIs('admin.*') ? 'admin' : 'pegawai');
+    $ruangOptions = $ruang ?? [];
+    $oldDistribusi = collect(old('distribusi_ruang', []));
+    if ($oldDistribusi->isEmpty() && isset($distribusi) && $distribusi->count()) {
+        $oldDistribusi = $distribusi->pluck('idruang');
+    }
+    $oldDistribusi = $oldDistribusi->map(function ($value, $index) use ($distribusi) {
+        $jumlah = old('distribusi_jumlah.' . $index);
+        $catatan = old('distribusi_catatan.' . $index);
+        if (is_null($jumlah) && isset($distribusi[$index])) {
+            $jumlah = $distribusi[$index]['jumlah'] ?? 1;
+        }
+        if (is_null($catatan) && isset($distribusi[$index])) {
+            $catatan = $distribusi[$index]['catatan'] ?? null;
+        }
+        return [
+            'ruang' => $value,
+            'jumlah' => $jumlah ?? 1,
+            'catatan' => $catatan,
+        ];
+    });
+    if ($oldDistribusi->isEmpty()) {
+        $oldDistribusi = collect([['ruang' => null, 'jumlah' => $barangMasuk->jumlah ?? 1, 'catatan' => null]]);
+    }
 @endphp
 <div class="min-h-screen bg-slate-950 text-white">
     <div class="relative overflow-hidden">
@@ -101,6 +124,52 @@
                             @error('status_barang')
                                 <p class="text-sm text-rose-300 mt-1">{{ $message }}</p>
                             @enderror
+                        </div>
+                    </div>
+
+                    <div class="border border-white/10 rounded-xl p-5 bg-white/5 hidden" id="inventaris-fields">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-semibold text-white">Distribusi Barang Tetap per Ruang</p>
+                                <p class="text-xs text-indigo-100/80">Atur ulang alokasi unit kepemilikan per ruang.</p>
+                            </div>
+                            <button type="button" id="tambahDistribusi" class="text-xs text-indigo-200 hover:text-white font-semibold">+ Tambah Ruang</button>
+                        </div>
+                        @error('distribusi_ruang.*')
+                            <p class="text-sm text-rose-300 mb-2">{{ $message }}</p>
+                        @enderror
+                        @error('distribusi_jumlah.*')
+                            <p class="text-sm text-rose-300 mb-2">{{ $message }}</p>
+                        @enderror
+                        @error('distribusi_catatan.*')
+                            <p class="text-sm text-rose-300 mb-2">{{ $message }}</p>
+                        @enderror
+                        <div id="listDistribusi" class="space-y-3">
+                            @foreach($oldDistribusi as $idx => $row)
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 distribusi-item">
+                                    <div>
+                                        <label class="text-xs text-indigo-100/80">Ruang</label>
+                                        <select name="distribusi_ruang[]" data-inventaris data-required="true" class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent">
+                                            <option value="">-- Pilih Ruang --</option>
+                                            @foreach($ruangOptions as $r)
+                                                <option value="{{ $r->idruang }}" @selected($row['ruang'] == $r->idruang)>{{ $r->nama_ruang }} ({{ $r->nama_gedung }})</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-indigo-100/80">Jumlah Unit</label>
+        <input type="number" name="distribusi_jumlah[]" min="1" max="500" value="{{ $row['jumlah'] ?? 1 }}" data-inventaris data-required="true"
+            class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-indigo-100/80">Catatan</label>
+                                        <div class="flex items-center space-x-2">
+                                            <input type="text" name="distribusi_catatan[]" value="{{ $row['catatan'] }}" data-inventaris class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent" placeholder="Opsional">
+                                            <button type="button" class="text-rose-400 hover:text-rose-300 text-xs remove-distribusi" title="Hapus">&times;</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
 
@@ -209,12 +278,16 @@
     const selectBarang = document.getElementById('idbarang');
     const selectKategori = document.getElementById('idkategori');
     const jenisBarang = document.getElementById('jenis_barang');
+    const inventarisWrapper = document.getElementById('inventaris-fields');
+    const listDistribusi = document.getElementById('listDistribusi');
+    const tambahDistribusi = document.getElementById('tambahDistribusi');
 
     function syncJenisFromBarang() {
         const selected = selectBarang.options[selectBarang.selectedIndex];
         if (selected?.dataset.jenis) {
             jenisBarang.value = selected.dataset.jenis;
         }
+        toggleDistribusi();
     }
 
     function filterBarangByKategori() {
@@ -234,9 +307,76 @@
         }
     }
 
+    function toggleDistribusi() {
+        const aktif = jenisBarang.value === 'tetap';
+        inventarisWrapper?.classList.toggle('hidden', !aktif);
+        listDistribusi?.querySelectorAll('[data-inventaris]').forEach(el => {
+            if (aktif) {
+                if (el.dataset.required === 'true') el.setAttribute('required', 'required');
+                el.removeAttribute('disabled');
+            } else {
+                el.removeAttribute('required');
+                el.setAttribute('disabled', 'disabled');
+            }
+        });
+    }
+
+    function addDistribusiRow(data = {}) {
+        const template = document.createElement('div');
+        template.className = 'grid grid-cols-1 md:grid-cols-3 gap-3 distribusi-item';
+        template.innerHTML = `
+            <div>
+                <label class="text-xs text-indigo-100/80">Ruang</label>
+                <select name="distribusi_ruang[]" data-inventaris data-required="true" class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent">
+                    <option value="">-- Pilih Ruang --</option>
+                    @foreach($ruangOptions as $r)
+                        <option value="{{ $r->idruang }}">{{ $r->nama_ruang }} ({{ $r->nama_gedung }})</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="text-xs text-indigo-100/80">Jumlah Unit</label>
+                <input type="number" name="distribusi_jumlah[]" min="1" max="500" value="1" data-inventaris data-required="true"
+                    class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent">
+            </div>
+            <div>
+                <label class="text-xs text-indigo-100/80">Catatan</label>
+                <div class="flex items-center space-x-2">
+                    <input type="text" name="distribusi_catatan[]" data-inventaris class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus-border-transparent" placeholder="Opsional">
+                    <button type="button" class="text-rose-400 hover:text-rose-300 text-xs remove-distribusi">&times;</button>
+                </div>
+            </div>
+        `;
+        listDistribusi.appendChild(template);
+        if (data.ruang) template.querySelector('select').value = data.ruang;
+        if (data.jumlah) template.querySelector('input[name="distribusi_jumlah[]"]').value = data.jumlah;
+        if (data.catatan) template.querySelector('input[name="distribusi_catatan[]"]').value = data.catatan;
+        toggleDistribusi();
+    }
+
+    if (listDistribusi && tambahDistribusi) {
+        listDistribusi.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-distribusi')) {
+                const item = e.target.closest('.distribusi-item');
+                if (listDistribusi.children.length > 1) {
+                    item.remove();
+                } else {
+                    item.querySelectorAll('select, input').forEach(el => el.value = '');
+                    item.querySelector('input[name="distribusi_jumlah[]"]').value = 1;
+                }
+            }
+        });
+
+        tambahDistribusi.addEventListener('click', function () {
+            addDistribusiRow();
+        });
+    }
+
     filterBarangByKategori();
     syncJenisFromBarang();
+    toggleDistribusi();
     selectBarang?.addEventListener('change', syncJenisFromBarang);
+    jenisBarang?.addEventListener('change', toggleDistribusi);
     selectKategori?.addEventListener('change', filterBarangByKategori);
 </script>
 @endsection
