@@ -118,7 +118,7 @@ class InventarisAdminDosenMHSeeder extends Seeder
                 }
             }
 
-            BarangMasuk::updateOrCreate(
+            $bm = BarangMasuk::updateOrCreate(
                 [
                     'idbarang' => $barang->idbarang,
                     'tgl_masuk' => null,
@@ -134,7 +134,9 @@ class InventarisAdminDosenMHSeeder extends Seeder
             foreach ($unitRecords as $record) {
                 BarangUnit::updateOrCreate(
                     ['kode_unit' => $record['kode_unit']],
-                    $record
+                    array_merge($record, [
+                        'barang_masuk_id' => $bm->idbarang_masuk,
+                    ])
                 );
             }
 

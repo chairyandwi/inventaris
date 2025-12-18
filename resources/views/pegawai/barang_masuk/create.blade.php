@@ -155,6 +155,12 @@
                                 </div>
                             @endforeach
                         </div>
+                        <div class="mt-2 text-xs text-indigo-100/80">
+                            Total distribusi:
+                            <span id="distribusi-total" class="font-semibold text-white">0</span> /
+                            <span id="distribusi-target" class="font-semibold text-white">{{ old('jumlah', 1) }}</span>
+                            <span id="distribusi-status" class="ml-2 font-semibold"></span>
+                        </div>
                     </div>
 
                     <div class="border border-white/10 rounded-xl p-5 bg-white/5">
@@ -262,6 +268,11 @@
     const inventarisWrapper = document.getElementById('inventaris-fields');
     const listDistribusi = document.getElementById('listDistribusi');
     const tambahDistribusi = document.getElementById('tambahDistribusi');
+    const jumlahMasukInput = document.getElementById('jumlah');
+    const distribusiTotalEl = document.getElementById('distribusi-total');
+    const distribusiTargetEl = document.getElementById('distribusi-target');
+    const distribusiStatusEl = document.getElementById('distribusi-status');
+    const submitBtn = document.querySelector('button[type="submit"]');
 
     function toggleDistribusi() {
         const aktif = jenisBarang.value === 'tetap';
@@ -304,6 +315,36 @@
         }
     }
 
+    function hitungDistribusi() {
+        const target = parseInt(jumlahMasukInput?.value || '0', 10) || 0;
+        let total = 0;
+        listDistribusi?.querySelectorAll('input[name="distribusi_jumlah[]"]').forEach(el => {
+            total += parseInt(el.value || '0', 10) || 0;
+        });
+        if (distribusiTotalEl) distribusiTotalEl.textContent = total;
+        if (distribusiTargetEl) distribusiTargetEl.textContent = target;
+
+        if (!distribusiStatusEl) return;
+        distribusiStatusEl.textContent = '';
+        distribusiStatusEl.className = 'ml-2 font-semibold';
+
+        const valid = target > 0 && total === target;
+        const over = target > 0 && total > target;
+
+        if (over) {
+            distribusiStatusEl.textContent = 'Melebihi jumlah masuk';
+            distribusiStatusEl.classList.add('text-rose-300');
+        } else if (!valid) {
+            distribusiStatusEl.textContent = 'Belum sama dengan jumlah masuk';
+            distribusiStatusEl.classList.add('text-amber-300');
+        } else {
+            distribusiStatusEl.textContent = 'Siap disimpan';
+            distribusiStatusEl.classList.add('text-emerald-300');
+        }
+
+        if (submitBtn) submitBtn.disabled = target > 0 ? !valid : false;
+    }
+
     function addDistribusiRow(data = {}) {
         const template = document.createElement('div');
         template.className = 'grid grid-cols-1 md:grid-cols-3 gap-3 distribusi-item';
@@ -336,6 +377,7 @@
         if (data.jumlah) template.querySelector('input[name="distribusi_jumlah[]"]').value = data.jumlah;
         if (data.catatan) template.querySelector('input[name="distribusi_catatan[]"]').value = data.catatan;
         toggleDistribusi();
+        hitungDistribusi();
     }
 
     if (listDistribusi && tambahDistribusi) {
@@ -348,11 +390,18 @@
                     item.querySelectorAll('select, input').forEach(el => el.value = '');
                     item.querySelector('input[name="distribusi_jumlah[]"]').value = 1;
                 }
+                hitungDistribusi();
             }
         });
 
         tambahDistribusi.addEventListener('click', function () {
             addDistribusiRow();
+        });
+
+        listDistribusi.addEventListener('input', function (e) {
+            if (e.target.name === 'distribusi_jumlah[]') {
+                hitungDistribusi();
+            }
         });
     }
 
@@ -360,8 +409,10 @@
     filterBarangByKategori();
     syncJenisFromBarang();
     toggleDistribusi();
+    hitungDistribusi();
     selectBarang?.addEventListener('change', syncJenisFromBarang);
     jenisBarang?.addEventListener('change', toggleDistribusi);
     selectKategori?.addEventListener('change', filterBarangByKategori);
+    jumlahMasukInput?.addEventListener('input', hitungDistribusi);
 </script>
 @endsection

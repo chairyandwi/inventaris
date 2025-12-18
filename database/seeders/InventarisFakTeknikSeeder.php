@@ -214,7 +214,7 @@ class InventarisFakTeknikSeeder extends Seeder
                 }
             }
 
-            BarangMasuk::updateOrCreate(
+            $bm = BarangMasuk::updateOrCreate(
                 [
                     'idbarang' => $barang->idbarang,
                     'tgl_masuk' => null,
@@ -230,7 +230,9 @@ class InventarisFakTeknikSeeder extends Seeder
             foreach ($unitRecords as $record) {
                 $unit = BarangUnit::updateOrCreate(
                     ['kode_unit' => $record['kode_unit']],
-                    $record
+                    array_merge($record, [
+                        'barang_masuk_id' => $bm->idbarang_masuk,
+                    ])
                 );
                 // log kerusakan jika ada
                 foreach ($rusakRecords as $rusak) {

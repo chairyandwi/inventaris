@@ -100,24 +100,13 @@ class InventarisServerSeeder extends Seeder
 
             $unitCount = 0;
             $barangMasuk = [];
+            $unitRecords = [];
 
             foreach ($data['units'] as $unit) {
                 $nomor = $this->extractNomor($unit['kode']);
                 $tglMasuk = $unit['tgl_masuk'] ?? null;
                 $timestamp = $tglMasuk ? Carbon::parse($tglMasuk) : now();
                 $specs = $unit['specs'] ?? ($data['specs'] ?? []);
-
-                BarangUnit::updateOrCreate(
-                    ['kode_unit' => $unit['kode']],
-                    [
-                        'idbarang' => $barang->idbarang,
-                        'idruang' => $ruang->idruang,
-                        'nomor_unit' => $nomor,
-                        'keterangan' => $unit['keterangan'] ?? null,
-                        'created_at' => $timestamp,
-                        'updated_at' => $timestamp,
-                    ]
-                );
 
                 $key = $barang->idbarang . '|' . ($tglMasuk ?? 'null');
                 if (!isset($barangMasuk[$key])) {
@@ -133,13 +122,25 @@ class InventarisServerSeeder extends Seeder
                 }
                 $barangMasuk[$key]['jumlah']++;
 
+                $unitRecords[] = [
+                    'bm_key' => $key,
+                    'data' => [
+                        'kode_unit' => $unit['kode'],
+                        'idbarang' => $barang->idbarang,
+                        'idruang' => $ruang->idruang,
+                        'nomor_unit' => $nomor,
+                        'keterangan' => $unit['keterangan'] ?? null,
+                        'created_at' => $timestamp,
+                        'updated_at' => $timestamp,
+                    ],
+                ];
+
                 $unitCount++;
             }
 
-            $barang->update(['stok' => $unitCount]);
-
-            foreach ($barangMasuk as $entry) {
-                BarangMasuk::updateOrCreate(
+            $bmMap = [];
+            foreach ($barangMasuk as $key => $entry) {
+                $bm = BarangMasuk::updateOrCreate(
                     [
                         'idbarang' => $entry['idbarang'],
                         'tgl_masuk' => $entry['tgl_masuk'],
@@ -159,7 +160,19 @@ class InventarisServerSeeder extends Seeder
                         'monitor_size_inch' => $entry['specs']['monitor_size_inch'] ?? null,
                     ]
                 );
+                $bmMap[$key] = $bm->idbarang_masuk;
             }
+
+            foreach ($unitRecords as $record) {
+                BarangUnit::updateOrCreate(
+                    ['kode_unit' => $record['data']['kode_unit']],
+                    array_merge($record['data'], [
+                        'barang_masuk_id' => $bmMap[$record['bm_key']] ?? null,
+                    ])
+                );
+            }
+
+            $barang->update(['stok' => $unitCount]);
         }
     }
 

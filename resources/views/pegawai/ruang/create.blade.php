@@ -79,6 +79,8 @@
                                 <option value="Gedung B" {{ old('nama_gedung') == 'Gedung B' ? 'selected' : '' }}>Gedung B</option>
                                 <option value="Gedung C" {{ old('nama_gedung') == 'Gedung C' ? 'selected' : '' }}>Gedung C</option>
                                 <option value="Gedung D" {{ old('nama_gedung') == 'Gedung D' ? 'selected' : '' }}>Gedung D</option>
+                                <option value="Yayasan" {{ old('nama_gedung') == 'Yayasan' ? 'selected' : '' }}>Yayasan</option>
+                                <option value="Keamanan" {{ old('nama_gedung') == 'Keamanan' ? 'selected' : '' }}>Keamanan</option>
                             </select>
                             @error('nama_gedung')
                                 <p class="mt-1 text-sm text-rose-300">{{ $message }}</p>

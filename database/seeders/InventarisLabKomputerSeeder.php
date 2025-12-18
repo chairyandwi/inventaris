@@ -70,11 +70,10 @@ class InventarisLabKomputerSeeder extends Seeder
             $jumlah = $data['jumlah'] ?? 0;
             $keterangan = $data['keterangan'] ?? null;
             $specs = $data['specs'] ?? [];
-            $tglMasuk = $specs['tgl_masuk'] ?? null;
+            // berikan default tanggal masuk khusus lab komputer agar tidak bentrok dengan ruang lain (mis. C202)
+            $tglMasuk = $data['tgl_masuk'] ?? ($specs['tgl_masuk'] ?? '2025-01-15');
             $timestamp = $tglMasuk ? Carbon::parse($tglMasuk) : now();
-            $barangMasuk = null;
-
-            BarangMasuk::updateOrCreate(
+            $bm = BarangMasuk::updateOrCreate(
                 [
                     'idbarang' => $barang->idbarang,
                     'tgl_masuk' => $tglMasuk,
@@ -107,6 +106,7 @@ class InventarisLabKomputerSeeder extends Seeder
                         'keterangan' => $keterangan,
                         'created_at' => $timestamp,
                         'updated_at' => $timestamp,
+                        'barang_masuk_id' => $bm->idbarang_masuk,
                     ]
                 );
             }

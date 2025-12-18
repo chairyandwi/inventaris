@@ -190,11 +190,26 @@
                                         {{ $bm->barang->nama_barang ?? '-' }}
                                     </td>
                                     @php
-                                        $agg = $ruangAggregates[$bm->idbarang_masuk] ?? null;
-                                        $ruangText = $agg?->kode_list ?: $agg?->ruang_list;
+                                    $agg = $ruangAggregates[$bm->idbarang_masuk] ?? null;
+                                    $ruangText = $agg?->kode_list ?: $agg?->ruang_list;
+
+                                    $ruangDisplay = '-';
+                                    if ($ruangText) {
+                                        $ruangArray = array_filter(array_map('trim', explode(',', $ruangText)));
+                                        if ((int) $bm->jumlah === 1) {
+                                            $ruangDisplay = $ruangArray ? $ruangArray[0] : '-';
+                                        } else {
+                                            $ruangCount = count($ruangArray);
+                                            $preview = array_slice($ruangArray, 0, 3);
+                                            $ruangDisplay = implode(', ', $preview);
+                                            if ($ruangCount > 3) {
+                                                $ruangDisplay .= ' +' . ($ruangCount - 3);
+                                            }
+                                        }
+                                    }
                                     @endphp
                                     <td class="px-6 py-4 text-sm text-indigo-100/80">
-                                        {{ $ruangText ?: '-' }}
+                                        {{ $ruangDisplay }}
                                     </td>
                                     <td class="px-6 py-4">
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $bm->status_barang === 'bekas' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700' }}">

@@ -23,13 +23,15 @@ class InventarisC202Seeder extends Seeder
             return;
         }
 
+        // gunakan tanggal masuk eksplisit agar tidak berbagi entry barang_masuk dengan ruang lain
+        $defaultTgl = '2025-12-17';
         $items = [
-            'PBT10' => ['nama' => 'Kursi Kuliah', 'jumlah' => 69, 'keterangan' => 'Kursi Kuliah Lipat'],
-            'PBT08' => ['nama' => 'Meja', 'jumlah' => 2, 'keterangan' => 'Kayu'],
-            'PLT01' => ['nama' => 'Papan Tulis (White Board)', 'jumlah' => 1, 'keterangan' => 'White Board'],
-            'ELK01' => ['nama' => 'AC', 'jumlah' => 1, 'keterangan' => 'Panasonic 2PK'],
-            'ELK02' => ['nama' => 'Proyektor', 'jumlah' => 1, 'keterangan' => 'Epson EB-E500'],
-            'ELK09' => ['nama' => 'Lampu', 'jumlah' => 6, 'keterangan' => 'Lampu TL (4 baik, 2 rusak)'],
+            'PBT10' => ['nama' => 'Kursi Kuliah', 'jumlah' => 69, 'keterangan' => 'Kursi Kuliah Lipat', 'tgl_masuk' => $defaultTgl],
+            'PBT08' => ['nama' => 'Meja', 'jumlah' => 2, 'keterangan' => 'Kayu', 'tgl_masuk' => $defaultTgl],
+            'PLT01' => ['nama' => 'Papan Tulis (White Board)', 'jumlah' => 1, 'keterangan' => 'White Board', 'tgl_masuk' => $defaultTgl],
+            'ELK01' => ['nama' => 'AC', 'jumlah' => 1, 'keterangan' => 'Panasonic 2PK', 'tgl_masuk' => $defaultTgl],
+            'ELK02' => ['nama' => 'Proyektor', 'jumlah' => 1, 'keterangan' => 'Epson EB-E500', 'tgl_masuk' => $defaultTgl],
+            'ELK09' => ['nama' => 'Lampu', 'jumlah' => 6, 'keterangan' => 'Lampu TL (4 baik, 2 rusak)', 'tgl_masuk' => $defaultTgl],
         ];
 
         foreach ($items as $kodeBarang => $data) {
@@ -55,7 +57,7 @@ class InventarisC202Seeder extends Seeder
             $timestamp = $tglMasuk ? Carbon::parse($tglMasuk) : now();
 
             // Catat barang masuk agar riwayat kedatangan tercatat
-            BarangMasuk::updateOrCreate(
+            $bm = BarangMasuk::updateOrCreate(
                 [
                     'idbarang' => $barang->idbarang,
                     'tgl_masuk' => $tglMasuk,
@@ -76,6 +78,7 @@ class InventarisC202Seeder extends Seeder
                     [
                         'idbarang' => $barang->idbarang,
                         'idruang' => $ruang->idruang,
+                        'barang_masuk_id' => $bm->idbarang_masuk,
                         'nomor_unit' => $i,
                         'keterangan' => $keterangan,
                         'created_at' => $timestamp,
