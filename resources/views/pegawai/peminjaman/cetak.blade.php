@@ -68,6 +68,13 @@
         if (file_exists($logoFile)) {
             $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoFile));
         }
+        $signatureBase64 = '';
+        if ($usePdfConfig && $appConfig && $appConfig->petugas_signature) {
+            $signatureFile = storage_path('app/public/' . $appConfig->petugas_signature);
+            if (file_exists($signatureFile)) {
+                $signatureBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($signatureFile));
+            }
+        }
     @endphp
     <div class="rangkasurat">
         <!-- Header Section -->
@@ -152,7 +159,24 @@
 
     @php
         date_default_timezone_set('Asia/Jakarta');
-        $currentTime = date('d/m/Y H:i:s');
+        $monthNames = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
+        $tanggal = date('d') . ' ' . $monthNames[(int) date('n')] . ' ' . date('Y');
+        $petugasInventaris = $usePdfConfig && $appConfig && $appConfig->petugas_inventaris
+            ? $appConfig->petugas_inventaris
+            : 'Nama Petugas';
         $totalPeminjaman = $peminjaman->count();
     @endphp
 
@@ -179,18 +203,20 @@
             <span style="font-size: 10pt; font-weight: 700; color: #1e3a8a;">{{ $totalPeminjaman }} item</span>
         </div>
 
-        <div style="
-            background-color: #f0f4f8;
-            padding: 12px 18px;
-            border-radius: 10px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            min-width: 220px;
-        ">
-            <span style="font-size: 10pt; color: #555;">Dicetak pada</span>
-            <span style="font-size: 10pt; font-weight: 700; color: #1e3a8a;">{{ $currentTime }}</span>
+    </div>
+
+    <div style="margin-top: 22px; text-align: right; line-height: 1.4; font-family: 'Arial', sans-serif;">
+        <div style="font-size: 11pt; font-weight: bold; text-transform: uppercase;">Sleman, {{ $tanggal }}</div>
+        <div style="font-size: 11pt; font-weight: bold; margin-top: 4px;">Petugas Inventaris</div>
+        @if ($signatureBase64)
+            <div style="margin-top: 10px;">
+                <img src="{{ $signatureBase64 }}" alt="Tanda Tangan Petugas" style="height: 70px; width: auto; object-fit: contain;">
+            </div>
+        @else
+            <div style="margin-top: 26px;"></div>
+        @endif
+        <div style="margin-top: 12px; font-weight: bold; text-decoration: underline; font-size: 11pt;">
+            {{ $petugasInventaris }}
         </div>
     </div>
 

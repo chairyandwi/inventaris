@@ -288,7 +288,7 @@ class PeminjamanController extends Controller
         
         $user = auth('web')->user();
         
-        if (!$user || $user->role !== 'pegawai') {
+        if (!$user || !in_array($user->role, ['pegawai', 'admin'])) {
             abort(403, 'Anda tidak memiliki akses.');
         }
 

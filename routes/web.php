@@ -89,6 +89,8 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
     Route::delete('inventaris-ruang/{inventaris_ruang}/kerusakan', [InventarisRuangController::class, 'restoreKerusakan'])->name('inventaris-ruang.restore-kerusakan');
 
     // Manajemen peminjaman (pegawai approve/reject/return)
+    Route::get('peminjaman/laporan', [PeminjamanController::class, 'laporan'])->name('peminjaman.laporan');
+    Route::get('peminjaman/cetak', [PeminjamanController::class, 'cetak'])->name('peminjaman.cetak');
     Route::resource('peminjaman', PeminjamanController::class);
     Route::post('peminjaman/{id}/approve', [PeminjamanController::class, 'approve'])->name('peminjaman.approve');
     Route::post('peminjaman/{id}/reject', [PeminjamanController::class, 'reject'])->name('peminjaman.reject');
@@ -173,13 +175,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('inventaris-ruang/{inventaris_ruang}/mark-rusak', [InventarisRuangController::class, 'markRusak'])->name('inventaris-ruang.mark-rusak');
     Route::patch('inventaris-ruang/{inventaris_ruang}/kerusakan', [InventarisRuangController::class, 'updateKerusakan'])->name('inventaris-ruang.update-kerusakan');
     Route::delete('inventaris-ruang/{inventaris_ruang}/kerusakan', [InventarisRuangController::class, 'restoreKerusakan'])->name('inventaris-ruang.restore-kerusakan');
+    Route::get('peminjaman/laporan', [PeminjamanController::class, 'laporan'])->name('peminjaman.laporan');
+    Route::get('peminjaman/cetak', [PeminjamanController::class, 'cetak'])->name('peminjaman.cetak');
     Route::resource('peminjaman', PeminjamanController::class);
     Route::post('peminjaman/{id}/approve', [PeminjamanController::class, 'approve'])->name('peminjaman.approve');
     Route::post('peminjaman/{id}/reject', [PeminjamanController::class, 'reject'])->name('peminjaman.reject');
     Route::post('peminjaman/{id}/pickup', [PeminjamanController::class, 'pickup'])->name('peminjaman.pickup');
     Route::post('peminjaman/{id}/return', [PeminjamanController::class, 'return'])->name('peminjaman.return');
-    Route::get('peminjaman/laporan', [PeminjamanController::class, 'laporan'])->name('peminjaman.laporan');
-    Route::get('peminjaman/cetak', [PeminjamanController::class, 'cetak'])->name('peminjaman.cetak');
 
     Route::get('aplikasi', [AppConfigController::class, 'index'])->name('aplikasi.index');
     Route::put('aplikasi', [AppConfigController::class, 'update'])->name('aplikasi.update');
