@@ -229,6 +229,15 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
+                            <label class="block text-sm font-semibold text-indigo-100 mb-2" for="merk">Merk</label>
+                            <input type="text" name="merk" id="merk" value="{{ old('merk') }}"
+                                class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus-border-transparent"
+                                placeholder="Contoh: Toyota, Honda, Lenovo">
+                            @error('merk')
+                                <p class="text-sm text-rose-300 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
                             <label class="block text-sm font-semibold text-indigo-100 mb-2" for="keterangan">Keterangan</label>
                             <textarea name="keterangan" id="keterangan" rows="3"
                                 class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus-border-transparent"
@@ -328,7 +337,8 @@
         distribusiStatusEl.textContent = '';
         distribusiStatusEl.className = 'ml-2 font-semibold';
 
-        const valid = target > 0 && total === target;
+        const isTetap = jenisBarang?.value === 'tetap';
+        const valid = !isTetap || (target > 0 && total === target);
         const over = target > 0 && total > target;
 
         if (over) {
@@ -342,7 +352,7 @@
             distribusiStatusEl.classList.add('text-emerald-300');
         }
 
-        if (submitBtn) submitBtn.disabled = target > 0 ? !valid : false;
+        if (submitBtn) submitBtn.disabled = isTetap && target > 0 ? !valid : false;
     }
 
     function addDistribusiRow(data = {}) {

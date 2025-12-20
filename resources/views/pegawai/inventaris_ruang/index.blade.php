@@ -131,10 +131,11 @@
                             <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 font-semibold shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 transition">
                                 Terapkan
                             </button>
-                            <a href="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.laporan', request()->only(['idruang','idbarang','gedung','lantai'])) }}"
-                               class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-900 font-semibold shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition">
+                            <button type="submit"
+                                formaction="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.laporan') }}"
+                                class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-900 font-semibold shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition">
                                 Unduh
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </form>
@@ -176,16 +177,16 @@
                         @php
                             $barang = $unit->barang;
                             $ruangItem = $unit->ruang;
-                            $latestMasuk = $barang?->barangMasuk->first();
+                            $unitMasuk = $unit->barangMasuk;
                             $isRusak = (bool) $unit->kerusakanAktif;
                             $isKurangBaik = !$isRusak && $unit->keterangan && str_contains(strtolower($unit->keterangan), 'kurang');
                             $statusLabel = $isRusak ? 'Rusak' : ($isKurangBaik ? 'Kurang Baik' : 'Baik');
                             $statusClass = $isRusak ? 'text-rose-300' : ($isKurangBaik ? 'text-amber-300' : 'text-emerald-300');
-                            $hasSpec = $latestMasuk && (
-                                $latestMasuk->processor ||
-                                $latestMasuk->ram_capacity_gb ||
-                                $latestMasuk->storage_capacity_gb ||
-                                $latestMasuk->monitor_brand
+                            $hasSpec = $unitMasuk && (
+                                $unitMasuk->processor ||
+                                $unitMasuk->ram_capacity_gb ||
+                                $unitMasuk->storage_capacity_gb ||
+                                $unitMasuk->monitor_brand
                             );
                         @endphp
                         <div class="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-slate-800/70 backdrop-blur shadow-lg shadow-indigo-500/15">
@@ -200,7 +201,7 @@
                                     <span class="px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-semibold text-indigo-50">{{ $unit->kode_unit }}</span>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-3 text-sm text-indigo-100/80">
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-indigo-100/80">
                                     <div class="rounded-xl border border-white/5 bg-white/5 p-3">
                                         <p class="text-[11px] uppercase tracking-[0.2em] text-indigo-200/70">Kategori</p>
                                         <p class="text-sm font-semibold text-white mt-1">{{ $barang?->kategori?->nama_kategori ?? '-' }}</p>
@@ -214,48 +215,52 @@
                                             <p class="text-xs text-amber-100/80 mt-0.5">{{ $unit->keterangan }}</p>
                                         @endif
                                     </div>
+                                    <div class="rounded-xl border border-white/5 bg-white/5 p-3">
+                                        <p class="text-[11px] uppercase tracking-[0.2em] text-indigo-200/70">Merk</p>
+                                        <p class="text-sm font-semibold text-white mt-1">{{ $unitMasuk?->merk ?? '-' }}</p>
+                                    </div>
                                 </div>
 
                                 @if($hasSpec)
                                     <div class="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4">
                                         <div class="flex items-center justify-between mb-2">
                                             <p class="text-xs font-semibold text-indigo-100 uppercase tracking-wide">Detail Spesifikasi</p>
-                                            @if($latestMasuk?->tgl_masuk)
-                                                <span class="text-[11px] px-2 py-1 rounded-full bg-white/5 border border-white/10 text-indigo-100/80">Datang {{ \Carbon\Carbon::parse($latestMasuk->tgl_masuk)->format('d M Y') }}</span>
+                                            @if($unitMasuk?->tgl_masuk)
+                                                <span class="text-[11px] px-2 py-1 rounded-full bg-white/5 border border-white/10 text-indigo-100/80">Datang {{ \Carbon\Carbon::parse($unitMasuk->tgl_masuk)->format('d M Y') }}</span>
                                             @endif
                                         </div>
                                         <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-indigo-100/80">
                                             <div>
                                                 <dt class="text-[11px] uppercase tracking-[0.15em] text-indigo-200/70">Prosesor</dt>
-                                                <dd class="font-semibold text-white">{{ $latestMasuk?->processor ?? '—' }}</dd>
+                                                <dd class="font-semibold text-white">{{ $unitMasuk?->processor ?? '—' }}</dd>
                                             </div>
                                             <div>
                                                 <dt class="text-[11px] uppercase tracking-[0.15em] text-indigo-200/70">RAM</dt>
                                                 <dd class="font-semibold text-white">
-                                                    @if($latestMasuk?->ram_capacity_gb)
-                                                        {{ $latestMasuk->ram_capacity_gb }} GB {{ $latestMasuk->ram_brand ? '('.$latestMasuk->ram_brand.')' : '' }}
+                                                    @if($unitMasuk?->ram_capacity_gb)
+                                                        {{ $unitMasuk->ram_capacity_gb }} GB {{ $unitMasuk->ram_brand ? '('.$unitMasuk->ram_brand.')' : '' }}
                                                     @else
-                                                        —
+                                                        — 
                                                     @endif
                                                 </dd>
                                             </div>
                                             <div>
                                                 <dt class="text-[11px] uppercase tracking-[0.15em] text-indigo-200/70">Penyimpanan</dt>
                                                 <dd class="font-semibold text-white">
-                                                    @if($latestMasuk?->storage_capacity_gb)
-                                                        {{ $latestMasuk->storage_capacity_gb }} GB {{ $latestMasuk->storage_type ?? '' }}
+                                                    @if($unitMasuk?->storage_capacity_gb)
+                                                        {{ $unitMasuk->storage_capacity_gb }} GB {{ $unitMasuk->storage_type ?? '' }}
                                                     @else
-                                                        —
+                                                        — 
                                                     @endif
                                                 </dd>
                                             </div>
                                             <div>
                                                 <dt class="text-[11px] uppercase tracking-[0.15em] text-indigo-200/70">Monitor</dt>
                                                 <dd class="font-semibold text-white">
-                                                    @if($latestMasuk?->monitor_brand)
-                                                        {{ $latestMasuk->monitor_brand }} {{ $latestMasuk->monitor_model }} {{ $latestMasuk->monitor_size_inch ? $latestMasuk->monitor_size_inch . '”' : '' }}
+                                                    @if($unitMasuk?->monitor_brand)
+                                                        {{ $unitMasuk->monitor_brand }} {{ $unitMasuk->monitor_model }} {{ $unitMasuk->monitor_size_inch ? $unitMasuk->monitor_size_inch . '”' : '' }}
                                                     @else
-                                                        —
+                                                        — 
                                                     @endif
                                                 </dd>
                                             </div>

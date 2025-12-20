@@ -28,14 +28,16 @@ class AppConfigController extends Controller
             'email' => 'nullable|email|max:100',
             'website' => 'nullable|string|max:100',
             'profil' => 'nullable|string',
+            'petugas_inventaris' => 'nullable|string|max:255',
             'logo' => 'nullable|image|mimes:png,jpg,jpeg,svg|max:2048',
+            'petugas_signature' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
             'apply_layout' => 'nullable|boolean',
             'apply_pdf' => 'nullable|boolean',
             'apply_email' => 'nullable|boolean',
         ]);
 
         $config = AppConfiguration::first() ?? new AppConfiguration();
-        $data = $request->only(['nama_kampus', 'alamat', 'telepon', 'email', 'website', 'profil']);
+        $data = $request->only(['nama_kampus', 'alamat', 'telepon', 'email', 'website', 'profil', 'petugas_inventaris']);
         $data['apply_layout'] = $request->boolean('apply_layout');
         $data['apply_pdf'] = $request->boolean('apply_pdf');
         $data['apply_email'] = $request->boolean('apply_email');
@@ -45,6 +47,12 @@ class AppConfigController extends Controller
                 Storage::disk('public')->delete($config->logo);
             }
             $data['logo'] = $request->file('logo')->store('logo', 'public');
+        }
+        if ($request->hasFile('petugas_signature')) {
+            if ($config->petugas_signature) {
+                Storage::disk('public')->delete($config->petugas_signature);
+            }
+            $data['petugas_signature'] = $request->file('petugas_signature')->store('signatures', 'public');
         }
 
         $config->fill($data);

@@ -77,13 +77,24 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <div class="bg-slate-900/70 border border-white/10 rounded-2xl shadow-lg shadow-indigo-500/10 backdrop-blur">
                 <form method="GET" class="p-6 space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
                         <div>
                             <label class="text-sm font-semibold text-indigo-100 mb-2 block">Barang</label>
                             <select name="idbarang" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
                                 <option class="text-slate-900" value="">Semua Barang</option>
                                 @foreach($barangList ?? [] as $b)
                                     <option class="text-slate-900" value="{{ $b->idbarang }}" @selected(request('idbarang') == $b->idbarang)>{{ $b->nama_barang }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-indigo-100 mb-2 block">Ruang</label>
+                            <select name="idruang" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
+                                <option class="text-slate-900" value="">Semua Ruang</option>
+                                @foreach($ruangList ?? [] as $r)
+                                    <option class="text-slate-900" value="{{ $r->idruang }}" @selected(request('idruang') == $r->idruang)>
+                                        {{ $r->kode_ruang ? $r->kode_ruang . ' - ' : '' }}{{ $r->nama_ruang }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -101,6 +112,13 @@
                                 <option class="text-slate-900" value="">Semua</option>
                                 <option class="text-slate-900" value="1" @selected(request('is_pc') === '1')>PC / dengan spesifikasi</option>
                                 <option class="text-slate-900" value="0" @selected(request('is_pc') === '0')>Non PC</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-indigo-100 mb-2 block">Urutkan</label>
+                            <select name="sort_direction" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
+                                <option class="text-slate-900" value="desc" @selected(request('sort_direction', 'desc') === 'desc')>Terbaru - Terlama</option>
+                                <option class="text-slate-900" value="asc" @selected(request('sort_direction') === 'asc')>Terlama - Terbaru</option>
                             </select>
                         </div>
                         <div>
@@ -166,6 +184,7 @@
                                     $rowNumber = ($barangMasuk->currentPage() - 1) * $barangMasuk->perPage() + $index + 1;
                                     $isPc = $bm->is_pc || str_contains(strtolower(optional($bm->barang?->kategori)->nama_kategori ?? ''), 'pc');
                                     $specParts = [];
+                                    $merkText = $bm->merk ? 'Merk: ' . $bm->merk : null;
                                     if ($bm->ram_capacity_gb) {
                                         $brand = $bm->ram_brand ? ' (' . $bm->ram_brand . ')' : '';
                                         $specParts[] = 'RAM ' . $bm->ram_capacity_gb . 'GB' . $brand;
@@ -176,7 +195,24 @@
                                     if ($bm->processor) {
                                         $specParts[] = 'CPU ' . $bm->processor;
                                     }
+                                    if ($merkText) {
+                                        array_unshift($specParts, $merkText);
+                                    }
                                     $specText = $specParts ? implode(' • ', $specParts) : ($isPc ? 'Spesifikasi PC belum lengkap' : '-');
+                                @endphp
+                                @php
+                                    $agg = $ruangAggregates[$bm->idbarang_masuk] ?? null;
+                                    $ruangText = $agg?->kode_list ?: $agg?->ruang_list;
+                                    $ruangDisplay = '-';
+                                    if ($ruangText) {
+                                        $ruangArray = array_filter(array_map('trim', explode(',', $ruangText)));
+                                        $ruangCount = count($ruangArray);
+                                        $preview = array_slice($ruangArray, 0, 3);
+                                        $ruangDisplay = implode(', ', $preview);
+                                        if ($ruangCount > 3) {
+                                            $ruangDisplay .= ' +' . ($ruangCount - 3);
+                                        }
+                                    }
                                 @endphp
                                 <tr class="hover:bg-white/5 transition">
                                     <td class="px-6 py-4 text-sm text-indigo-50">{{ $rowNumber }}</td>
@@ -189,25 +225,6 @@
                                     <td class="px-6 py-4 text-sm text-white">
                                         {{ $bm->barang->nama_barang ?? '-' }}
                                     </td>
-                                    @php
-                                    $agg = $ruangAggregates[$bm->idbarang_masuk] ?? null;
-                                    $ruangText = $agg?->kode_list ?: $agg?->ruang_list;
-
-                                    $ruangDisplay = '-';
-                                    if ($ruangText) {
-                                        $ruangArray = array_filter(array_map('trim', explode(',', $ruangText)));
-                                        if ((int) $bm->jumlah === 1) {
-                                            $ruangDisplay = $ruangArray ? $ruangArray[0] : '-';
-                                        } else {
-                                            $ruangCount = count($ruangArray);
-                                            $preview = array_slice($ruangArray, 0, 3);
-                                            $ruangDisplay = implode(', ', $preview);
-                                            if ($ruangCount > 3) {
-                                                $ruangDisplay .= ' +' . ($ruangCount - 3);
-                                            }
-                                        }
-                                    }
-                                    @endphp
                                     <td class="px-6 py-4 text-sm text-indigo-100/80">
                                         {{ $ruangDisplay }}
                                     </td>

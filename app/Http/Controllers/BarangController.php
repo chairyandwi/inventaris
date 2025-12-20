@@ -6,6 +6,7 @@ use App\Models\Barang;
 use App\Models\BarangUnit;
 use App\Models\BarangMasuk;
 use App\Models\Kategori;
+use App\Models\Peminjaman;
 use App\Models\Ruang;
 use App\Support\KodeInventarisGenerator;
 use Illuminate\Http\Request;
@@ -64,7 +65,7 @@ class BarangController extends Controller
             'idkategori'   => 'required|exists:kategori,idkategori',
             'kode_barang'  => 'required|string|max:20|unique:barang,kode_barang',
             'nama_barang'  => 'required|string|max:100',
-            'jenis_barang' => 'required|in:pinjam,tetap',
+            'jenis_barang' => 'nullable|in:pinjam,tetap',
             'keterangan'   => 'nullable|string|max:500',
             'distribusi_ruang' => 'required_if:jenis_barang,tetap|array|min:1',
             'distribusi_ruang.*' => 'required_with:distribusi_jumlah.*|exists:ruang,idruang',
@@ -78,7 +79,6 @@ class BarangController extends Controller
             'kode_barang.required'=> 'Kode barang wajib diisi',
             'kode_barang.unique'  => 'Kode barang sudah ada',
             'nama_barang.required'=> 'Nama barang wajib diisi',
-            'jenis_barang.required' => 'Jenis barang wajib dipilih',
             'distribusi_ruang.required_if' => 'Pilih minimal satu ruang inventaris',
             'distribusi_ruang.*.exists' => 'Ruang tidak valid',
             'distribusi_jumlah.*.integer' => 'Jumlah unit harus angka',
@@ -128,7 +128,7 @@ class BarangController extends Controller
             'idkategori'   => 'required|exists:kategori,idkategori',
             'kode_barang'  => ['required', 'string', 'max:20', Rule::unique('barang', 'kode_barang')->ignore($barang->idbarang, 'idbarang')],
             'nama_barang'  => 'required|string|max:100',
-            'jenis_barang' => 'required|in:pinjam,tetap',
+            'jenis_barang' => 'nullable|in:pinjam,tetap',
             'keterangan'   => 'nullable|string|max:500',
             'distribusi_ruang' => 'required_if:jenis_barang,tetap|array|min:1',
             'distribusi_ruang.*' => 'required_with:distribusi_jumlah.*|exists:ruang,idruang',
@@ -177,7 +177,66 @@ class BarangController extends Controller
             ];
         })->values();
 
-        return view('pegawai.barang.show', compact('barang', 'units', 'distribution'));
+        $latestMasuk = $barang->barangMasuk()
+            ->orderByDesc('tgl_masuk')
+            ->orderByDesc('created_at')
+            ->first();
+        $effectiveJenis = $barang->barangMasuk()
+            ->whereNotNull('jenis_barang')
+            ->orderByDesc('tgl_masuk')
+            ->orderByDesc('created_at')
+            ->value('jenis_barang');
+        $dipinjamQty = Peminjaman::where('idbarang', $barang->idbarang)
+            ->where('status', 'dipinjam')
+            ->sum('jumlah');
+        $stokPinjam = $barang->barangMasuk()
+            ->where('jenis_barang', 'pinjam')
+            ->sum('jumlah');
+        $availablePinjam = max($stokPinjam - $dipinjamQty, 0);
+        $merkEntries = $barang->barangMasuk()
+            ->where('jenis_barang', 'pinjam')
+            ->whereNotNull('merk')
+            ->where('merk', '!=', '')
+            ->get(['merk', 'status_barang', 'jumlah']);
+        $merkStats = $merkEntries
+            ->groupBy('merk')
+            ->map(function ($items, $merk) {
+                $hasBaru = $items->contains('status_barang', 'baru');
+                $hasBekas = $items->contains('status_barang', 'bekas');
+                if ($hasBaru && $hasBekas) {
+                    $kondisi = 'Campuran';
+                } elseif ($hasBaru) {
+                    $kondisi = 'Baru';
+                } elseif ($hasBekas) {
+                    $kondisi = 'Bekas';
+                } else {
+                    $kondisi = '-';
+                }
+
+                return [
+                    'merk' => $merk,
+                    'kondisi' => $kondisi,
+                    'total_masuk' => $items->sum('jumlah'),
+                ];
+            })
+            ->values();
+        $kondisiList = $barang->barangMasuk()
+            ->whereNotNull('status_barang')
+            ->pluck('status_barang')
+            ->unique()
+            ->values();
+        return view('pegawai.barang.show', compact(
+            'barang',
+            'units',
+            'distribution',
+            'latestMasuk',
+            'effectiveJenis',
+            'stokPinjam',
+            'availablePinjam',
+            'merkStats',
+            'kondisiList',
+            'dipinjamQty'
+        ));
     }
 
     public function api()

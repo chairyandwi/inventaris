@@ -114,6 +114,13 @@
                             placeholder="Deskripsi singkat tentang kampus">{{ old('profil', $config->profil ?? '') }}</textarea>
                         @error('profil') <p class="text-sm text-rose-300 mt-1">{{ $message }}</p> @enderror
                     </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-indigo-100 mb-2">Petugas Inventaris (untuk PDF)</label>
+                        <input type="text" name="petugas_inventaris" value="{{ old('petugas_inventaris', $config->petugas_inventaris ?? '') }}"
+                            class="w-full rounded-xl bg-slate-800/70 border border-white/10 text-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400"
+                            placeholder="Nama petugas yang ditampilkan di laporan">
+                        @error('petugas_inventaris') <p class="text-sm text-rose-300 mt-1">{{ $message }}</p> @enderror
+                    </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
@@ -127,6 +134,22 @@
                                 <div class="w-full">
                                     <p class="text-xs text-indigo-100/80 mb-2">Logo saat ini:</p>
                                     <img src="{{ asset('storage/'.$config->logo) }}" alt="Logo Kampus" class="h-16 object-contain bg-white/60 rounded-xl px-3 py-2 border border-white/20">
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-semibold text-indigo-100 mb-2">Tanda Tangan Petugas (PDF)</label>
+                            <input type="file" name="petugas_signature" accept="image/png,image/jpeg"
+                                class="w-full rounded-xl bg-slate-800/70 border border-white/10 text-indigo-100 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400">
+                            @error('petugas_signature') <p class="text-sm text-rose-300 mt-1">{{ $message }}</p> @enderror
+                        </div>
+                        @if(!empty($config->petugas_signature))
+                            <div class="flex items-end">
+                                <div class="w-full">
+                                    <p class="text-xs text-indigo-100/80 mb-2">Tanda tangan saat ini:</p>
+                                    <img src="{{ asset('storage/'.$config->petugas_signature) }}" alt="Tanda Tangan Petugas" class="h-16 object-contain bg-white/60 rounded-xl px-3 py-2 border border-white/20">
                                 </div>
                             </div>
                         @endif

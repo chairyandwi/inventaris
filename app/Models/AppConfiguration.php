@@ -14,6 +14,8 @@ class AppConfiguration extends Model
         'website',
         'logo',
         'profil',
+        'petugas_inventaris',
+        'petugas_signature',
         'apply_layout',
         'apply_pdf',
         'apply_email',

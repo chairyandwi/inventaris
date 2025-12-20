@@ -242,6 +242,15 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
+                            <label class="block text-sm font-semibold text-indigo-100 mb-2" for="merk">Merk</label>
+                            <input type="text" name="merk" id="merk" value="{{ old('merk', $barangMasuk->merk) }}"
+                                class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus-border-transparent"
+                                placeholder="Contoh: Toyota, Honda, Lenovo">
+                            @error('merk')
+                                <p class="text-sm text-rose-300 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
                             <label class="block text-sm font-semibold text-indigo-100 mb-2" for="keterangan">Keterangan</label>
                             <textarea name="keterangan" id="keterangan" rows="3"
                                 class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus-border-transparent"
@@ -281,6 +290,7 @@
     const inventarisWrapper = document.getElementById('inventaris-fields');
     const listDistribusi = document.getElementById('listDistribusi');
     const tambahDistribusi = document.getElementById('tambahDistribusi');
+    const submitBtn = document.querySelector('button[type="submit"]');
 
     function syncJenisFromBarang() {
         const selected = selectBarang.options[selectBarang.selectedIndex];
@@ -354,6 +364,17 @@
         toggleDistribusi();
     }
 
+    function hitungDistribusi() {
+        const target = parseInt(document.getElementById('jumlah')?.value || '0', 10) || 0;
+        let total = 0;
+        listDistribusi?.querySelectorAll('input[name="distribusi_jumlah[]"]').forEach(el => {
+            total += parseInt(el.value || '0', 10) || 0;
+        });
+        const isTetap = jenisBarang?.value === 'tetap';
+        const valid = !isTetap || (target > 0 && total === target);
+        if (submitBtn) submitBtn.disabled = isTetap && target > 0 ? !valid : false;
+    }
+
     if (listDistribusi && tambahDistribusi) {
         listDistribusi.addEventListener('click', function (e) {
             if (e.target.classList.contains('remove-distribusi')) {
@@ -364,17 +385,20 @@
                     item.querySelectorAll('select, input').forEach(el => el.value = '');
                     item.querySelector('input[name="distribusi_jumlah[]"]').value = 1;
                 }
+                hitungDistribusi();
             }
         });
 
         tambahDistribusi.addEventListener('click', function () {
             addDistribusiRow();
+            hitungDistribusi();
         });
     }
 
     filterBarangByKategori();
     syncJenisFromBarang();
     toggleDistribusi();
+    hitungDistribusi();
     selectBarang?.addEventListener('change', syncJenisFromBarang);
     jenisBarang?.addEventListener('change', toggleDistribusi);
     selectKategori?.addEventListener('change', filterBarangByKategori);

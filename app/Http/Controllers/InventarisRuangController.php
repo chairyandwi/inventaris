@@ -12,6 +12,11 @@ use Illuminate\Http\Request;
 
 class InventarisRuangController extends Controller
 {
+    private function getRoutePrefix(): string
+    {
+        return auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+    }
+
     public function index(Request $request)
     {
         $gedungFilter = trim((string) $request->get('gedung', ''));
@@ -21,11 +26,7 @@ class InventarisRuangController extends Controller
         $query = BarangUnit::with([
                 'barang',
                 'ruang',
-                'barang.barangMasuk' => function ($q) {
-                    $q->orderByDesc('tgl_masuk')
-                      ->orderByDesc('created_at')
-                      ->take(1);
-                },
+                'barangMasuk',
                 'kerusakanAktif',
             ])
             ->orderBy('kode_unit');
@@ -52,6 +53,35 @@ class InventarisRuangController extends Controller
 
         if ($request->filled('idbarang')) {
             $query->where('idbarang', $request->idbarang);
+        }
+
+        $statusFilter = $request->get('status', '');
+        if ($statusFilter === 'rusak') {
+            $query->whereHas('kerusakanAktif');
+        } elseif ($statusFilter === 'baik') {
+            $query->whereDoesntHave('kerusakanAktif')
+                ->where(function ($q) {
+                    $q->whereNull('keterangan')
+                      ->orWhereRaw("LOWER(keterangan) NOT LIKE '%kurang%'");
+                });
+        } elseif ($statusFilter === 'kurang_baik') {
+            $query->whereDoesntHave('kerusakanAktif')
+                ->where(function ($q) {
+                    $q->whereRaw("LOWER(keterangan) LIKE '%kurang%'")
+                      ->orWhereRaw("LOWER(keterangan) LIKE '%kb%'");
+                });
+        }
+
+        if ($request->filled('gedung')) {
+            $query->whereHas('ruang', function ($q) use ($request) {
+                $q->where('nama_gedung', trim($request->gedung));
+            });
+        }
+
+        if ($request->filled('lantai')) {
+            $query->whereHas('ruang', function ($q) use ($request) {
+                $q->where('nama_lantai', trim($request->lantai));
+            });
         }
 
         if ($gedungFilter !== '') {
@@ -110,7 +140,12 @@ class InventarisRuangController extends Controller
             abort(403, 'Anda tidak memiliki akses.');
         }
 
-        $query = BarangUnit::with(['barang.kategori', 'ruang'])
+        $query = BarangUnit::with([
+                'barang:idbarang,nama_barang,idkategori',
+                'barang.kategori:idkategori,nama_kategori',
+                'ruang:idruang,nama_ruang,nama_gedung',
+            ])
+            ->select('id', 'idbarang', 'idruang', 'kode_unit', 'keterangan', 'nomor_unit')
             ->orderBy('idruang')
             ->orderBy('idbarang')
             ->orderBy('nomor_unit');
@@ -125,8 +160,56 @@ class InventarisRuangController extends Controller
             $query->where('idbarang', $request->idbarang);
         }
 
-        $units = $query->get();
+        $hasFilters = $request->filled('idruang')
+            || $request->filled('idbarang')
+            || $request->filled('gedung')
+            || $request->filled('lantai')
+            || $request->filled('status');
 
+        if (!$hasFilters) {
+            $ruangList = Ruang::orderBy('nama_gedung')
+                ->orderBy('nama_ruang')
+                ->get(['idruang', 'nama_ruang', 'nama_gedung']);
+            $dateStamp = now()->format('Ymd_His');
+            $zipName = "Laporan_Inventaris_Ruang_{$dateStamp}.zip";
+            $tempDir = storage_path('app/tmp/inventaris_zip_' . $dateStamp);
+            if (!is_dir($tempDir)) {
+                mkdir($tempDir, 0777, true);
+            }
+            $zipPath = $tempDir . DIRECTORY_SEPARATOR . $zipName;
+
+            $zip = new \ZipArchive();
+            if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+                return redirect()->route($this->getRoutePrefix() . '.inventaris-ruang.index')
+                    ->with('error', 'Gagal membuat file ZIP laporan.');
+            }
+
+            foreach ($ruangList as $ruang) {
+                $units = (clone $query)
+                    ->where('idruang', $ruang->idruang)
+                    ->get();
+                if ($units->isEmpty()) {
+                    continue;
+                }
+                $ruangName = $ruang->nama_ruang ?: 'Ruang';
+                $gedungName = $ruang->nama_gedung ?: 'Gedung';
+                $safeGedung = preg_replace('/[^A-Za-z0-9_-]+/', '_', $gedungName);
+                $safeRuang = preg_replace('/[^A-Za-z0-9_-]+/', '_', $ruangName);
+                $pdfFile = "{$safeGedung}_{$safeRuang}.pdf";
+                $pdfPath = $tempDir . DIRECTORY_SEPARATOR . $pdfFile;
+
+                $pdf = Pdf::loadView('pegawai.inventaris_ruang.laporan', compact('units'))
+                    ->setPaper('A4', 'portrait');
+                file_put_contents($pdfPath, $pdf->output());
+                $zip->addFile($pdfPath, $pdfFile);
+            }
+
+            $zip->close();
+
+            return response()->download($zipPath)->deleteFileAfterSend(true);
+        }
+
+        $units = $query->get();
         $pdf = Pdf::loadView('pegawai.inventaris_ruang.laporan', compact('units'))
             ->setPaper('A4', 'portrait');
 

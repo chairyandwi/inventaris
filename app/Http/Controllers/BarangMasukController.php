@@ -25,6 +25,7 @@ class BarangMasukController extends Controller
     {
         $query = BarangMasuk::with('barang'); // eager load relasi barang
         $barangList = Barang::orderBy('nama_barang')->get();
+        $ruangList = Ruang::orderBy('nama_ruang')->get();
         $stats = [
             'totalEntry' => BarangMasuk::count(),
             'totalQty' => BarangMasuk::sum('jumlah'),
@@ -36,11 +37,23 @@ class BarangMasukController extends Controller
         // Search
         if ($request->filled('search')) {
             $searchTerm = $request->search;
-            $query->whereHas('barang', function ($q) use ($searchTerm) {
-                $q->where('kode_barang', 'like', "%{$searchTerm}%")
-                  ->orWhere('nama_barang', 'like', "%{$searchTerm}%");
-            })
-            ->orWhere('keterangan', 'like', "%{$searchTerm}%");
+            $query->where(function ($q) use ($searchTerm) {
+                $q->whereHas('barang', function ($q) use ($searchTerm) {
+                    $q->where('kode_barang', 'like', "%{$searchTerm}%")
+                        ->orWhere('nama_barang', 'like', "%{$searchTerm}%");
+                })
+                ->orWhere('keterangan', 'like', "%{$searchTerm}%")
+                ->orWhereIn('idbarang_masuk', function ($sub) use ($searchTerm) {
+                    $sub->from('barang_units')
+                        ->join('ruang', 'ruang.idruang', '=', 'barang_units.idruang')
+                        ->select('barang_units.barang_masuk_id')
+                        ->whereNotNull('barang_units.barang_masuk_id')
+                        ->where(function ($q) use ($searchTerm) {
+                            $q->where('ruang.kode_ruang', 'like', "%{$searchTerm}%")
+                                ->orWhere('ruang.nama_ruang', 'like', "%{$searchTerm}%");
+                        });
+                });
+            });
         }
 
         // Filters
@@ -56,6 +69,15 @@ class BarangMasukController extends Controller
             $query->where('is_pc', (bool)$request->is_pc);
         }
 
+        if ($request->filled('idruang')) {
+            $query->whereIn('idbarang_masuk', function ($sub) use ($request) {
+                $sub->from('barang_units')
+                    ->select('barang_masuk_id')
+                    ->whereNotNull('barang_masuk_id')
+                    ->where('idruang', $request->idruang);
+            });
+        }
+
         if ($request->filled('tgl_masuk_from')) {
             $query->whereDate('tgl_masuk', '>=', $request->tgl_masuk_from);
         }
@@ -65,20 +87,25 @@ class BarangMasukController extends Controller
         }
 
         // Sorting
-        $sortBy = $request->get('sort_by', 'idbarang_masuk');
-        $sortDirection = $request->get('sort_direction', 'asc');
+        $sortBy = $request->get('sort_by', 'tgl_masuk');
+        $sortDirection = strtolower($request->get('sort_direction', 'desc')) === 'asc' ? 'asc' : 'desc';
         $allowedSortFields = ['idbarang_masuk', 'idbarang', 'jumlah', 'tgl_masuk'];
         $query->orderBy(in_array($sortBy, $allowedSortFields) ? $sortBy : 'idbarang_masuk', $sortDirection);
 
         // Pagination
         $perPage = in_array($request->get('per_page', 10), [10, 25, 50, 100]) ? $request->get('per_page', 10) : 10;
 
+        $baseQuery = clone $query;
+        $allIds = $baseQuery->pluck('idbarang_masuk');
+
         $barangMasuk = $query->paginate($perPage)->appends($request->all());
         $ruangAggregates = collect();
-        if ($barangMasuk->count()) {
+        $unitCounts = collect();
+        $unitTotalsByBarangRuang = collect();
+        if ($allIds->count()) {
             $ruangAggregates = DB::table('barang_units')
                 ->join('ruang', 'ruang.idruang', '=', 'barang_units.idruang')
-                ->whereIn('barang_units.barang_masuk_id', $barangMasuk->pluck('idbarang_masuk'))
+                ->whereIn('barang_units.barang_masuk_id', $allIds)
                 ->select(
                     'barang_units.barang_masuk_id',
                     DB::raw("GROUP_CONCAT(DISTINCT ruang.kode_ruang ORDER BY ruang.kode_ruang SEPARATOR ', ') as kode_list"),
@@ -87,9 +114,31 @@ class BarangMasukController extends Controller
                 ->groupBy('barang_units.barang_masuk_id')
                 ->get()
                 ->keyBy('barang_masuk_id');
+            $unitCounts = DB::table('barang_units')
+                ->whereIn('barang_units.barang_masuk_id', $allIds)
+                ->select('barang_units.barang_masuk_id', DB::raw('COUNT(*) as total'))
+                ->groupBy('barang_units.barang_masuk_id')
+                ->get()
+                ->keyBy('barang_masuk_id');
         }
 
-        return view('pegawai.barang_masuk.index', compact('barangMasuk', 'stats', 'barangList', 'ruangAggregates'));
+        if ($barangMasuk->count()) {
+            $barangIds = $barangMasuk->pluck('idbarang')->filter()->unique()->values();
+            if ($barangIds->isNotEmpty()) {
+                $unitTotalsByBarangRuang = DB::table('barang_units')
+                    ->join('ruang', 'ruang.idruang', '=', 'barang_units.idruang')
+                    ->whereIn('barang_units.idbarang', $barangIds)
+                    ->select('barang_units.idbarang', 'ruang.kode_ruang', DB::raw('COUNT(*) as total'))
+                    ->groupBy('barang_units.idbarang', 'ruang.kode_ruang')
+                    ->get()
+                    ->groupBy('idbarang')
+                    ->map(function ($items) {
+                        return $items->keyBy('kode_ruang')->map(fn ($row) => (int) $row->total);
+                    });
+            }
+        }
+
+        return view('pegawai.barang_masuk.index', compact('barangMasuk', 'stats', 'barangList', 'ruangList', 'ruangAggregates', 'unitCounts', 'unitTotalsByBarangRuang'));
     }
 
     public function create()
@@ -112,6 +161,7 @@ class BarangMasukController extends Controller
             'status_barang' => 'required|in:baru,bekas',
             'jenis_barang' => 'nullable|in:pinjam,tetap',
             'keterangan'  => 'nullable|string|max:500',
+            'merk'        => 'nullable|string|max:120',
             'is_pc'       => 'nullable|boolean',
             'ram_brand'   => 'nullable|string|max:100',
             'ram_capacity_gb' => 'nullable|integer|min:1|max:1024',
@@ -136,7 +186,7 @@ class BarangMasukController extends Controller
         ]);
 
         $barang = Barang::with('kategori')->find($request->idbarang);
-        $barangJenis = $barang?->jenis_barang ?? $request->input('jenis_barang', 'pinjam');
+        $barangJenis = $request->input('jenis_barang', $barang?->jenis_barang ?? 'pinjam');
         $kategoriNama = strtolower(optional($barang?->kategori)->nama_kategori ?? '');
         $requiresPcSpec = $request->boolean('is_pc') || str_contains($kategoriNama, 'pc');
         $distribusiRuang = $request->input('distribusi_ruang', []);
@@ -293,6 +343,7 @@ class BarangMasukController extends Controller
             'status_barang' => 'required|in:baru,bekas',
             'jenis_barang' => 'nullable|in:pinjam,tetap',
             'keterangan'  => 'nullable|string|max:500',
+            'merk'        => 'nullable|string|max:120',
             'is_pc'       => 'nullable|boolean',
             'ram_brand'   => 'nullable|string|max:100',
             'ram_capacity_gb' => 'nullable|integer|min:1|max:1024',

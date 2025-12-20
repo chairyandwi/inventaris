@@ -23,6 +23,11 @@ class BarangUnit extends Model
         return $this->belongsTo(Barang::class, 'idbarang', 'idbarang');
     }
 
+    public function barangMasuk()
+    {
+        return $this->belongsTo(BarangMasuk::class, 'barang_masuk_id', 'idbarang_masuk');
+    }
+
     public function kerusakan()
     {
         return $this->hasMany(BarangUnitKerusakan::class, 'barang_unit_id');

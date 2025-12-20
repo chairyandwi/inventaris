@@ -39,8 +39,32 @@
         if (file_exists($logoFile)) {
             $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoFile));
         }
+        $signatureBase64 = '';
+        if ($usePdfConfig && $appConfig && $appConfig->petugas_signature) {
+            $signatureFile = storage_path('app/public/' . $appConfig->petugas_signature);
+            if (file_exists($signatureFile)) {
+                $signatureBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($signatureFile));
+            }
+        }
         date_default_timezone_set('Asia/Jakarta');
-        $currentTime = date('d/m/Y H:i:s');
+        $monthNames = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
+        $tanggal = date('d') . ' ' . $monthNames[(int) date('n')] . ' ' . date('Y');
+        $petugasInventaris = $usePdfConfig && $appConfig && $appConfig->petugas_inventaris
+            ? $appConfig->petugas_inventaris
+            : 'Nama Petugas';
     @endphp
 
     <div class="rangkasurat">
@@ -67,7 +91,13 @@
         </div>
 
         <div>
-            <div class="section-title">Unit Barang per Ruang</div>
+            @php
+                $firstUnit = $units->first();
+                $ruangLabel = $firstUnit?->ruang?->nama_ruang ?? '-';
+                $gedungLabel = $firstUnit?->ruang?->nama_gedung ?? '-';
+            @endphp
+            <div class="section-title">Nama Ruang: {{ $ruangLabel }}</div>
+            <div class="section-title" style="margin-top: 4px;">Gedung: {{ $gedungLabel }}</div>
             <table class="isi">
                 <tr>
                     <th width="20">NO</th>
@@ -99,10 +129,18 @@
             </table>
         </div>
 
-        <div style="margin-top: 24px;">
-            <div class="section-title">Dicetak pada</div>
-            <div style="padding: 10px; background: #f0f4f8; border-radius: 8px; display: inline-block; font-weight: 700; color: #1e3a8a; font-size: 10pt;">
-                {{ $currentTime }}
+        <div style="margin-top: 24px; text-align: right; line-height: 1.4;">
+            <div class="section-title" style="text-transform: uppercase;">Sleman, {{ $tanggal }}</div>
+            <div class="section-title" style="margin-top: 4px;">Petugas Inventaris</div>
+            @if ($signatureBase64)
+                <div style="margin-top: 10px;">
+                    <img src="{{ $signatureBase64 }}" alt="Tanda Tangan Petugas" style="height: 70px; width: auto; object-fit: contain;">
+                </div>
+            @else
+                <div style="margin-top: 26px;"></div>
+            @endif
+            <div style="margin-top: 12px; font-weight: bold; text-decoration: underline; font-size: 11pt;">
+                {{ $petugasInventaris }}
             </div>
         </div>
     </div>
