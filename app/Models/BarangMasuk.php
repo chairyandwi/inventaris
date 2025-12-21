@@ -36,4 +36,9 @@ class BarangMasuk extends Model
     {
         return $this->belongsTo(Barang::class, 'idbarang', 'idbarang');
     }
+
+    public function units()
+    {
+        return $this->hasMany(BarangUnit::class, 'barang_masuk_id', 'idbarang_masuk');
+    }
 }

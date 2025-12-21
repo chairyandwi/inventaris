@@ -153,6 +153,13 @@
                                class="px-4 py-2 rounded-xl border border-white/15 text-sm font-semibold text-indigo-50 hover:bg-white/10 transition">
                                 Reset
                             </a>
+                            <a href="{{ route(($routePrefix ?? 'pegawai') . '.barang_masuk.laporan', request()->only(['idbarang','idruang','status_barang','is_pc','sort_by','sort_direction','tgl_masuk_from','tgl_masuk_to','per_page','search'])) }}"
+                               class="px-4 py-2 rounded-xl bg-white/10 border border-emerald-300/30 text-sm font-semibold text-emerald-100 hover:bg-emerald-500/20 transition flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M5 8h14M6 4h12a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" />
+                                </svg>
+                                Unduh Laporan
+                            </a>
                             <button type="submit" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 font-semibold shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 transition">
                                 Terapkan Filter
                             </button>

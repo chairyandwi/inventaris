@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Barang</title>
+    <title>Laporan Barang Masuk</title>
     <style>
         @page {
             margin: 15mm 12mm;
@@ -155,22 +155,6 @@
             text-align: center;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 30px;
-            color: #666;
-            font-style: italic;
-        }
-
-        .section-title {
-            font-size: 13pt;
-            font-weight: bold;
-            margin-top: 25px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
         .badge {
             display: inline-block;
             padding: 4px 8px;
@@ -314,41 +298,89 @@
 
         <hr>
 
-        <div class="report-title">
-            <b>LAPORAN BARANG</b>
+        <div class="report-title" style="page-break-inside: avoid;">
+            <b>LAPORAN BARANG MASUK</b>
         </div>
 
         <div>
-            <div class="section-title">Ringkasan Stok Barang</div>
+            <div class="section-title">Rekap Barang Masuk</div>
             <table class="isi">
                 <tr>
                     <th width="20">NO</th>
+                    <th>Tgl Masuk</th>
                     <th>Kode Barang</th>
                     <th>Nama Barang</th>
-                    <th>Kategori</th>
-                    <th>Keterangan</th>
-                    <th>Stok</th>
+                    <th>Ruang / Status</th>
+                    <th>Jenis</th>
+                    <th>Status</th>
+                    <th>Jumlah Masuk</th>
+                    <th>Spesifikasi / Keterangan</th>
                 </tr>
-                @php $no = 1; @endphp
-                @forelse($barang as $d)
+                @php $urut = 1; @endphp
+                @forelse($barangMasuk as $masuk)
+                    @php
+                        $isPc = $masuk->is_pc || str_contains(strtolower(optional($masuk->barang?->kategori)->nama_kategori ?? ''), 'pc');
+                        $jenisBarang = $masuk->barang?->jenis_barang;
+                        $ruangList = '-';
+                        if ($jenisBarang === 'tetap') {
+                            $ruangNames = $masuk->units
+                                ->map(fn($unit) => $unit->ruang?->nama_ruang)
+                                ->filter()
+                                ->unique()
+                                ->values();
+                            $ruangList = $ruangNames->isNotEmpty() ? $ruangNames->join(', ') : '-';
+                        } elseif ($jenisBarang === 'pinjam') {
+                            $ruangList = 'Barang pinjam';
+                        }
+                        $specParts = [];
+                        if ($masuk->ram_capacity_gb) {
+                            $ramBrand = $masuk->ram_brand ? ' (' . $masuk->ram_brand . ')' : '';
+                            $specParts[] = 'RAM ' . $masuk->ram_capacity_gb . 'GB' . $ramBrand;
+                        }
+                        if ($masuk->storage_type && $masuk->storage_capacity_gb) {
+                            $specParts[] = $masuk->storage_type . ' ' . $masuk->storage_capacity_gb . 'GB';
+                        }
+                        if ($masuk->processor) {
+                            $specParts[] = 'CPU ' . $masuk->processor;
+                        }
+                        $specText = $isPc
+                            ? ($specParts ? implode(' | ', $specParts) : 'Spesifikasi PC belum diisi')
+                            : ($masuk->keterangan ?? 'Non-PC / tidak memerlukan detail komponen');
+                        $tanggalMasuk = $masuk->tgl_masuk ?? ($masuk->created_at ? $masuk->created_at->format('Y-m-d') : '-');
+                    @endphp
                     <tr>
-                        <td class="number-cell" data-label="NO">{{ $no++ }}</td>
-                        <td class="code-cell" data-label="Kode Barang">{{ $d->kode_barang ?? '-' }}</td>
-                        <td data-label="Nama Barang" class="category-cell">{{ $d->nama_barang ?? '-' }}</td>
-                        <td class="category-cell" data-label="Kategori">{{ $d->kategori->nama_kategori ?? '-' }}</td>
-                        <td data-label="Keterangan" class="category-cell">{{ $d->keterangan ?? '-' }}</td>
-                        <td class="stock-cell" data-label="Stok">{{ $d->stok ?? 0 }}</td>
+                        <td class="number-cell" data-label="NO">{{ $urut++ }}</td>
+                        <td data-label="Tgl Masuk">{{ $tanggalMasuk }}</td>
+                        <td class="code-cell" data-label="Kode Barang">{{ $masuk->barang->kode_barang ?? '-' }}</td>
+                        <td data-label="Nama Barang" class="category-cell">{{ $masuk->barang->nama_barang ?? '-' }}</td>
+                        <td class="category-cell" data-label="Ruang / Status">{{ $ruangList }}</td>
+                        @php
+                            $jenisBarang = $masuk->barang->jenis_barang ?? $masuk->jenis_barang;
+                            $jenisLabel = $jenisBarang === 'tetap' ? 'Tetap' : ($jenisBarang === 'pinjam' ? 'Pinjam' : '-');
+                        @endphp
+                        <td class="category-cell" data-label="Jenis">{{ strtoupper($jenisLabel) }}</td>
+                        <td class="category-cell" data-label="Status">
+                            <span class="badge {{ $masuk->status_barang === 'bekas' ? 'bekas' : 'baru' }}">
+                                {{ strtoupper($masuk->status_barang ?? 'baru') }}
+                            </span>
+                        </td>
+                        <td class="stock-cell" data-label="Jumlah Masuk">{{ $masuk->jumlah ?? 0 }}</td>
+                        <td data-label="Spesifikasi / Keterangan" class="category-cell">
+                            {{ $specText }}
+                            @if (!$isPc && $masuk->keterangan)
+                                <div class="muted">{{ $masuk->keterangan }}</div>
+                            @endif
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="empty-state">
-                            Tidak ada data barang yang tersedia
+                        <td colspan="9" class="empty-state">
+                            Belum ada barang masuk yang tercatat
                         </td>
                     </tr>
                 @endforelse
             </table>
         </div>
-
     </div>
     @php
     date_default_timezone_set('Asia/Jakarta');
@@ -370,10 +402,10 @@
     $petugasInventaris = $usePdfConfig && $appConfig && $appConfig->petugas_inventaris
         ? $appConfig->petugas_inventaris
         : 'Nama Petugas';
-    $totalBarang = $barang->count();
+    $totalBarangMasuk = $barangMasuk->sum('jumlah');
+    $totalTransaksi = $barangMasuk->count();
 @endphp
 
-<!-- Info tambahan di bawah tabel dalam kolom stylish -->
 <div style="
     display: flex;
     justify-content: flex-start;
@@ -384,21 +416,34 @@
     page-break-inside: avoid;
     flex-wrap: wrap;
 ">
-    <!-- Total Barang -->
     <div style="
         background-color: #f0f4f8;
         padding: 12px 18px;
         border-radius: 10px;
         box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    min-width: 200px;
-    width: 240px;
-">
-    <span style="font-size: 10pt; color: #555;">Total Barang</span>
-    <span style="font-size: 10pt; font-weight: 700; color: #1e3a8a;">{{ $totalBarang }} item</span>
-</div>
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        min-width: 200px;
+        width: 240px;
+    ">
+        <span style="font-size: 10pt; color: #555;">Total Transaksi</span>
+        <span style="font-size: 10pt; font-weight: 700; color: #1e3a8a;">{{ $totalTransaksi }} pencatatan</span>
+    </div>
+    <div style="
+        background-color: #f0f4f8;
+        padding: 12px 18px;
+        border-radius: 10px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        min-width: 200px;
+        width: 240px;
+    ">
+        <span style="font-size: 10pt; color: #555;">Total Barang Masuk</span>
+        <span style="font-size: 10pt; font-weight: 700; color: #1e3a8a;">{{ $totalBarangMasuk }} unit</span>
+    </div>
 </div>
 
 <div style="margin-top: 16px; text-align: right; padding-right: 6mm; line-height: 1.4; page-break-inside: avoid;">
@@ -415,6 +460,7 @@
         {{ $petugasInventaris }}
     </div>
 </div>
+
 
 </body>
 

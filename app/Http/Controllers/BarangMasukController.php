@@ -8,9 +8,11 @@ use App\Models\Kategori;
 use App\Models\Ruang;
 use App\Models\BarangUnit;
 use Illuminate\Http\Request;
+use App\Http\Requests\BarangMasukRequest;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Support\KodeInventarisGenerator;
 
@@ -151,7 +153,7 @@ class BarangMasukController extends Controller
         return view('pegawai.barang_masuk.create', compact('barang', 'kategori', 'ruang', 'routePrefix'));
     }
 
-    public function store(Request $request)
+    public function store(BarangMasukRequest $request)
     {
         $routePrefix = $this->getRoutePrefix();
         $validator = Validator::make($request->all(), [
@@ -333,7 +335,7 @@ class BarangMasukController extends Controller
         return view('pegawai.barang_masuk.edit', compact('barangMasuk', 'barang', 'kategori', 'ruang', 'distribusi', 'routePrefix'));
     }
 
-    public function update(Request $request, BarangMasuk $barangMasuk)
+    public function update(BarangMasukRequest $request, BarangMasuk $barangMasuk)
     {
         $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         $validator = Validator::make($request->all(), [
@@ -556,21 +558,44 @@ class BarangMasukController extends Controller
 
     public function laporan()
     {
-        if (!auth('web')->check()) {
-            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+        try {
+            if (!auth('web')->check()) {
+                return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+            }
+
+            // Antisipasi pemrosesan PDF dengan dataset besar
+            ini_set('memory_limit', '512M');
+            set_time_limit(60);
+
+            $user = auth('web')->user();
+
+            if (!$user || !in_array($user->role, ['pegawai', 'admin'])) {
+                abort(403, 'Anda tidak memiliki akses.');
+            }
+
+            $barangMasukQuery = BarangMasuk::with(['barang.kategori', 'units.ruang'])->orderByDesc('idbarang_masuk');
+            $start = request()->query('tgl_masuk_from') ?? request()->query('start_date');
+            $end = request()->query('tgl_masuk_to') ?? request()->query('end_date');
+            if ($start) {
+                $barangMasukQuery->whereDate('tgl_masuk', '>=', $start);
+            }
+            if ($end) {
+                $barangMasukQuery->whereDate('tgl_masuk', '<=', $end);
+            }
+            $barangMasuk = $barangMasukQuery->get();
+
+            $pdf = Pdf::loadView('pegawai.barang_masuk.laporan', compact('barangMasuk'))
+                      ->setPaper('A4', 'portrait');
+
+            return $pdf->download('Laporan_Barang_Masuk.pdf');
+        } catch (\Throwable $e) {
+            Log::error('Gagal membuat laporan barang masuk', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
+            ]);
+
+            return redirect()->back()->with('error', 'Gagal membuat laporan: ' . $e->getMessage());
         }
-
-        $user = auth('web')->user();
-
-        if (!$user || $user->role !== 'pegawai') {
-            abort(403, 'Anda tidak memiliki akses.');
-        }
-
-        $barangMasuk = BarangMasuk::with('barang')->orderByDesc('idbarang_masuk')->get();
-
-        $pdf = Pdf::loadView('pegawai.barang_masuk.laporan', compact('barangMasuk'))
-                  ->setPaper('A4', 'portrait');
-
-        return $pdf->download('Laporan_Barang_Masuk.pdf');
     }
 }

@@ -9,6 +9,7 @@ use App\Models\Kategori;
 use App\Models\Peminjaman;
 use App\Models\Ruang;
 use App\Support\KodeInventarisGenerator;
+use App\Http\Requests\BarangRequest;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Arr;
@@ -58,37 +59,10 @@ class BarangController extends Controller
         return view('pegawai.barang.create', compact('kategori', 'ruang'));
     }
 
-    public function store(Request $request)
+    public function store(BarangRequest $request)
     {
         $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
-        $validator = Validator::make($request->all(), [
-            'idkategori'   => 'required|exists:kategori,idkategori',
-            'kode_barang'  => 'required|string|max:20|unique:barang,kode_barang',
-            'nama_barang'  => 'required|string|max:100',
-            'jenis_barang' => 'nullable|in:pinjam,tetap',
-            'keterangan'   => 'nullable|string|max:500',
-            'distribusi_ruang' => 'required_if:jenis_barang,tetap|array|min:1',
-            'distribusi_ruang.*' => 'required_with:distribusi_jumlah.*|exists:ruang,idruang',
-            'distribusi_jumlah' => 'required_if:jenis_barang,tetap|array',
-            'distribusi_jumlah.*' => 'required_with:distribusi_ruang.*|integer|min:1|max:500',
-            'distribusi_catatan' => 'array|nullable',
-            'distribusi_catatan.*' => 'nullable|string|max:255',
-        ], [
-            'idkategori.required' => 'Kategori wajib dipilih',
-            'idkategori.exists'   => 'Kategori tidak valid',
-            'kode_barang.required'=> 'Kode barang wajib diisi',
-            'kode_barang.unique'  => 'Kode barang sudah ada',
-            'nama_barang.required'=> 'Nama barang wajib diisi',
-            'distribusi_ruang.required_if' => 'Pilih minimal satu ruang inventaris',
-            'distribusi_ruang.*.exists' => 'Ruang tidak valid',
-            'distribusi_jumlah.*.integer' => 'Jumlah unit harus angka',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        $validated = $validator->validated();
+        $validated = $request->validated();
         $barangData = Arr::except($validated, ['ruang_tetap', 'jumlah_tetap', 'keterangan_inventaris']);
         $barangData['stok'] = 0; // stok dikalkulasi dari transaksi (barang masuk / peminjaman)
 
@@ -121,28 +95,10 @@ class BarangController extends Controller
         ));
     }
 
-    public function update(Request $request, Barang $barang)
+    public function update(BarangRequest $request, Barang $barang)
     {
         $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
-        $validator = Validator::make($request->all(), [
-            'idkategori'   => 'required|exists:kategori,idkategori',
-            'kode_barang'  => ['required', 'string', 'max:20', Rule::unique('barang', 'kode_barang')->ignore($barang->idbarang, 'idbarang')],
-            'nama_barang'  => 'required|string|max:100',
-            'jenis_barang' => 'nullable|in:pinjam,tetap',
-            'keterangan'   => 'nullable|string|max:500',
-            'distribusi_ruang' => 'required_if:jenis_barang,tetap|array|min:1',
-            'distribusi_ruang.*' => 'required_with:distribusi_jumlah.*|exists:ruang,idruang',
-            'distribusi_jumlah' => 'required_if:jenis_barang,tetap|array',
-            'distribusi_jumlah.*' => 'required_with:distribusi_ruang.*|integer|min:1|max:500',
-            'distribusi_catatan' => 'array|nullable',
-            'distribusi_catatan.*' => 'nullable|string|max:255',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        $validated = $validator->validated();
+        $validated = $request->validated();
         $barangData = Arr::except($validated, ['ruang_tetap', 'jumlah_tetap', 'keterangan_inventaris', 'stok']);
 
         DB::transaction(function () use ($barangData, $barang, $request) {
@@ -264,12 +220,8 @@ class BarangController extends Controller
         
 
         $barang = Barang::with('kategori')->orderByDesc('idbarang')->get();
-        $barangMasuk = BarangMasuk::with(['barang.kategori'])
-            ->orderByDesc('tgl_masuk')
-            ->orderByDesc('created_at')
-            ->get();
 
-        $pdf = Pdf::loadView('pegawai.barang.laporan', compact('barang', 'barangMasuk'))
+        $pdf = Pdf::loadView('pegawai.barang.laporan', compact('barang'))
                   ->setPaper('A4', 'portrait');
 
         return $pdf->download('Laporan_Barang.pdf');

@@ -6,12 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Peminjaman</title>
     <style>
+        @page { margin: 15mm 12mm; }
         /* --- Layout sama persis seperti cetak barang --- */
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family: 'Arial', sans-serif; font-size:12pt; color:#333; background:white; }
-        .rangkasurat { margin:0 auto; padding:20px; max-width:210mm; }
+        .rangkasurat { margin:0 auto; padding:10mm 8mm 0; max-width:210mm; }
         .tengah { text-align:center; line-height:1.2; }
-        .header-table { width:85%; margin-bottom:20px; }
+        .header-table { width:100%; margin-bottom:16px; }
         .logo-cell { width:120px; vertical-align:top; padding-right:20px; }
         .logo-cell img { height:100px; width:auto; padding-left:10px; object-fit:contain; }
         .logo-placeholder { height:100px; width:100px; background:#e3f2fd; border:2px solid #2196f3; display:flex; align-items:center; justify-content:center; font-size:12px; color:#1976d2; font-weight:bold; text-align:center; border-radius:8px; margin-left:10px; }
@@ -42,7 +43,7 @@
 
         @media print {
             body { background:white; font-size:11pt; }
-            .rangkasurat { margin:0; padding:15mm; max-width:none; width:100%; }
+            .rangkasurat { margin:0; padding:0; max-width:none; width:100%; }
             hr { border-top:2px solid black; }
             .isi th { background-color:#f0f0f0 !important; -webkit-print-color-adjust:exact; color-adjust:exact; }
             .isi tr { page-break-inside:avoid; }
@@ -183,11 +184,13 @@
     <!-- Info tambahan -->
     <div style="
         display: flex;
-        justify-content: flex-end;
-        gap: 20px;
-        margin-top: 25px;
+        justify-content: flex-start;
+        gap: 14px;
+        margin-top: 14px;
         font-family: 'Arial', sans-serif;
         font-size: 11pt;
+        page-break-inside: avoid;
+        flex-wrap: wrap;
     ">
         <div style="
             background-color: #f0f4f8;
@@ -197,7 +200,8 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            min-width: 180px;
+            min-width: 200px;
+            width: 240px;
         ">
             <span style="font-size: 10pt; color: #555;">Total Peminjaman</span>
             <span style="font-size: 10pt; font-weight: 700; color: #1e3a8a;">{{ $totalPeminjaman }} item</span>
@@ -205,7 +209,7 @@
 
     </div>
 
-    <div style="margin-top: 22px; text-align: right; line-height: 1.4; font-family: 'Arial', sans-serif;">
+    <div style="margin-top: 18px; text-align: right; padding-right: 6mm; line-height: 1.4; font-family: 'Arial', sans-serif; page-break-inside: avoid;">
         <div style="font-size: 11pt; font-weight: bold; text-transform: uppercase;">Sleman, {{ $tanggal }}</div>
         <div style="font-size: 11pt; font-weight: bold; margin-top: 4px;">Petugas Inventaris</div>
         @if ($signatureBase64)

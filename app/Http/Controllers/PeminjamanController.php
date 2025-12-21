@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Barang;
 use App\Models\Peminjaman;
 use Illuminate\Http\Request;
+use App\Http\Requests\PeminjamanRequest;
 use App\Models\Ruang;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
@@ -80,20 +81,10 @@ class PeminjamanController extends Controller
     /**
      * Ajukan peminjaman baru (role: peminjam).
      */
-    public function store(Request $request)
+    public function store(\App\Http\Requests\PeminjamanRequest $request)
     {
-        $request->validate([
-            'idbarang' => 'required|exists:barang,idbarang',
-            'kegiatan' => 'required|in:kampus,luar',
-            'keterangan_kegiatan' => 'required|string|max:255',
-            'idruang' => 'required_if:kegiatan,kampus|nullable|exists:ruang,idruang',
-            'jumlah' => 'required|integer|min:1',
-            'tgl_pinjam_rencana' => 'required|date|after_or_equal:today',
-            'tgl_kembali_rencana' => 'required|date|after_or_equal:tgl_pinjam_rencana',
-            'foto_identitas' => 'required|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
-
-        $barang = Barang::findOrFail($request->idbarang);
+        $validated = $request->validated();
+        $barang = Barang::findOrFail($validated['idbarang']);
 
         $hasActiveLoan = Peminjaman::where('iduser', Auth::id())
             ->whereIn('status', ['pending', 'dipinjam'])
@@ -112,22 +103,22 @@ class PeminjamanController extends Controller
             return back()->with('error', 'Barang ini sedang tidak tersedia untuk dipinjam.');
         }
 
-        if ($request->jumlah > $availableStok) {
+        if ($validated['jumlah'] > $availableStok) {
             return back()->with('error', 'Stok barang tidak mencukupi.');
         }
 
         $fotoPath = $request->file('foto_identitas')->store('identitas', 'public');
 
         Peminjaman::create([
-            'idbarang' => $request->idbarang,
+            'idbarang' => $validated['idbarang'],
             'iduser' => Auth::id(),
-            'idruang' => $request->kegiatan === 'kampus' ? $request->idruang : null,
-            'jumlah' => $request->jumlah,
+            'idruang' => $validated['kegiatan'] === 'kampus' ? $validated['idruang'] : null,
+            'jumlah' => $validated['jumlah'],
             'foto_identitas' => $fotoPath,
-            'tgl_pinjam_rencana' => $request->tgl_pinjam_rencana,
-            'tgl_kembali_rencana' => $request->tgl_kembali_rencana,
-            'kegiatan' => $request->kegiatan,
-            'keterangan_kegiatan' => $request->keterangan_kegiatan,
+            'tgl_pinjam_rencana' => $validated['tgl_pinjam_rencana'],
+            'tgl_kembali_rencana' => $validated['tgl_kembali_rencana'],
+            'kegiatan' => $validated['kegiatan'],
+            'keterangan_kegiatan' => $validated['keterangan_kegiatan'],
             'status' => 'pending',
         ]);
 
