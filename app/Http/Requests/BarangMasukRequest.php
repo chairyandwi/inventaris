@@ -20,7 +20,7 @@ class BarangMasukRequest extends FormRequest
             'tgl_masuk' => ['nullable', 'date'],
             'jumlah' => ['required', 'integer', 'min:1'],
             'status_barang' => ['required', Rule::in(['baru', 'bekas'])],
-            'jenis_barang' => ['nullable', Rule::in(['tetap', 'pinjam'])],
+            'jenis_barang' => ['nullable', Rule::in(['tetap', 'pinjam', 'habis_pakai'])],
             'is_pc' => ['nullable', 'boolean'],
             'merk' => ['nullable', 'string', 'max:100'],
             'ram_brand' => ['nullable', 'string', 'max:100'],

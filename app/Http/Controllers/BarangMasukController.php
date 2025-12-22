@@ -67,8 +67,8 @@ class BarangMasukController extends Controller
             $query->where('status_barang', $request->status_barang);
         }
 
-        if ($request->has('is_pc') && $request->is_pc !== '') {
-            $query->where('is_pc', (bool)$request->is_pc);
+        if ($request->filled('jenis_barang')) {
+            $query->where('jenis_barang', $request->jenis_barang);
         }
 
         if ($request->filled('idruang')) {
@@ -161,7 +161,7 @@ class BarangMasukController extends Controller
             'tgl_masuk'   => 'required|date',
             'jumlah'      => 'required|integer|min:1',
             'status_barang' => 'required|in:baru,bekas',
-            'jenis_barang' => 'nullable|in:pinjam,tetap',
+            'jenis_barang' => 'nullable|in:pinjam,tetap,habis_pakai',
             'keterangan'  => 'nullable|string|max:500',
             'merk'        => 'nullable|string|max:120',
             'is_pc'       => 'nullable|boolean',
@@ -188,7 +188,7 @@ class BarangMasukController extends Controller
         ]);
 
         $barang = Barang::with('kategori')->find($request->idbarang);
-        $barangJenis = $request->input('jenis_barang', $barang?->jenis_barang ?? 'pinjam');
+        $barangJenis = $request->input('jenis_barang', 'pinjam');
         $kategoriNama = strtolower(optional($barang?->kategori)->nama_kategori ?? '');
         $requiresPcSpec = $request->boolean('is_pc') || str_contains($kategoriNama, 'pc');
         $distribusiRuang = $request->input('distribusi_ruang', []);
@@ -311,8 +311,12 @@ class BarangMasukController extends Controller
         $ruang = Ruang::orderBy('nama_ruang')->get();
 
         $distribusi = collect();
-        $barangJenis = $barangMasuk->barang->jenis_barang ?? $barangMasuk->jenis_barang;
-        if ($barangJenis === 'tetap') {
+        $hasUnits = BarangUnit::where('barang_masuk_id', $barangMasuk->idbarang_masuk)->exists();
+        $barangJenis = $barangMasuk->jenis_barang ?? ($hasUnits ? 'tetap' : 'pinjam');
+        if ($barangMasuk->jenis_barang === null) {
+            $barangMasuk->setAttribute('jenis_barang', $barangJenis);
+        }
+        if ($barangJenis === 'tetap' || $hasUnits) {
             // Ambil distribusi hanya untuk entry barang_masuk ini
             $distribusi = BarangUnit::select('idruang', DB::raw('COUNT(*) as jumlah'), DB::raw('MIN(keterangan) as catatan'))
                 ->where('idbarang', $barangMasuk->idbarang)
@@ -343,7 +347,7 @@ class BarangMasukController extends Controller
             'tgl_masuk'   => 'required|date',
             'jumlah'      => 'required|integer|min:1',
             'status_barang' => 'required|in:baru,bekas',
-            'jenis_barang' => 'nullable|in:pinjam,tetap',
+            'jenis_barang' => 'nullable|in:pinjam,tetap,habis_pakai',
             'keterangan'  => 'nullable|string|max:500',
             'merk'        => 'nullable|string|max:120',
             'is_pc'       => 'nullable|boolean',
@@ -366,7 +370,7 @@ class BarangMasukController extends Controller
         $barang = Barang::with('kategori')->find($request->idbarang);
         $kategoriNama = strtolower(optional($barang?->kategori)->nama_kategori ?? '');
         $requiresPcSpec = $request->boolean('is_pc') || str_contains($kategoriNama, 'pc');
-        $barangJenis = $request->input('jenis_barang', $barang->jenis_barang ?? 'pinjam');
+        $barangJenis = $request->input('jenis_barang', 'pinjam');
         $distribusiRuang = $request->input('distribusi_ruang', []);
         $distribusiJumlah = $request->input('distribusi_jumlah', []);
         $distribusiCatatan = $request->input('distribusi_catatan', []);
@@ -601,12 +605,12 @@ class BarangMasukController extends Controller
             }
 
             if ($request->filled('status_barang')) {
-                $barangMasukQuery->where('status_barang', $request->status_barang);
-            }
+            $barangMasukQuery->where('status_barang', $request->status_barang);
+        }
 
-            if ($request->has('is_pc') && $request->is_pc !== '') {
-                $barangMasukQuery->where('is_pc', (bool) $request->is_pc);
-            }
+        if ($request->filled('jenis_barang')) {
+            $barangMasukQuery->where('jenis_barang', $request->jenis_barang);
+        }
 
             if ($request->filled('idruang')) {
                 $barangMasukQuery->whereIn('idbarang_masuk', function ($sub) use ($request) {

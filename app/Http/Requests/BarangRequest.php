@@ -25,14 +25,7 @@ class BarangRequest extends FormRequest
                 Rule::unique('barang', 'kode_barang')->ignore($barangId, 'idbarang'),
             ],
             'nama_barang' => ['required', 'string', 'max:100'],
-            'jenis_barang' => ['nullable', 'in:pinjam,tetap'],
             'keterangan' => ['nullable', 'string', 'max:500'],
-            'distribusi_ruang' => ['required_if:jenis_barang,tetap', 'array', 'min:1'],
-            'distribusi_ruang.*' => ['required_with:distribusi_jumlah.*', 'exists:ruang,idruang'],
-            'distribusi_jumlah' => ['required_if:jenis_barang,tetap', 'array'],
-            'distribusi_jumlah.*' => ['required_with:distribusi_ruang.*', 'integer', 'min:1', 'max:500'],
-            'distribusi_catatan' => ['nullable', 'array'],
-            'distribusi_catatan.*' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -44,9 +37,6 @@ class BarangRequest extends FormRequest
             'kode_barang.required' => 'Kode barang wajib diisi.',
             'kode_barang.unique' => 'Kode barang sudah ada.',
             'nama_barang.required' => 'Nama barang wajib diisi.',
-            'distribusi_ruang.required_if' => 'Pilih minimal satu ruang inventaris untuk barang tetap.',
-            'distribusi_ruang.*.exists' => 'Ruang tidak valid.',
-            'distribusi_jumlah.*.integer' => 'Jumlah unit harus berupa angka.',
         ];
     }
 }

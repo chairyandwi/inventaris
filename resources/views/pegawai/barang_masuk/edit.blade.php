@@ -71,7 +71,6 @@
                                 <option value="">-- Pilih Barang --</option>
                                 @foreach($barang as $item)
                                     <option value="{{ $item->idbarang }}"
-                                            data-jenis="{{ $item->jenis_barang ?? 'pinjam' }}"
                                             data-kategori="{{ $item->idkategori }}"
                                             @selected(old('idbarang', $barangMasuk->idbarang) == $item->idbarang)>
                                         {{ $item->kode_barang }} - {{ $item->nama_barang }} ({{ $item->kategori->nama_kategori ?? '-' }})
@@ -89,6 +88,7 @@
                                 class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus-border-transparent {{ $errors->has('jenis_barang') ? 'border-rose-400' : '' }}">
                                 <option value="pinjam" {{ old('jenis_barang', $barangMasuk->jenis_barang) === 'pinjam' ? 'selected' : '' }}>Barang Pinjam (bisa dipinjam)</option>
                                 <option value="tetap" {{ old('jenis_barang', $barangMasuk->jenis_barang) === 'tetap' ? 'selected' : '' }}>Barang Tetap (hak unit, tidak dipinjam)</option>
+                                <option value="habis_pakai" {{ old('jenis_barang', $barangMasuk->jenis_barang) === 'habis_pakai' ? 'selected' : '' }}>Barang Habis Pakai</option>
                             </select>
                             <p class="text-xs text-indigo-100/70 mt-1">Nilai default mengikuti jenis barang terpilih, bisa disesuaikan.</p>
                             @error('jenis_barang')
@@ -292,14 +292,6 @@
     const tambahDistribusi = document.getElementById('tambahDistribusi');
     const submitBtn = document.querySelector('button[type="submit"]');
 
-    function syncJenisFromBarang() {
-        const selected = selectBarang.options[selectBarang.selectedIndex];
-        if (selected?.dataset.jenis) {
-            jenisBarang.value = selected.dataset.jenis;
-        }
-        toggleDistribusi();
-    }
-
     function filterBarangByKategori() {
         const selectedKategori = selectKategori?.value || '';
         Array.from(selectBarang.options).forEach(opt => {
@@ -312,9 +304,8 @@
         });
         if (!selectBarang.value) {
             jenisBarang.value = 'pinjam';
-        } else {
-            syncJenisFromBarang();
         }
+        toggleDistribusi();
     }
 
     function toggleDistribusi() {
@@ -396,10 +387,9 @@
     }
 
     filterBarangByKategori();
-    syncJenisFromBarang();
     toggleDistribusi();
     hitungDistribusi();
-    selectBarang?.addEventListener('change', syncJenisFromBarang);
+    selectBarang?.addEventListener('change', toggleDistribusi);
     jenisBarang?.addEventListener('change', toggleDistribusi);
     selectKategori?.addEventListener('change', filterBarangByKategori);
 </script>

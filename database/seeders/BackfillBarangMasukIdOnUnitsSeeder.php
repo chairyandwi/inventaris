@@ -28,13 +28,13 @@ class BackfillBarangMasukIdOnUnitsSeeder extends Seeder
                 continue;
             }
 
-            $isPc = $barang->jenis_barang === 'pc'
-                || str_contains(strtolower($barang->kategori->nama_kategori ?? ''), 'pc');
+            $isPc = str_contains(strtolower($barang->kategori->nama_kategori ?? ''), 'pc');
 
             $bm = BarangMasuk::create([
                 'idbarang' => $barang->idbarang,
                 'tgl_masuk' => $group->pertama ?: now(),
                 'jumlah' => (int) $group->jumlah,
+                'jenis_barang' => 'tetap',
                 'status_barang' => 'baru',
                 'is_pc' => $isPc,
                 'keterangan' => $group->catatan,

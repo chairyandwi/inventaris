@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
+use App\Models\BarangMasuk;
 use App\Models\Peminjaman;
 use Illuminate\Http\Request;
 use App\Http\Requests\PeminjamanRequest;
@@ -65,14 +66,32 @@ class PeminjamanController extends Controller
 
         $rusakCounts = $this->getRusakCounts();
 
-        $barang = Barang::withCount('units')->get()->filter(function ($item) use ($rusakCounts) {
-            $rusak = $rusakCounts[$item->idbarang] ?? 0;
-            return ($item->stok - $rusak) > $item->units_count;
-        })->map(function ($item) use ($rusakCounts) {
-            $rusak = $rusakCounts[$item->idbarang] ?? 0;
-            $item->available_stok = max(($item->stok - $rusak) - $item->units_count, 0);
-            return $item;
-        })->values();
+        $pinjamMasuk = BarangMasuk::where('jenis_barang', 'pinjam')
+            ->select('idbarang', DB::raw('SUM(jumlah) as total'))
+            ->groupBy('idbarang')
+            ->pluck('total', 'idbarang');
+        $pinjamTerpakai = Peminjaman::whereIn('status', ['pending', 'disetujui', 'dipinjam'])
+            ->select('idbarang', DB::raw('SUM(jumlah) as total'))
+            ->groupBy('idbarang')
+            ->pluck('total', 'idbarang');
+
+        $barang = Barang::whereHas('barangMasuk', function ($q) {
+            $q->where('jenis_barang', 'pinjam');
+        })
+            ->get()
+            ->filter(function ($item) use ($rusakCounts, $pinjamMasuk, $pinjamTerpakai) {
+                $rusak = $rusakCounts[$item->idbarang] ?? 0;
+                $totalPinjam = $pinjamMasuk[$item->idbarang] ?? 0;
+                $terpakai = $pinjamTerpakai[$item->idbarang] ?? 0;
+                return ($totalPinjam - $terpakai - $rusak) > 0;
+            })
+            ->map(function ($item) use ($rusakCounts, $pinjamMasuk, $pinjamTerpakai) {
+                $rusak = $rusakCounts[$item->idbarang] ?? 0;
+                $totalPinjam = $pinjamMasuk[$item->idbarang] ?? 0;
+                $terpakai = $pinjamTerpakai[$item->idbarang] ?? 0;
+                $item->available_stok = max(($totalPinjam - $terpakai - $rusak), 0);
+                return $item;
+            })->values();
         $ruang = Ruang::orderBy('nama_ruang')->get();
 
         return view('peminjam.peminjaman.create', compact('barang', 'ruang'));
@@ -85,6 +104,14 @@ class PeminjamanController extends Controller
     {
         $validated = $request->validated();
         $barang = Barang::findOrFail($validated['idbarang']);
+        $jenisBarang = $barang->barangMasuk()
+            ->whereNotNull('jenis_barang')
+            ->orderByDesc('tgl_masuk')
+            ->orderByDesc('created_at')
+            ->value('jenis_barang') ?? 'pinjam';
+        if ($jenisBarang !== 'pinjam') {
+            return back()->with('error', 'Barang ini tidak tersedia untuk peminjaman.');
+        }
 
         $hasActiveLoan = Peminjaman::where('iduser', Auth::id())
             ->whereIn('status', ['pending', 'dipinjam'])
@@ -95,9 +122,14 @@ class PeminjamanController extends Controller
                 ->with('error', 'Anda belum dapat mengajukan peminjaman baru sebelum pengajuan sebelumnya selesai.');
         }
 
-        $assignedUnits = $barang->units()->count();
+        $totalPinjam = BarangMasuk::where('idbarang', $barang->idbarang)
+            ->where('jenis_barang', 'pinjam')
+            ->sum('jumlah');
+        $terpakai = Peminjaman::where('idbarang', $barang->idbarang)
+            ->whereIn('status', ['pending', 'disetujui', 'dipinjam'])
+            ->sum('jumlah');
         $rusak = $this->getRusakCounts([$barang->idbarang])[$barang->idbarang] ?? 0;
-        $availableStok = max(($barang->stok - $rusak) - $assignedUnits, 0);
+        $availableStok = max(($totalPinjam - $terpakai - $rusak), 0);
 
         if ($availableStok <= 0) {
             return back()->with('error', 'Barang ini sedang tidak tersedia untuk dipinjam.');
@@ -150,9 +182,12 @@ class PeminjamanController extends Controller
             ->where('idpeminjaman', '!=', $peminjaman->idpeminjaman)
             ->sum('jumlah');
 
+        $totalPinjam = BarangMasuk::where('idbarang', $barang->idbarang)
+            ->where('jenis_barang', 'pinjam')
+            ->sum('jumlah');
         $rusak = $this->getRusakCounts([$barang->idbarang])[$barang->idbarang] ?? 0;
 
-        $tersedia = max(($barang->stok - $rusak) - $sudahDibooking, 0);
+        $tersedia = max(($totalPinjam - $rusak) - $sudahDibooking, 0);
 
         if ($peminjaman->jumlah > $tersedia) {
             return back()->with('error', 'Stok barang tidak mencukupi untuk disetujui pada jadwal tersebut.');

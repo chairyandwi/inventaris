@@ -105,7 +105,6 @@ class InventarisB101Seeder extends Seeder
                 [
                     'idkategori' => $kategori->idkategori,
                     'nama_barang' => $data['nama'],
-                    'jenis_barang' => 'tetap',
                     'stok' => 0,
                 ]
             );
@@ -159,3 +158,4 @@ class InventarisB101Seeder extends Seeder
         }
     }
 }
+

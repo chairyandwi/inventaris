@@ -108,10 +108,11 @@
                         </div>
                         <div>
                             <label class="text-sm font-semibold text-indigo-100 mb-2 block">Jenis</label>
-                            <select name="is_pc" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
+                            <select name="jenis_barang" class="w-full rounded-xl bg-slate-800/60 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
                                 <option class="text-slate-900" value="">Semua</option>
-                                <option class="text-slate-900" value="1" @selected(request('is_pc') === '1')>PC / dengan spesifikasi</option>
-                                <option class="text-slate-900" value="0" @selected(request('is_pc') === '0')>Non PC</option>
+                                <option class="text-slate-900" value="pinjam" @selected(request('jenis_barang') === 'pinjam')>Barang Pinjam</option>
+                                <option class="text-slate-900" value="tetap" @selected(request('jenis_barang') === 'tetap')>Barang Tetap</option>
+                                <option class="text-slate-900" value="habis_pakai" @selected(request('jenis_barang') === 'habis_pakai')>Barang Habis Pakai</option>
                             </select>
                         </div>
                         <div>
@@ -153,7 +154,7 @@
                                class="px-4 py-2 rounded-xl border border-white/15 text-sm font-semibold text-indigo-50 hover:bg-white/10 transition">
                                 Reset
                             </a>
-                            <a href="{{ route(($routePrefix ?? 'pegawai') . '.barang_masuk.laporan', request()->only(['idbarang','idruang','status_barang','is_pc','sort_by','sort_direction','tgl_masuk_from','tgl_masuk_to','per_page','search'])) }}"
+                            <a href="{{ route(($routePrefix ?? 'pegawai') . '.barang_masuk.laporan', request()->only(['idbarang','idruang','status_barang','jenis_barang','sort_by','sort_direction','tgl_masuk_from','tgl_masuk_to','per_page','search'])) }}"
                                class="px-4 py-2 rounded-xl bg-white/10 border border-emerald-300/30 text-sm font-semibold text-emerald-100 hover:bg-emerald-500/20 transition flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M5 8h14M6 4h12a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" />
@@ -210,6 +211,12 @@
                                 @php
                                     $agg = $ruangAggregates[$bm->idbarang_masuk] ?? null;
                                     $ruangText = $agg?->kode_list ?: $agg?->ruang_list;
+                                    if (!$ruangText && isset($unitTotalsByBarangRuang[$bm->idbarang])) {
+                                        $totalUnitsForBarang = $unitTotalsByBarangRuang[$bm->idbarang]->sum();
+                                        if ($totalUnitsForBarang === (int) $bm->jumlah) {
+                                            $ruangText = $unitTotalsByBarangRuang[$bm->idbarang]->keys()->implode(', ');
+                                        }
+                                    }
                                     $ruangDisplay = '-';
                                     if ($ruangText) {
                                         $ruangArray = array_filter(array_map('trim', explode(',', $ruangText)));

@@ -33,8 +33,9 @@ class NormalizeUnitsBarangMasukSeeder extends Seeder
                 'idbarang' => $barang->idbarang,
                 'tgl_masuk' => $group->pertama ?: now(),
                 'jumlah' => (int) $group->jumlah,
+                'jenis_barang' => 'tetap',
                 'status_barang' => 'baru',
-                'is_pc' => $barang->jenis_barang === 'pc',
+                'is_pc' => str_contains(strtolower($barang->kategori->nama_kategori ?? ''), 'pc'),
                 'keterangan' => $group->catatan,
             ]);
 

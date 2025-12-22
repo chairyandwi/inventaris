@@ -3,19 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
-use App\Models\BarangUnit;
 use App\Models\BarangMasuk;
 use App\Models\Kategori;
 use App\Models\Peminjaman;
 use App\Models\Ruang;
-use App\Support\KodeInventarisGenerator;
 use App\Http\Requests\BarangRequest;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Validator;
 
 class BarangController extends Controller
 {
@@ -25,8 +20,8 @@ class BarangController extends Controller
 
         $stats = [
             'total' => Barang::count(),
-            'totalTetap' => Barang::where('jenis_barang', 'tetap')->count(),
-            'totalPinjam' => Barang::where('jenis_barang', 'pinjam')->count(),
+            'totalTetap' => BarangMasuk::where('jenis_barang', 'tetap')->distinct('idbarang')->count('idbarang'),
+            'totalPinjam' => BarangMasuk::where('jenis_barang', 'pinjam')->distinct('idbarang')->count('idbarang'),
             'totalStok' => Barang::sum('stok'),
         ];
 
@@ -66,10 +61,7 @@ class BarangController extends Controller
         $barangData = Arr::except($validated, ['ruang_tetap', 'jumlah_tetap', 'keterangan_inventaris']);
         $barangData['stok'] = 0; // stok dikalkulasi dari transaksi (barang masuk / peminjaman)
 
-        DB::transaction(function () use ($barangData, $request) {
-            $barang = Barang::create($barangData);
-            $this->syncInventarisUnits($barang, $request);
-        });
+        Barang::create($barangData);
 
         return redirect()->route($routePrefix . '.barang.index')->with('success', 'Barang berhasil ditambahkan');
     }
@@ -101,10 +93,7 @@ class BarangController extends Controller
         $validated = $request->validated();
         $barangData = Arr::except($validated, ['ruang_tetap', 'jumlah_tetap', 'keterangan_inventaris', 'stok']);
 
-        DB::transaction(function () use ($barangData, $barang, $request) {
-            $barang->update($barangData);
-            $this->syncInventarisUnits($barang, $request);
-        });
+        $barang->update($barangData);
 
         return redirect()->route($routePrefix . '.barang.index')->with('success', 'Barang berhasil diubah');
     }
@@ -227,53 +216,4 @@ class BarangController extends Controller
         return $pdf->download('Laporan_Barang.pdf');
     }
 
-    protected function syncInventarisUnits(Barang $barang, Request $request): void
-    {
-        if ($barang->jenis_barang !== 'tetap') {
-            $barang->units()->delete();
-            return;
-        }
-
-        $barang->units()->delete();
-
-        $ruangList = $request->input('distribusi_ruang', []);
-        $jumlahList = $request->input('distribusi_jumlah', []);
-        $catatanList = $request->input('distribusi_catatan', []);
-
-        $records = [];
-
-        foreach ($ruangList as $index => $ruangId) {
-            if (!$ruangId) {
-                continue;
-            }
-
-            $jumlah = (int)($jumlahList[$index] ?? 0);
-            if ($jumlah <= 0) {
-                continue;
-            }
-
-            $ruang = Ruang::find($ruangId);
-            if (!$ruang) {
-                continue;
-            }
-
-            $catatan = $catatanList[$index] ?? null;
-
-            for ($i = 1; $i <= $jumlah; $i++) {
-                $records[] = [
-                    'idbarang' => $barang->idbarang,
-                    'idruang' => $ruang->idruang,
-                    'nomor_unit' => $i,
-                    'kode_unit' => KodeInventarisGenerator::make($barang, $ruang, $i),
-                    'keterangan' => $catatan,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-            }
-        }
-
-        if ($records) {
-            BarangUnit::insert($records);
-        }
-    }
 }

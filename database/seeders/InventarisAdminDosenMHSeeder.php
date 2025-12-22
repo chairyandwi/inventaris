@@ -87,7 +87,6 @@ class InventarisAdminDosenMHSeeder extends Seeder
                 [
                     'idkategori' => $kategori->idkategori,
                     'nama_barang' => $data['nama'],
-                    'jenis_barang' => 'tetap',
                     'stok' => 0,
                 ]
             );
@@ -144,3 +143,4 @@ class InventarisAdminDosenMHSeeder extends Seeder
         }
     }
 }
+

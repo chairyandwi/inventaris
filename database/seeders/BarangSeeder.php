@@ -165,7 +165,6 @@ class BarangSeeder extends Seeder
                     [
                         'idkategori' => $kategoriId,
                         'nama_barang' => $barang['nama'],
-                        'jenis_barang' => 'tetap',
                         'keterangan' => $barang['keterangan'] ?? null,
                     ]
                 );

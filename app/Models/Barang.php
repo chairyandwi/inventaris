@@ -14,7 +14,6 @@ class Barang extends Model
         'idkategori',
         'kode_barang',
         'nama_barang',
-        'jenis_barang',
         'stok',
         'keterangan',
     ];
@@ -27,6 +26,11 @@ class Barang extends Model
     public function barangMasuk()
     {
         return $this->hasMany(BarangMasuk::class, 'idbarang', 'idbarang');
+    }
+
+    public function barangKeluar()
+    {
+        return $this->hasMany(BarangKeluar::class, 'idbarang', 'idbarang');
     }
 
     public function units()

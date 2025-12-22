@@ -10,7 +10,7 @@
             <div class="flex flex-col lg:flex-row items-start lg:items-center gap-6">
                 <div class="flex-1">
                     <p class="text-sm uppercase tracking-[0.25em] text-indigo-100/80">Dashboard Peminjam</p>
-                    <h2 class="text-4xl sm:text-5xl font-bold leading-tight mt-2">Halo, {{ auth()->user()->nama }} 👋</h2>
+                    <h2 class="text-4xl sm:text-5xl font-bold leading-tight mt-2">Halo, {{ auth()->user()->nama }}</h2>
                     <p class="mt-4 text-indigo-100/90 max-w-3xl">Lihat status permintaan, ajukan peminjaman baru, dan ketahui progres barang yang Anda pinjam dengan visual informatif.</p>
                     <div class="mt-6 flex flex-wrap gap-3">
                         <a href="{{ route('peminjam.peminjaman.create') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-indigo-700 font-semibold shadow-lg shadow-indigo-500/30 hover:-translate-y-0.5 transition">
@@ -18,6 +18,9 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
+                        </a>
+                        <a href="{{ route('peminjam.barang-habis-pakai.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 transition">
+                            <span class="text-sm font-semibold">Request Barang</span>
                         </a>
                         <a href="{{ route('peminjam.peminjaman.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 transition">
                             <span class="text-sm font-semibold">Lihat Riwayat</span>
@@ -41,27 +44,36 @@
                                 <span>Sedang dipinjam</span>
                                 <span class="font-semibold">{{ $dipinjamPeminjaman ?? 0 }}</span>
                             </div>
-                            <div class="flex items-center justify-between">
-                                <span>Ditolak</span>
-                                <span class="font-semibold">{{ $ditolakPeminjaman ?? 0 }}</span>
-                            </div>
+                        <div class="flex items-center justify-between">
+                            <span>Ditolak</span>
+                            <span class="font-semibold">{{ $ditolakPeminjaman ?? 0 }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>Request habis pakai</span>
+                            <span class="font-semibold">{{ $requestHabisPakaiTotal ?? 0 }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>Unit habis pakai</span>
+                            <span class="font-semibold">{{ $requestHabisPakaiUnit ?? 0 }}</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        </div>
     </div>
 
     <div class="relative -mt-20 pb-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-            <!-- Highlight cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4">
                 @php
                     $cards = [
                         ['title' => 'Total Peminjaman', 'value' => $totalPeminjaman ?? 0, 'color' => 'from-indigo-500 to-blue-500', 'route' => route('peminjam.peminjaman.index')],
                         ['title' => 'Pending', 'value' => $pendingPeminjaman ?? 0, 'color' => 'from-amber-500 to-orange-500', 'route' => route('peminjam.peminjaman.index')],
                         ['title' => 'Sedang Dipinjam', 'value' => $dipinjamPeminjaman ?? 0, 'color' => 'from-emerald-500 to-teal-500', 'route' => route('peminjam.peminjaman.index')],
                         ['title' => 'Ditolak', 'value' => $ditolakPeminjaman ?? 0, 'color' => 'from-rose-500 to-pink-500', 'route' => route('peminjam.peminjaman.index')],
+                        ['title' => 'Request Habis Pakai', 'value' => $requestHabisPakaiTotal ?? 0, 'color' => 'from-sky-500 to-cyan-500', 'route' => route('peminjam.barang-habis-pakai.index')],
+                        ['title' => 'Request Bulan Ini', 'value' => $requestHabisPakaiBulan ?? 0, 'color' => 'from-fuchsia-500 to-pink-500', 'route' => route('peminjam.barang-habis-pakai.index')],
                     ];
                 @endphp
                 @foreach ($cards as $card)
@@ -82,26 +94,20 @@
                 @endforeach
             </div>
 
-            <!-- Info & Quick actions -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="col-span-2 bg-slate-900/70 border border-white/10 rounded-2xl p-6 shadow-lg shadow-indigo-500/10">
                     <div class="flex items-center justify-between mb-4">
                         <div>
                             <p class="text-xs uppercase tracking-[0.2em] text-indigo-200/70">Ketersediaan</p>
-                            <h3 class="text-xl font-semibold">Barang & Ruang</h3>
+                            <h3 class="text-xl font-semibold">Barang Tersedia</h3>
                         </div>
                         <a href="{{ route('peminjam.peminjaman.create') }}" class="text-xs px-3 py-1 rounded-full bg-white/10 text-indigo-50 hover:bg-white/20 transition">Mulai ajukan</a>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div class="rounded-xl bg-white/5 border border-white/10 p-4">
                             <p class="text-xs text-indigo-100/70">Barang tersedia</p>
                             <p class="text-2xl font-bold mt-1">{{ $barangTersedia ?? 0 }}</p>
                             <p class="text-xs text-indigo-100/70 mt-1">Bisa dipinjam</p>
-                        </div>
-                        <div class="rounded-xl bg-white/5 border border-white/10 p-4">
-                            <p class="text-xs text-indigo-100/70">Ruang terdaftar</p>
-                            <p class="text-2xl font-bold mt-1">{{ $ruangTersedia ?? 0 }}</p>
-                            <p class="text-xs text-indigo-100/70 mt-1">Lokasi penggunaan</p>
                         </div>
                         <div class="rounded-xl bg-white/5 border border-white/10 p-4">
                             <p class="text-xs text-indigo-100/70">Selesai</p>
@@ -116,36 +122,45 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-white text-slate-900 rounded-2xl shadow-xl shadow-indigo-500/10 p-6 border border-indigo-50">
+                <div class="bg-slate-900/80 text-white rounded-2xl shadow-xl shadow-indigo-500/10 p-6 border border-white/10">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-slate-900">Aksi Cepat</h3>
-                        <span class="text-xs text-indigo-600 font-semibold">Prioritas</span>
+                        <h3 class="text-lg font-semibold text-white">Aksi Cepat</h3>
+                        <span class="text-xs text-indigo-200 font-semibold">Prioritas</span>
                     </div>
                     <div class="space-y-3">
-                        <a href="{{ route('peminjam.peminjaman.create') }}" class="flex items-center justify-between p-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 transition">
+                        <a href="{{ route('peminjam.peminjaman.create') }}" class="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                             <div>
-                                <p class="text-sm font-semibold text-indigo-900">Ajukan Peminjaman</p>
-                                <p class="text-xs text-indigo-600">Proses langkah demi langkah</p>
+                                <p class="text-sm font-semibold text-indigo-100">Ajukan Peminjaman</p>
+                                <p class="text-xs text-indigo-200/70">Proses langkah demi langkah</p>
                             </div>
-                            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
                         </a>
-                        <a href="{{ route('peminjam.peminjaman.index') }}" class="flex items-center justify-between p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 transition">
+                        <a href="{{ route('peminjam.peminjaman.index') }}" class="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                             <div>
-                                <p class="text-sm font-semibold text-emerald-900">Pantau Status</p>
-                                <p class="text-xs text-emerald-600">Pending, disetujui, selesai</p>
+                                <p class="text-sm font-semibold text-emerald-100">Pantau Status</p>
+                                <p class="text-xs text-emerald-200/70">Pending, disetujui, selesai</p>
                             </div>
-                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
                         </a>
-                        <a href="{{ route('peminjam.peminjaman.index') }}" class="flex items-center justify-between p-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-100 transition">
+                        <a href="{{ route('peminjam.peminjaman.index') }}" class="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                             <div>
-                                <p class="text-sm font-semibold text-amber-900">Riwayat Permintaan</p>
-                                <p class="text-xs text-amber-600">Cetak/lihat detail</p>
+                                <p class="text-sm font-semibold text-amber-100">Riwayat Permintaan</p>
+                                <p class="text-xs text-amber-200/70">Cetak/lihat detail</p>
                             </div>
-                            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                        <a href="{{ route('peminjam.barang-habis-pakai.index') }}" class="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                            <div>
+                                <p class="text-sm font-semibold text-slate-100">Request Habis Pakai</p>
+                                <p class="text-xs text-slate-300">Tissue, spidol, dll.</p>
+                            </div>
+                            <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
                         </a>

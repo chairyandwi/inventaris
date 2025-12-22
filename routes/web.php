@@ -6,12 +6,16 @@ use App\Models\Barang;
 use App\Models\Kategori;
 use App\Models\BarangMasuk;
 use App\Models\Peminjaman;
+use App\Models\BarangKeluar;
+use App\Models\BarangUnitKerusakan;
 use App\Models\AppConfiguration;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RuangController;
 use App\Http\Controllers\BarangController;
+use App\Http\Controllers\BarangHabisPakaiController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\KategoriController;
@@ -77,6 +81,7 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
     Route::get('peminjaman/cetak', [PeminjamanController::class, 'cetak'])->name('peminjaman.cetak');
     Route::get('inventaris-ruang/laporan', [InventarisRuangController::class, 'laporan'])->name('inventaris-ruang.laporan');
 
+    Route::get('barang-habis-pakai', [BarangHabisPakaiController::class, 'index'])->name('barang-habis-pakai.index');
 
     // Master Data
     Route::resource('kategori', KategoriController::class);
@@ -116,8 +121,36 @@ Route::middleware(['auth', 'role:peminjam'])->prefix('peminjam')->name('peminjam
         $dipinjamPeminjaman = Peminjaman::where('iduser', $userId)->where('status', 'dipinjam')->count();
         $selesaiPeminjaman = Peminjaman::where('iduser', $userId)->where('status', 'dikembalikan')->count();
         $ditolakPeminjaman = Peminjaman::where('iduser', $userId)->where('status', 'ditolak')->count();
-        $barangTersedia = Barang::count();
-        $ruangTersedia = Ruang::count();
+        $rusakCounts = BarangUnitKerusakan::where('status', 'rusak')
+            ->join('barang_units', 'barang_unit_kerusakan.barang_unit_id', '=', 'barang_units.id')
+            ->select('barang_units.idbarang', DB::raw('COUNT(*) as jumlah'))
+            ->groupBy('barang_units.idbarang')
+            ->pluck('jumlah', 'idbarang');
+        $pinjamMasuk = BarangMasuk::where('jenis_barang', 'pinjam')
+            ->select('idbarang', DB::raw('SUM(jumlah) as total'))
+            ->groupBy('idbarang')
+            ->pluck('total', 'idbarang');
+        $pinjamTerpakai = Peminjaman::whereIn('status', ['pending', 'disetujui', 'dipinjam'])
+            ->select('idbarang', DB::raw('SUM(jumlah) as total'))
+            ->groupBy('idbarang')
+            ->pluck('total', 'idbarang');
+        $barangTersedia = Barang::whereHas('barangMasuk', function ($q) {
+            $q->where('jenis_barang', 'pinjam');
+        })
+            ->get()
+            ->filter(function ($item) use ($rusakCounts, $pinjamMasuk, $pinjamTerpakai) {
+                $rusak = $rusakCounts[$item->idbarang] ?? 0;
+                $totalPinjam = $pinjamMasuk[$item->idbarang] ?? 0;
+                $terpakai = $pinjamTerpakai[$item->idbarang] ?? 0;
+                return ($totalPinjam - $terpakai - $rusak) > 0;
+            })
+            ->count();
+        $requestHabisPakaiTotal = BarangKeluar::where('iduser', $userId)->count();
+        $requestHabisPakaiUnit = BarangKeluar::where('iduser', $userId)->sum('jumlah');
+        $requestHabisPakaiBulan = BarangKeluar::where('iduser', $userId)
+            ->whereYear('tgl_keluar', now()->year)
+            ->whereMonth('tgl_keluar', now()->month)
+            ->count();
 
         return view('peminjam.index', compact(
             'totalPeminjaman',
@@ -126,12 +159,16 @@ Route::middleware(['auth', 'role:peminjam'])->prefix('peminjam')->name('peminjam
             'selesaiPeminjaman',
             'ditolakPeminjaman',
             'barangTersedia',
-            'ruangTersedia'
+            'requestHabisPakaiTotal',
+            'requestHabisPakaiUnit',
+            'requestHabisPakaiBulan'
         ));
     })->name('index');
 
     // Ajukan & lihat status peminjaman
     Route::resource('peminjaman', PeminjamanController::class)->only(['index', 'create', 'store', 'show']);
+    Route::get('barang-habis-pakai', [BarangHabisPakaiController::class, 'peminjamIndex'])->name('barang-habis-pakai.index');
+    Route::post('barang-habis-pakai', [BarangHabisPakaiController::class, 'store'])->name('barang-habis-pakai.store');
 
     // Profil peminjam (akses melalui prefix peminjam)
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -171,6 +208,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('user', UserController::class);
     Route::get('barang/laporan', [BarangController::class, 'laporan'])->name('barang.laporan');
     Route::get('barang_masuk/laporan', [BarangMasukController::class, 'laporan'])->name('barang_masuk.laporan');
+    Route::get('barang-habis-pakai', [BarangHabisPakaiController::class, 'index'])->name('barang-habis-pakai.index');
     Route::resource('barang', BarangController::class);
     Route::resource('barang_masuk', BarangMasukController::class);
     Route::resource('inventaris-ruang', InventarisRuangController::class)->only(['index', 'create', 'store', 'destroy']);

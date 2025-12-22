@@ -115,7 +115,7 @@ class InventarisRuangController extends Controller
         $summary = [
             'totalUnits' => BarangUnit::count(),
             'ruangTerisi' => BarangUnit::distinct('idruang')->count('idruang'),
-            'barangTetap' => Barang::where('jenis_barang', 'tetap')->count(),
+            'barangTetap' => \App\Models\BarangMasuk::where('jenis_barang', 'tetap')->distinct('idbarang')->count('idbarang'),
         ];
 
         return view('pegawai.inventaris_ruang.index', compact('units', 'ruang', 'ruangAll', 'barang', 'summary', 'gedungList', 'lantaiList'));
@@ -123,7 +123,11 @@ class InventarisRuangController extends Controller
 
     public function create()
     {
-        $barang = Barang::where('jenis_barang', 'tetap')->orderBy('nama_barang')->get();
+        $barang = Barang::whereHas('barangMasuk', function ($q) {
+                $q->where('jenis_barang', 'tetap');
+            })
+            ->orderBy('nama_barang')
+            ->get();
         $ruang = Ruang::orderBy('nama_ruang')->get();
 
         return view('pegawai.inventaris_ruang.create', compact('barang', 'ruang'));
@@ -341,7 +345,12 @@ class InventarisRuangController extends Controller
         $barang = Barang::findOrFail($request->idbarang);
         $ruang = Ruang::findOrFail($request->idruang);
 
-        if ($barang->jenis_barang !== 'tetap') {
+        $jenisBarang = $barang->barangMasuk()
+            ->whereNotNull('jenis_barang')
+            ->orderByDesc('tgl_masuk')
+            ->orderByDesc('created_at')
+            ->value('jenis_barang') ?? 'pinjam';
+        if ($jenisBarang !== 'tetap') {
             return back()->withInput()->withErrors([
                 'idbarang' => 'Barang ini bukan barang tetap, tidak bisa dicatat sebagai inventaris ruang.',
             ]);

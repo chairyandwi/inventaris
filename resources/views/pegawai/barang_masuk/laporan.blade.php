@@ -330,7 +330,7 @@
                     @php $urut = 1; @endphp
                     @forelse($barangMasuk as $masuk)
                         @php
-                            $jenisBarang = $masuk->barang?->jenis_barang;
+                        $jenisBarang = $masuk->jenis_barang;
                             $ruangList = '-';
                             if ($jenisBarang === 'tetap') {
                                 $ruangNames = $masuk->units
@@ -354,7 +354,7 @@
                             </td>
                             <td class="category-cell" data-label="Ruang">{{ $ruangList }}</td>
                             @php
-                                $jenisBarang = $masuk->barang->jenis_barang ?? $masuk->jenis_barang;
+                            $jenisBarang = $masuk->jenis_barang;
                                 $jenisLabel =
                                     $jenisBarang === 'tetap' ? 'Tetap' : ($jenisBarang === 'pinjam' ? 'Pinjam' : '-');
                             @endphp
