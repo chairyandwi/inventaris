@@ -556,7 +556,7 @@ class BarangMasukController extends Controller
         return view('pegawai.barang_masuk.show', compact('barangMasuk'));
     }
 
-    public function laporan()
+    public function laporan(Request $request)
     {
         try {
             if (!auth('web')->check()) {
@@ -573,15 +573,64 @@ class BarangMasukController extends Controller
                 abort(403, 'Anda tidak memiliki akses.');
             }
 
-            $barangMasukQuery = BarangMasuk::with(['barang.kategori', 'units.ruang'])->orderByDesc('idbarang_masuk');
-            $start = request()->query('tgl_masuk_from') ?? request()->query('start_date');
-            $end = request()->query('tgl_masuk_to') ?? request()->query('end_date');
+            $barangMasukQuery = BarangMasuk::with(['barang.kategori', 'units.ruang']);
+
+            if ($request->filled('search')) {
+                $searchTerm = $request->search;
+                $barangMasukQuery->where(function ($q) use ($searchTerm) {
+                    $q->whereHas('barang', function ($q) use ($searchTerm) {
+                        $q->where('kode_barang', 'like', "%{$searchTerm}%")
+                            ->orWhere('nama_barang', 'like', "%{$searchTerm}%");
+                    })
+                    ->orWhere('keterangan', 'like', "%{$searchTerm}%")
+                    ->orWhereIn('idbarang_masuk', function ($sub) use ($searchTerm) {
+                        $sub->from('barang_units')
+                            ->join('ruang', 'ruang.idruang', '=', 'barang_units.idruang')
+                            ->select('barang_units.barang_masuk_id')
+                            ->whereNotNull('barang_units.barang_masuk_id')
+                            ->where(function ($q) use ($searchTerm) {
+                                $q->where('ruang.kode_ruang', 'like', "%{$searchTerm}%")
+                                    ->orWhere('ruang.nama_ruang', 'like', "%{$searchTerm}%");
+                            });
+                    });
+                });
+            }
+
+            if ($request->filled('idbarang')) {
+                $barangMasukQuery->where('idbarang', $request->idbarang);
+            }
+
+            if ($request->filled('status_barang')) {
+                $barangMasukQuery->where('status_barang', $request->status_barang);
+            }
+
+            if ($request->has('is_pc') && $request->is_pc !== '') {
+                $barangMasukQuery->where('is_pc', (bool) $request->is_pc);
+            }
+
+            if ($request->filled('idruang')) {
+                $barangMasukQuery->whereIn('idbarang_masuk', function ($sub) use ($request) {
+                    $sub->from('barang_units')
+                        ->select('barang_masuk_id')
+                        ->whereNotNull('barang_masuk_id')
+                        ->where('idruang', $request->idruang);
+                });
+            }
+
+            $start = $request->query('tgl_masuk_from') ?? $request->query('start_date');
+            $end = $request->query('tgl_masuk_to') ?? $request->query('end_date');
             if ($start) {
                 $barangMasukQuery->whereDate('tgl_masuk', '>=', $start);
             }
             if ($end) {
                 $barangMasukQuery->whereDate('tgl_masuk', '<=', $end);
             }
+
+            $sortBy = $request->get('sort_by', 'tgl_masuk');
+            $sortDirection = strtolower($request->get('sort_direction', 'desc')) === 'asc' ? 'asc' : 'desc';
+            $allowedSortFields = ['idbarang_masuk', 'idbarang', 'jumlah', 'tgl_masuk'];
+            $barangMasukQuery->orderBy(in_array($sortBy, $allowedSortFields) ? $sortBy : 'idbarang_masuk', $sortDirection);
+
             $barangMasuk = $barangMasukQuery->get();
 
             $pdf = Pdf::loadView('pegawai.barang_masuk.laporan', compact('barangMasuk'))

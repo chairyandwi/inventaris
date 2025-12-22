@@ -7,6 +7,12 @@
     <title>Laporan Barang Masuk</title>
     <style>
         @page {
+<<<<<<< ours
+            margin: 20mm 12mm;
+        }
+        @page:first {
+=======
+>>>>>>> theirs
             margin: 15mm 12mm;
         }
         * {
@@ -119,7 +125,7 @@
             border-collapse: collapse;
             font-size: 11pt;
             width: 100%;
-            margin-top: 10px;
+            margin: 10px auto 0;
         }
 
         .isi th {
@@ -181,6 +187,7 @@
             font-style: italic;
         }
 
+
         @media screen and (max-width: 768px) {
             .rangkasurat {
                 padding: 10px;
@@ -221,8 +228,8 @@
             }
 
             .rangkasurat {
-                margin: 0;
-                padding: 15mm;
+                margin: 0 auto;
+                padding: 0;
                 max-width: none;
                 width: 100%;
             }
@@ -244,6 +251,7 @@
             .isi thead {
                 display: table-header-group;
             }
+
         }
     </style>
 </head>
@@ -305,21 +313,23 @@
         <div>
             <div class="section-title">Rekap Barang Masuk</div>
             <table class="isi">
-                <tr>
-                    <th width="20">NO</th>
-                    <th>Tgl Masuk</th>
-                    <th>Kode Barang</th>
-                    <th>Nama Barang</th>
-                    <th>Ruang / Status</th>
-                    <th>Jenis</th>
-                    <th>Status</th>
-                    <th>Jumlah Masuk</th>
-                    <th>Spesifikasi / Keterangan</th>
-                </tr>
+                <thead>
+                    <tr>
+                        <th width="20">NO</th>
+                        <th>Tgl Masuk</th>
+                        <th>Kode Barang</th>
+                        <th>Nama Barang</th>
+                        <th>Ruang</th>
+                        <th>Jenis</th>
+                        <th>Status</th>
+                        <th>Jumlah Masuk</th>
+                        <th>Merk</th>
+                    </tr>
+                </thead>
+                <tbody>
                 @php $urut = 1; @endphp
                 @forelse($barangMasuk as $masuk)
                     @php
-                        $isPc = $masuk->is_pc || str_contains(strtolower(optional($masuk->barang?->kategori)->nama_kategori ?? ''), 'pc');
                         $jenisBarang = $masuk->barang?->jenis_barang;
                         $ruangList = '-';
                         if ($jenisBarang === 'tetap') {
@@ -332,20 +342,7 @@
                         } elseif ($jenisBarang === 'pinjam') {
                             $ruangList = 'Barang pinjam';
                         }
-                        $specParts = [];
-                        if ($masuk->ram_capacity_gb) {
-                            $ramBrand = $masuk->ram_brand ? ' (' . $masuk->ram_brand . ')' : '';
-                            $specParts[] = 'RAM ' . $masuk->ram_capacity_gb . 'GB' . $ramBrand;
-                        }
-                        if ($masuk->storage_type && $masuk->storage_capacity_gb) {
-                            $specParts[] = $masuk->storage_type . ' ' . $masuk->storage_capacity_gb . 'GB';
-                        }
-                        if ($masuk->processor) {
-                            $specParts[] = 'CPU ' . $masuk->processor;
-                        }
-                        $specText = $isPc
-                            ? ($specParts ? implode(' | ', $specParts) : 'Spesifikasi PC belum diisi')
-                            : ($masuk->keterangan ?? 'Non-PC / tidak memerlukan detail komponen');
+                        $merkText = $masuk->merk ?: '-';
                         $tanggalMasuk = $masuk->tgl_masuk ?? ($masuk->created_at ? $masuk->created_at->format('Y-m-d') : '-');
                     @endphp
                     <tr>
@@ -353,7 +350,7 @@
                         <td data-label="Tgl Masuk">{{ $tanggalMasuk }}</td>
                         <td class="code-cell" data-label="Kode Barang">{{ $masuk->barang->kode_barang ?? '-' }}</td>
                         <td data-label="Nama Barang" class="category-cell">{{ $masuk->barang->nama_barang ?? '-' }}</td>
-                        <td class="category-cell" data-label="Ruang / Status">{{ $ruangList }}</td>
+                        <td class="category-cell" data-label="Ruang">{{ $ruangList }}</td>
                         @php
                             $jenisBarang = $masuk->barang->jenis_barang ?? $masuk->jenis_barang;
                             $jenisLabel = $jenisBarang === 'tetap' ? 'Tetap' : ($jenisBarang === 'pinjam' ? 'Pinjam' : '-');
@@ -365,12 +362,7 @@
                             </span>
                         </td>
                         <td class="stock-cell" data-label="Jumlah Masuk">{{ $masuk->jumlah ?? 0 }}</td>
-                        <td data-label="Spesifikasi / Keterangan" class="category-cell">
-                            {{ $specText }}
-                            @if (!$isPc && $masuk->keterangan)
-                                <div class="muted">{{ $masuk->keterangan }}</div>
-                            @endif
-                        </td>
+                        <td data-label="Merk" class="category-cell">{{ $merkText }}</td>
                     </tr>
                 @empty
                     <tr>
@@ -379,6 +371,7 @@
                         </td>
                     </tr>
                 @endforelse
+                </tbody>
             </table>
         </div>
     </div>
