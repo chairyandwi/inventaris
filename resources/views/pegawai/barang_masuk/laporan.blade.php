@@ -7,14 +7,10 @@
     <title>Laporan Barang Masuk</title>
     <style>
         @page {
-<<<<<<< ours
+
             margin: 20mm 12mm;
         }
-        @page:first {
-=======
->>>>>>> theirs
-            margin: 15mm 12mm;
-        }
+
         * {
             margin: 0;
             padding: 0;
@@ -41,7 +37,7 @@
 
         .header-table {
             width: 100%;
-            margin-bottom: 16px;
+            margin-bottom: 10px;
         }
 
         .logo-cell {
@@ -260,15 +256,20 @@
     @php
         $appConfig = $globalAppConfig ?? null;
         $usePdfConfig = $appConfig && $appConfig->apply_pdf;
-        $kampusName = $usePdfConfig && $appConfig->nama_kampus ? strtoupper($appConfig->nama_kampus) : 'UNIVERSITAS PROKLAMASI 45';
+        $kampusName =
+            $usePdfConfig && $appConfig->nama_kampus
+                ? strtoupper($appConfig->nama_kampus)
+                : 'UNIVERSITAS PROKLAMASI 45';
         $departemen = $usePdfConfig && $appConfig->profil ? $appConfig->profil : 'BAGIAN UMUM';
-        $alamat = $usePdfConfig && $appConfig->alamat ? $appConfig->alamat : 'Jl. Proklamasi No. 1, Babarsari, Yogyakarta.';
+        $alamat =
+            $usePdfConfig && $appConfig->alamat ? $appConfig->alamat : 'Jl. Proklamasi No. 1, Babarsari, Yogyakarta.';
         $telepon = $usePdfConfig && $appConfig->telepon ? $appConfig->telepon : '(0274) 485535';
         $email = $usePdfConfig && $appConfig->email ? $appConfig->email : 'itsupport@up45.ac.id';
         $website = $usePdfConfig && $appConfig->website ? $appConfig->website : 'up45.ac.id';
-        $logoFile = $usePdfConfig && $appConfig && $appConfig->logo
-            ? storage_path('app/public/' . $appConfig->logo)
-            : public_path('images/up.png');
+        $logoFile =
+            $usePdfConfig && $appConfig && $appConfig->logo
+                ? storage_path('app/public/' . $appConfig->logo)
+                : public_path('images/up.png');
         $logoBase64 = '';
         if (file_exists($logoFile)) {
             $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoFile));
@@ -311,9 +312,8 @@
         </div>
 
         <div>
-            <div class="section-title">Rekap Barang Masuk</div>
             <table class="isi">
-                <thead>
+                <thead><br>
                     <tr>
                         <th width="20">NO</th>
                         <th>Tgl Masuk</th>
@@ -327,79 +327,84 @@
                     </tr>
                 </thead>
                 <tbody>
-                @php $urut = 1; @endphp
-                @forelse($barangMasuk as $masuk)
-                    @php
-                        $jenisBarang = $masuk->barang?->jenis_barang;
-                        $ruangList = '-';
-                        if ($jenisBarang === 'tetap') {
-                            $ruangNames = $masuk->units
-                                ->map(fn($unit) => $unit->ruang?->nama_ruang)
-                                ->filter()
-                                ->unique()
-                                ->values();
-                            $ruangList = $ruangNames->isNotEmpty() ? $ruangNames->join(', ') : '-';
-                        } elseif ($jenisBarang === 'pinjam') {
-                            $ruangList = 'Barang pinjam';
-                        }
-                        $merkText = $masuk->merk ?: '-';
-                        $tanggalMasuk = $masuk->tgl_masuk ?? ($masuk->created_at ? $masuk->created_at->format('Y-m-d') : '-');
-                    @endphp
-                    <tr>
-                        <td class="number-cell" data-label="NO">{{ $urut++ }}</td>
-                        <td data-label="Tgl Masuk">{{ $tanggalMasuk }}</td>
-                        <td class="code-cell" data-label="Kode Barang">{{ $masuk->barang->kode_barang ?? '-' }}</td>
-                        <td data-label="Nama Barang" class="category-cell">{{ $masuk->barang->nama_barang ?? '-' }}</td>
-                        <td class="category-cell" data-label="Ruang">{{ $ruangList }}</td>
+                    @php $urut = 1; @endphp
+                    @forelse($barangMasuk as $masuk)
                         @php
-                            $jenisBarang = $masuk->barang->jenis_barang ?? $masuk->jenis_barang;
-                            $jenisLabel = $jenisBarang === 'tetap' ? 'Tetap' : ($jenisBarang === 'pinjam' ? 'Pinjam' : '-');
+                            $jenisBarang = $masuk->barang?->jenis_barang;
+                            $ruangList = '-';
+                            if ($jenisBarang === 'tetap') {
+                                $ruangNames = $masuk->units
+                                    ->map(fn($unit) => $unit->ruang?->nama_ruang)
+                                    ->filter()
+                                    ->unique()
+                                    ->values();
+                                $ruangList = $ruangNames->isNotEmpty() ? $ruangNames->join(', ') : '-';
+                            } elseif ($jenisBarang === 'pinjam') {
+                                $ruangList = 'Barang pinjam';
+                            }
+                            $merkText = $masuk->merk ?: '-';
+                            $tanggalMasuk =
+                                $masuk->tgl_masuk ?? ($masuk->created_at ? $masuk->created_at->format('Y-m-d') : '-');
                         @endphp
-                        <td class="category-cell" data-label="Jenis">{{ strtoupper($jenisLabel) }}</td>
-                        <td class="category-cell" data-label="Status">
-                            <span class="badge {{ $masuk->status_barang === 'bekas' ? 'bekas' : 'baru' }}">
-                                {{ strtoupper($masuk->status_barang ?? 'baru') }}
-                            </span>
-                        </td>
-                        <td class="stock-cell" data-label="Jumlah Masuk">{{ $masuk->jumlah ?? 0 }}</td>
-                        <td data-label="Merk" class="category-cell">{{ $merkText }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="9" class="empty-state">
-                            Belum ada barang masuk yang tercatat
-                        </td>
-                    </tr>
-                @endforelse
+                        <tr>
+                            <td class="number-cell" data-label="NO">{{ $urut++ }}</td>
+                            <td data-label="Tgl Masuk">{{ $tanggalMasuk }}</td>
+                            <td class="code-cell" data-label="Kode Barang">{{ $masuk->barang->kode_barang ?? '-' }}</td>
+                            <td data-label="Nama Barang" class="category-cell">{{ $masuk->barang->nama_barang ?? '-' }}
+                            </td>
+                            <td class="category-cell" data-label="Ruang">{{ $ruangList }}</td>
+                            @php
+                                $jenisBarang = $masuk->barang->jenis_barang ?? $masuk->jenis_barang;
+                                $jenisLabel =
+                                    $jenisBarang === 'tetap' ? 'Tetap' : ($jenisBarang === 'pinjam' ? 'Pinjam' : '-');
+                            @endphp
+                            <td class="category-cell" data-label="Jenis">{{ strtoupper($jenisLabel) }}</td>
+                            <td class="category-cell" data-label="Status">
+                                <span class="badge {{ $masuk->status_barang === 'bekas' ? 'bekas' : 'baru' }}">
+                                    {{ strtoupper($masuk->status_barang ?? 'baru') }}
+                                </span>
+                            </td>
+                            <td class="stock-cell" data-label="Jumlah Masuk">{{ $masuk->jumlah ?? 0 }}</td>
+                            <td data-label="Merk" class="category-cell">{{ $merkText }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="9" class="empty-state">
+                                Belum ada barang masuk yang tercatat
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
     </div>
     @php
-    date_default_timezone_set('Asia/Jakarta');
-    $monthNames = [
-        1 => 'Januari',
-        2 => 'Februari',
-        3 => 'Maret',
-        4 => 'April',
-        5 => 'Mei',
-        6 => 'Juni',
-        7 => 'Juli',
-        8 => 'Agustus',
-        9 => 'September',
-        10 => 'Oktober',
-        11 => 'November',
-        12 => 'Desember',
-    ];
-    $tanggal = date('d') . ' ' . $monthNames[(int) date('n')] . ' ' . date('Y');
-    $petugasInventaris = $usePdfConfig && $appConfig && $appConfig->petugas_inventaris
-        ? $appConfig->petugas_inventaris
-        : 'Nama Petugas';
-    $totalBarangMasuk = $barangMasuk->sum('jumlah');
-    $totalTransaksi = $barangMasuk->count();
-@endphp
+        date_default_timezone_set('Asia/Jakarta');
+        $monthNames = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
+        $tanggal = date('d') . ' ' . $monthNames[(int) date('n')] . ' ' . date('Y');
+        $petugasInventaris =
+            $usePdfConfig && $appConfig && $appConfig->petugas_inventaris
+                ? $appConfig->petugas_inventaris
+                : 'Nama Petugas';
+        $totalBarangMasuk = $barangMasuk->sum('jumlah');
+        $totalTransaksi = $barangMasuk->count();
+    @endphp
 
-<div style="
+    <div
+        style="
     display: flex;
     justify-content: flex-start;
     gap: 14px;
@@ -409,7 +414,8 @@
     page-break-inside: avoid;
     flex-wrap: wrap;
 ">
-    <div style="
+        <div
+            style="
         background-color: #f0f4f8;
         padding: 12px 18px;
         border-radius: 10px;
@@ -420,39 +426,41 @@
         min-width: 200px;
         width: 240px;
     ">
-        <span style="font-size: 10pt; color: #555;">Total Transaksi</span>
-        <span style="font-size: 10pt; font-weight: 700; color: #1e3a8a;">{{ $totalTransaksi }} pencatatan</span>
-    </div>
-    <div style="
-        background-color: #f0f4f8;
-        padding: 12px 18px;
-        border-radius: 10px;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        min-width: 200px;
-        width: 240px;
-    ">
-        <span style="font-size: 10pt; color: #555;">Total Barang Masuk</span>
-        <span style="font-size: 10pt; font-weight: 700; color: #1e3a8a;">{{ $totalBarangMasuk }} unit</span>
-    </div>
-</div>
-
-<div style="margin-top: 16px; text-align: right; padding-right: 6mm; line-height: 1.4; page-break-inside: avoid;">
-    <div style="font-size: 11pt; font-weight: bold; text-transform: uppercase;">Sleman, {{ $tanggal }}</div>
-    <div style="font-size: 11pt; font-weight: bold; margin-top: 4px;">Petugas Inventaris</div>
-    @if ($signatureBase64)
-        <div style="margin-top: 10px;">
-            <img src="{{ $signatureBase64 }}" alt="Tanda Tangan Petugas" style="height: 70px; width: auto; object-fit: contain;">
+            <span style="font-size: 10pt; color: #555;">Total Transaksi</span>
+            <span style="font-size: 10pt; font-weight: 700; color: #1e3a8a;">{{ $totalTransaksi }} pencatatan</span>
         </div>
-    @else
-        <div style="margin-top: 26px;"></div>
-    @endif
-    <div style="margin-top: 12px; font-weight: bold; text-decoration: underline; font-size: 11pt;">
-        {{ $petugasInventaris }}
+        <div
+            style="
+        background-color: #f0f4f8;
+        padding: 12px 18px;
+        border-radius: 10px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        min-width: 200px;
+        width: 240px;
+    ">
+            <span style="font-size: 10pt; color: #555;">Total Barang Masuk</span>
+            <span style="font-size: 10pt; font-weight: 700; color: #1e3a8a;">{{ $totalBarangMasuk }} unit</span>
+        </div>
     </div>
-</div>
+
+    <div style="margin-top: 16px; text-align: right; padding-right: 6mm; line-height: 1.4; page-break-inside: avoid;">
+        <div style="font-size: 11pt; font-weight: bold; text-transform: uppercase;">Sleman, {{ $tanggal }}</div>
+        <div style="font-size: 11pt; font-weight: bold; margin-top: 4px;">Petugas Inventaris</div>
+        @if ($signatureBase64)
+            <div style="margin-top: 10px;">
+                <img src="{{ $signatureBase64 }}" alt="Tanda Tangan Petugas"
+                    style="height: 70px; width: auto; object-fit: contain;">
+            </div>
+        @else
+            <div style="margin-top: 26px;"></div>
+        @endif
+        <div style="margin-top: 12px; font-weight: bold; text-decoration: underline; font-size: 11pt;">
+            {{ $petugasInventaris }}
+        </div>
+    </div>
 
 
 </body>
