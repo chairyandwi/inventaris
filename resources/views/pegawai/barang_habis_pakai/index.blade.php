@@ -17,18 +17,11 @@
                 <div>
                     <p class="text-xs uppercase tracking-[0.25em] text-indigo-100/80">Barang Habis Pakai</p>
                     <h1 class="text-3xl sm:text-4xl font-bold leading-tight mt-2">Pantau stok barang habis pakai</h1>
-                    <p class="mt-3 text-indigo-50/90 max-w-2xl">Kelola stok tissue, spidol, dan perlengkapan sejenis yang keluar otomatis saat diminta peminjam.</p>
+                    <p class="mt-3 text-indigo-50/90 max-w-2xl">Kelola stok tissue, spidol, dan perlengkapan sejenis yang keluar setelah disetujui petugas.</p>
                 </div>
-                <a href="{{ route($routePrefix . '.barang.create') }}"
-                   class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-indigo-700 font-semibold shadow-lg shadow-indigo-500/30 hover:-translate-y-0.5 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m-6-6h12" />
-                    </svg>
-                    Tambah Barang
-                </a>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
                 <div class="relative overflow-hidden rounded-2xl border border-white/10 bg-white/10 backdrop-blur p-5 shadow-lg shadow-indigo-500/20">
                     <div class="absolute inset-0 bg-gradient-to-br from-emerald-400/30 to-teal-500/40 opacity-70"></div>
                     <div class="relative">
@@ -43,14 +36,6 @@
                         <p class="text-xs uppercase tracking-[0.25em] text-white/70">Total Stok</p>
                         <p class="text-3xl font-bold mt-2">{{ $stats['totalStok'] ?? 0 }}</p>
                         <p class="text-sm text-indigo-100/80 mt-1">Unit tersedia</p>
-                    </div>
-                </div>
-                <div class="relative overflow-hidden rounded-2xl border border-white/10 bg-white/10 backdrop-blur p-5 shadow-lg shadow-indigo-500/20">
-                    <div class="absolute inset-0 bg-gradient-to-br from-amber-400/30 to-orange-500/40 opacity-70"></div>
-                    <div class="relative">
-                        <p class="text-xs uppercase tracking-[0.25em] text-white/70">Total Keluar</p>
-                        <p class="text-3xl font-bold mt-2">{{ $stats['totalKeluar'] ?? 0 }}</p>
-                        <p class="text-sm text-indigo-100/80 mt-1">Transaksi keluar</p>
                     </div>
                 </div>
             </div>
@@ -80,22 +65,22 @@
 
             <div class="bg-slate-900/80 border border-white/10 rounded-2xl shadow-xl shadow-indigo-500/15 overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-white/10">
+                    <table class="min-w-full table-fixed divide-y divide-white/10">
                         <thead class="bg-white/5">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Kode</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Nama Barang</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Kategori</th>
-                                <th class="px-6 py-3 text-right text-xs font-semibold text-indigo-100 uppercase tracking-wide">Stok</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide w-1/5">Kode</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide w-2/5">Nama Barang</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide w-2/5">Kategori</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide w-24">Stok</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5">
                             @forelse($barang as $item)
                                 <tr class="hover:bg-white/5 transition">
-                                    <td class="px-6 py-4 text-sm font-mono text-white">{{ $item->kode_barang }}</td>
-                                    <td class="px-6 py-4 text-sm text-white">{{ $item->nama_barang }}</td>
-                                    <td class="px-6 py-4 text-sm text-indigo-100/80">{{ $item->kategori?->nama_kategori ?? '-' }}</td>
-                                    <td class="px-6 py-4 text-sm font-semibold text-right text-indigo-50">{{ $item->stok }}</td>
+                                    <td class="px-6 py-4 text-sm font-mono text-white truncate">{{ $item->kode_barang }}</td>
+                                    <td class="px-6 py-4 text-sm text-white truncate">{{ $item->nama_barang }}</td>
+                                    <td class="px-6 py-4 text-sm text-indigo-100/80 truncate">{{ $item->kategori?->nama_kategori ?? '-' }}</td>
+                                    <td class="px-6 py-4 text-sm font-semibold text-left text-indigo-50">{{ $item->stok }}</td>
                                 </tr>
                             @empty
                                 <tr>
@@ -117,50 +102,6 @@
                 </div>
             </div>
 
-            <div class="bg-slate-900/80 border border-white/10 rounded-2xl shadow-xl shadow-indigo-500/15 overflow-hidden">
-                <div class="px-6 py-5 border-b border-white/10">
-                    <h2 class="text-lg font-semibold text-white">Riwayat Barang Keluar</h2>
-                    <p class="text-sm text-indigo-100/70 mt-1">Transaksi barang habis pakai yang diminta peminjam.</p>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-white/10">
-                        <thead class="bg-white/5">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Tanggal</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Barang</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Peminjam</th>
-                                <th class="px-6 py-3 text-right text-xs font-semibold text-indigo-100 uppercase tracking-wide">Jumlah</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-100 uppercase tracking-wide">Keterangan</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-white/5">
-                            @forelse($keluar as $row)
-                                <tr class="hover:bg-white/5 transition">
-                                    <td class="px-6 py-4 text-sm text-indigo-50">{{ $row->tgl_keluar }}</td>
-                                    <td class="px-6 py-4 text-sm text-white">{{ $row->barang?->nama_barang ?? '-' }}</td>
-                                    <td class="px-6 py-4 text-sm text-indigo-100/80">{{ $row->user?->nama ?? $row->user?->username ?? '-' }}</td>
-                                    <td class="px-6 py-4 text-sm font-semibold text-right text-indigo-50">{{ $row->jumlah }}</td>
-                                    <td class="px-6 py-4 text-sm text-indigo-100/70">{{ $row->keterangan ?? '-' }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="px-6 py-12 text-center text-sm text-indigo-100/80">
-                                        Belum ada transaksi barang keluar.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-                <div class="px-6 py-4 bg-white/5 border-t border-white/10 text-indigo-100 flex items-center justify-between">
-                    <div>
-                        Menampilkan {{ $keluar->firstItem() ?? 0 }} - {{ $keluar->lastItem() ?? 0 }} dari {{ $keluar->total() }} transaksi
-                    </div>
-                    <div class="text-white">
-                        {{ $keluar->links() }}
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>

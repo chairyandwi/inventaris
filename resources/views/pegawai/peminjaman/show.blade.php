@@ -60,7 +60,7 @@
                         </div>
                         <div>
                             <p class="text-xs uppercase tracking-wide text-indigo-200/80">Profil</p>
-                            <p class="font-semibold text-white">{{ ucfirst($peminjaman->user->tipe_peminjam ?? 'umum') }}</p>
+                            <p class="font-semibold text-white">{{ ucfirst($peminjaman->user->tipe_peminjam ?? 'Tidak diketahui') }}</p>
                         </div>
                         @if($peminjaman->user?->tipe_peminjam === 'mahasiswa')
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">

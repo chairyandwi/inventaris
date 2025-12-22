@@ -19,8 +19,11 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
                         </a>
-                        <a href="{{ route('peminjam.barang-habis-pakai.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 transition">
-                            <span class="text-sm font-semibold">Request Barang</span>
+                        <a href="{{ route('peminjam.barang-habis-pakai.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-indigo-700 font-semibold shadow-lg shadow-indigo-500/30 hover:-translate-y-0.5 transition">
+                            Request Barang
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
                         </a>
                         <a href="{{ route('peminjam.peminjaman.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 transition">
                             <span class="text-sm font-semibold">Lihat Riwayat</span>
@@ -65,7 +68,7 @@
 
     <div class="relative -mt-20 pb-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 @php
                     $cards = [
                         ['title' => 'Total Peminjaman', 'value' => $totalPeminjaman ?? 0, 'color' => 'from-indigo-500 to-blue-500', 'route' => route('peminjam.peminjaman.index')],
@@ -77,18 +80,19 @@
                     ];
                 @endphp
                 @foreach ($cards as $card)
-                    <a href="{{ $card['route'] }}" class="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur shadow-lg shadow-indigo-500/10 block">
-                        <div class="absolute inset-0 bg-gradient-to-br {{ $card['color'] }} opacity-60 group-hover:opacity-80 transition"></div>
-                        <div class="relative p-5 flex items-center justify-between">
-                            <div>
-                                <p class="text-xs uppercase tracking-[0.25em] text-white/80">{{ $card['title'] }}</p>
-                                <p class="text-3xl font-bold mt-2">{{ $card['value'] }}</p>
-                            </div>
-                            <span class="p-3 rounded-xl bg-white/20 text-white hover:bg-white/30 transition inline-flex">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ $card['route'] }}" class="group relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/70 backdrop-blur p-5 min-h-[120px] shadow-lg shadow-indigo-500/10 block transition hover:-translate-y-0.5">
+                        <div class="absolute inset-0 bg-gradient-to-br {{ $card['color'] }} opacity-20 group-hover:opacity-30 transition"></div>
+                        <div class="relative flex items-start justify-between">
+                            <p class="text-[11px] uppercase tracking-[0.3em] text-white/70">{{ $card['title'] }}</p>
+                            <span class="w-9 h-9 rounded-xl bg-white/10 border border-white/10 text-white/80 group-hover:text-white flex items-center justify-center transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                 </svg>
                             </span>
+                        </div>
+                        <div class="relative mt-4">
+                            <p class="text-3xl font-bold">{{ $card['value'] }}</p>
+                            <p class="text-xs text-white/60 mt-1">Lihat detail</p>
                         </div>
                     </a>
                 @endforeach
@@ -137,6 +141,15 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
                         </a>
+                        <a href="{{ route('peminjam.profile.edit') }}" class="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                            <div>
+                                <p class="text-sm font-semibold text-indigo-100">Lengkapi Profil</p>
+                                <p class="text-xs text-indigo-200/70">Isi data & upload identitas</p>
+                            </div>
+                            <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
                         <a href="{{ route('peminjam.peminjaman.index') }}" class="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                             <div>
                                 <p class="text-sm font-semibold text-emerald-100">Pantau Status</p>
@@ -167,6 +180,20 @@
                     </div>
                 </div>
             </div>
+            @if(isset($profilLengkap) && !$profilLengkap)
+                <div class="mt-6 rounded-2xl bg-amber-500/10 border border-amber-300/30 px-5 py-4 text-amber-100">
+                    <p class="font-semibold">Profil belum lengkap.</p>
+                    <p class="text-sm text-amber-100/80 mt-1">
+                        Lengkapi profil Anda agar bisa mengajukan peminjaman dan request barang.
+                        @if(!empty($missingFields))
+                            Bagian yang perlu diisi: {{ implode(', ', $missingFields) }}.
+                        @endif
+                    </p>
+                    <a href="{{ route('peminjam.profile.edit') }}" class="inline-flex mt-3 items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-amber-50 hover:bg-white/20 transition text-sm font-semibold">
+                        Lengkapi Profil
+                    </a>
+                </div>
+            @endif
         </div>
     </div>
 </div>

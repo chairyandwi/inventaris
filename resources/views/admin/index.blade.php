@@ -53,6 +53,33 @@
                     </div>
                 </div>
             </div>
+            @if(($peminjamanPending ?? 0) > 0 || ($requestBarangPending ?? 0) > 0)
+                <div class="mt-6 rounded-2xl bg-amber-500/10 border border-amber-300/30 px-5 py-4 text-amber-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <p class="font-semibold">Ada permintaan menunggu persetujuan.</p>
+                        <p class="text-sm text-amber-100/80 mt-1">
+                            @if(($peminjamanPending ?? 0) > 0)
+                                Peminjaman pending: {{ $peminjamanPending }}.
+                            @endif
+                            @if(($requestBarangPending ?? 0) > 0)
+                                Request barang habis pakai: {{ $requestBarangPending }}.
+                            @endif
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        @if(($peminjamanPending ?? 0) > 0)
+                            <a href="{{ route('admin.peminjaman.index') }}" class="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-amber-50 hover:bg-white/20 transition text-sm font-semibold">
+                                Cek Peminjaman
+                            </a>
+                        @endif
+                        @if(($requestBarangPending ?? 0) > 0)
+                            <a href="{{ route('admin.barang-habis-pakai.request') }}" class="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-amber-50 hover:bg-white/20 transition text-sm font-semibold">
+                                Cek Request Barang
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 

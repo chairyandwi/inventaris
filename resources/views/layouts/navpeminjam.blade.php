@@ -44,7 +44,10 @@
             </a>
 
             <div x-data="{ userOpen: false }" class="relative">
-                <button @click="userOpen = !userOpen" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition border border-white/5 hover:border-indigo-300/40">
+                <button @click="userOpen = !userOpen" class="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 transition border border-white/10 hover:border-indigo-300/40 shadow-sm">
+                    <span class="w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-300/40 flex items-center justify-center text-xs font-bold text-indigo-100">
+                        {{ strtoupper(mb_substr(Auth::user()->nama, 0, 1)) }}
+                    </span>
                     <span class="text-sm font-semibold text-indigo-100">{{ Auth::user()->nama }}</span>
                     <svg class="w-4 h-4 text-indigo-200/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" />

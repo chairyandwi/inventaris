@@ -64,12 +64,14 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
         $peminjamanPending = Peminjaman::where('status', 'pending')->count();
         $peminjamanDipinjam = Peminjaman::where('status', 'dipinjam')->count();
         $peminjamanDikembalikan = Peminjaman::where('status', 'dikembalikan')->count();
+        $requestBarangPending = \App\Models\BarangKeluar::where('status', 'pending')->count();
         $user = User::count();
         $barang = Barang::count();
         $ruang = Ruang::count();
         $kategori = Kategori::count();
         return view('pegawai.index', compact(
             'barangMasuk', 'peminjamanPending', 'peminjamanDipinjam', 'peminjamanDikembalikan',
+            'requestBarangPending',
             'user', 'barang', 'ruang', 'kategori'
         ));
     })->name('index');
@@ -82,6 +84,11 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
     Route::get('inventaris-ruang/laporan', [InventarisRuangController::class, 'laporan'])->name('inventaris-ruang.laporan');
 
     Route::get('barang-habis-pakai', [BarangHabisPakaiController::class, 'index'])->name('barang-habis-pakai.index');
+    Route::get('barang-habis-pakai/request', [BarangHabisPakaiController::class, 'requestIndex'])->name('barang-habis-pakai.request');
+    Route::get('barang-habis-pakai/laporan', [BarangHabisPakaiController::class, 'laporan'])->name('barang-habis-pakai.laporan');
+    Route::post('barang-habis-pakai/{id}/approve', [BarangHabisPakaiController::class, 'approve'])->name('barang-habis-pakai.approve');
+    Route::post('barang-habis-pakai/{id}/receive', [BarangHabisPakaiController::class, 'receive'])->name('barang-habis-pakai.receive');
+    Route::post('barang-habis-pakai/{id}/reject', [BarangHabisPakaiController::class, 'reject'])->name('barang-habis-pakai.reject');
 
     // Master Data
     Route::resource('kategori', KategoriController::class);
@@ -115,6 +122,9 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
 Route::middleware(['auth', 'role:peminjam'])->prefix('peminjam')->name('peminjam.')->group(function () {
     Route::get('/', function () {
         $userId = Auth::id();
+        $user = Auth::user();
+        $missingFields = $user ? $user->missingProfileFields() : [];
+        $profilLengkap = $user ? $user->isProfileComplete() : false;
 
         $totalPeminjaman = Peminjaman::where('iduser', $userId)->count();
         $pendingPeminjaman = Peminjaman::where('iduser', $userId)->where('status', 'pending')->count();
@@ -161,7 +171,9 @@ Route::middleware(['auth', 'role:peminjam'])->prefix('peminjam')->name('peminjam
             'barangTersedia',
             'requestHabisPakaiTotal',
             'requestHabisPakaiUnit',
-            'requestHabisPakaiBulan'
+            'requestHabisPakaiBulan',
+            'profilLengkap',
+            'missingFields'
         ));
     })->name('index');
 
@@ -193,13 +205,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         $peminjamanDikembalikan = Peminjaman::where('status', 'dikembalikan')->count();
         $peminjamanDitolak = Peminjaman::where('status', 'ditolak')->count();
         $barangMasuk = BarangMasuk::count();
+        $requestBarangPending = \App\Models\BarangKeluar::where('status', 'pending')->count();
 
         $pesanAktivitas = \App\Models\LogAktivitas::latest()->take(5)->get();
 
         return view('admin.index', compact(
             'barangPinjam', 'barangMasuk',
             'user', 'barang', 'ruang', 'kategori', 'pesanAktivitas',
-            'peminjamanPending', 'peminjamanDipinjam', 'peminjamanDikembalikan', 'peminjamanDitolak'
+            'peminjamanPending', 'peminjamanDipinjam', 'peminjamanDikembalikan', 'peminjamanDitolak',
+            'requestBarangPending'
         ));
     })->name('index');
 
@@ -209,6 +223,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('barang/laporan', [BarangController::class, 'laporan'])->name('barang.laporan');
     Route::get('barang_masuk/laporan', [BarangMasukController::class, 'laporan'])->name('barang_masuk.laporan');
     Route::get('barang-habis-pakai', [BarangHabisPakaiController::class, 'index'])->name('barang-habis-pakai.index');
+    Route::get('barang-habis-pakai/request', [BarangHabisPakaiController::class, 'requestIndex'])->name('barang-habis-pakai.request');
+    Route::get('barang-habis-pakai/laporan', [BarangHabisPakaiController::class, 'laporan'])->name('barang-habis-pakai.laporan');
+    Route::post('barang-habis-pakai/{id}/approve', [BarangHabisPakaiController::class, 'approve'])->name('barang-habis-pakai.approve');
+    Route::post('barang-habis-pakai/{id}/receive', [BarangHabisPakaiController::class, 'receive'])->name('barang-habis-pakai.receive');
+    Route::post('barang-habis-pakai/{id}/reject', [BarangHabisPakaiController::class, 'reject'])->name('barang-habis-pakai.reject');
     Route::resource('barang', BarangController::class);
     Route::resource('barang_masuk', BarangMasukController::class);
     Route::resource('inventaris-ruang', InventarisRuangController::class)->only(['index', 'create', 'store', 'destroy']);

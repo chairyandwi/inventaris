@@ -12,7 +12,7 @@
                 <div>
                     <p class="text-xs uppercase tracking-[0.25em] text-indigo-100/80">Data Peminjam</p>
                     <h1 class="text-3xl sm:text-4xl font-bold leading-tight mt-2">Profil peminjam lebih informatif</h1>
-                    <p class="text-indigo-50/90 mt-3 max-w-2xl">Lihat tipe peminjam (umum, mahasiswa, pegawai), kontak, dan riwayat pembaruan dengan gaya futuristik.</p>
+                    <p class="text-indigo-50/90 mt-3 max-w-2xl">Lihat tipe peminjam (mahasiswa, pegawai), kontak, dan riwayat pembaruan dengan gaya futuristik.</p>
                 </div>
                 <form method="GET" class="flex gap-2">
                     <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama / email..."
@@ -56,7 +56,6 @@
                                 <div class="flex items-center gap-2">
                                     <span @class([
                                         'px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-2',
-                                        'bg-white/15 text-white border border-white/20' => $user->tipe_peminjam === 'umum',
                                         'bg-blue-100 text-blue-800' => $user->tipe_peminjam === 'mahasiswa',
                                         'bg-amber-100 text-amber-800' => $user->tipe_peminjam === 'pegawai',
                                     ])>

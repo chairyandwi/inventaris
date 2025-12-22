@@ -140,7 +140,7 @@
                                         <td class="px-6 py-4 text-sm text-white">{{ $p->user->nama ?? $p->user->username ?? $p->user->email ?? '-' }}</td>
                                         <td class="px-6 py-4 text-sm text-indigo-100/80">
                                             <div class="space-y-1">
-                                                <p><span class="font-semibold text-white">Profil:</span> {{ ucfirst($p->user->tipe_peminjam ?? 'Umum') }}</p>
+                                                <p><span class="font-semibold text-white">Profil:</span> {{ ucfirst($p->user->tipe_peminjam ?? 'Tidak diketahui') }}</p>
                                                 @if($p->user?->tipe_peminjam === 'mahasiswa')
                                                     <p><span class="font-semibold text-white">Prodi:</span> {{ $p->user->prodi ?? '-' }}</p>
                                                     <p><span class="font-semibold text-white">Angkatan:</span> {{ $p->user->angkatan ?? '-' }}</p>

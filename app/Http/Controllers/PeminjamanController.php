@@ -55,6 +55,11 @@ class PeminjamanController extends Controller
             abort(403);
         }
 
+        if (!$user->isProfileComplete()) {
+            return redirect()->route('peminjam.profile.edit')
+                ->with('error', 'Lengkapi profil terlebih dahulu sebelum mengajukan peminjaman.');
+        }
+
         $hasActiveLoan = Peminjaman::where('iduser', $user->id)
             ->whereIn('status', ['pending', 'dipinjam'])
             ->exists();
@@ -102,6 +107,12 @@ class PeminjamanController extends Controller
      */
     public function store(\App\Http\Requests\PeminjamanRequest $request)
     {
+        $user = $request->user();
+        if ($user && $user->role === 'peminjam' && !$user->isProfileComplete()) {
+            return redirect()->route('peminjam.profile.edit')
+                ->with('error', 'Lengkapi profil terlebih dahulu sebelum mengajukan peminjaman.');
+        }
+
         $validated = $request->validated();
         $barang = Barang::findOrFail($validated['idbarang']);
         $jenisBarang = $barang->barangMasuk()

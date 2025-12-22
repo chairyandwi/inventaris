@@ -128,7 +128,7 @@
                         {{ $p->user->nama ?? $p->user->username ?? $p->user->email ?? '-' }}
                     </td>
                     <td class="text-cell">
-                        Profil: {{ ucfirst($p->user->tipe_peminjam ?? 'Umum') }}<br>
+                        Profil: {{ ucfirst($p->user->tipe_peminjam ?? 'Tidak diketahui') }}<br>
                         @if($p->user?->tipe_peminjam === 'mahasiswa')
                             Prodi: {{ $p->user->prodi ?? '-' }}<br>
                             Angkatan: {{ $p->user->angkatan ?? '-' }}<br>

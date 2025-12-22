@@ -32,7 +32,7 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class, 'username')->ignore($this->user()->id),
             ],
             'nohp' => ['nullable', 'string', 'max:20'],
-            'tipe_peminjam' => ['required', Rule::in(['umum', 'mahasiswa', 'pegawai'])],
+            'tipe_peminjam' => ['required', Rule::in(['mahasiswa', 'pegawai'])],
             'prodi' => ['nullable', 'string', 'max:100', 'required_if:tipe_peminjam,mahasiswa'],
             'angkatan' => ['nullable', 'string', 'max:10', 'required_if:tipe_peminjam,mahasiswa'],
             'nim' => [
@@ -43,6 +43,20 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class, 'nim')->ignore($this->user()->id),
             ],
             'divisi' => ['nullable', 'string', 'max:100', 'required_if:tipe_peminjam,pegawai'],
+            'foto_identitas_mahasiswa' => [
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png',
+                'max:2048',
+                Rule::requiredIf(fn () => $this->input('tipe_peminjam') === 'mahasiswa' && !$this->user()->foto_identitas_mahasiswa),
+            ],
+            'foto_identitas_pegawai' => [
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png',
+                'max:2048',
+                Rule::requiredIf(fn () => $this->input('tipe_peminjam') === 'pegawai' && !$this->user()->foto_identitas_pegawai),
+            ],
         ];
     }
 }

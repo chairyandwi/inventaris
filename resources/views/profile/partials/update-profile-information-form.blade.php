@@ -1,5 +1,5 @@
 @php
-    $tipeAwal = old('tipe_peminjam', $user->tipe_peminjam ?? 'umum');
+    $tipeAwal = old('tipe_peminjam', $user->tipe_peminjam);
     $isPeminjamProfileRoute = request()->routeIs('peminjam.profile.*');
     $profileUpdateRouteName = $isPeminjamProfileRoute ? 'peminjam.profile.update' : 'profile.update';
     $prodiOptions = [
@@ -31,7 +31,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route($profileUpdateRouteName) }}" class="mt-6 space-y-6" x-data="{ tipe: @js($tipeAwal) }">
+    <form method="post" action="{{ route($profileUpdateRouteName) }}" class="mt-6 space-y-6" x-data="{ tipe: @js($tipeAwal) }" enctype="multipart/form-data">
         @csrf
         @method('patch')
 
@@ -84,12 +84,12 @@
         <div>
             <x-input-label for="tipe_peminjam" value="Profil Peminjam" />
             <select id="tipe_peminjam" name="tipe_peminjam" x-model="tipe" class="mt-1 block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
-                <option value="umum" @selected($tipeAwal === 'umum')>Umum</option>
+                <option value="">-- Pilih Profil --</option>
                 <option value="mahasiswa" @selected($tipeAwal === 'mahasiswa')>Mahasiswa</option>
                 <option value="pegawai" @selected($tipeAwal === 'pegawai')>Pegawai Kampus</option>
             </select>
             <p class="text-xs text-gray-500 mt-1">
-                Pilih profil yang sesuai. Mahasiswa perlu melengkapi data studi, sedangkan pegawai kantor perlu mengisi divisi/bagian.
+                Mahasiswa perlu melengkapi data studi, sedangkan pegawai kampus perlu mengisi divisi/bagian.
             </p>
             <x-input-error class="mt-2" :messages="$errors->get('tipe_peminjam')" />
         </div>
@@ -130,6 +130,26 @@
             <x-text-input id="divisi" name="divisi" type="text" class="mt-1 block w-full" :value="old('divisi', $user->divisi)" maxlength="100" />
             <p class="text-xs text-gray-500 mt-1">Isi nama divisi atau unit kerja untuk mempermudah validasi.</p>
             <x-input-error class="mt-2" :messages="$errors->get('divisi')" />
+        </div>
+
+        <div x-show="tipe === 'mahasiswa'" x-cloak>
+            <x-input-label for="foto_identitas_mahasiswa" value="Foto KTM" />
+            <input id="foto_identitas_mahasiswa" name="foto_identitas_mahasiswa" type="file" accept="image/*"
+                class="mt-1 block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
+            @if($user->foto_identitas_mahasiswa)
+                <p class="text-xs text-gray-500 mt-1">Tersimpan: <a class="text-indigo-600 underline" href="{{ asset('storage/'.$user->foto_identitas_mahasiswa) }}" target="_blank">Lihat</a></p>
+            @endif
+            <x-input-error class="mt-2" :messages="$errors->get('foto_identitas_mahasiswa')" />
+        </div>
+
+        <div x-show="tipe === 'pegawai'" x-cloak>
+            <x-input-label for="foto_identitas_pegawai" value="Foto ID Card" />
+            <input id="foto_identitas_pegawai" name="foto_identitas_pegawai" type="file" accept="image/*"
+                class="mt-1 block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
+            @if($user->foto_identitas_pegawai)
+                <p class="text-xs text-gray-500 mt-1">Tersimpan: <a class="text-indigo-600 underline" href="{{ asset('storage/'.$user->foto_identitas_pegawai) }}" target="_blank">Lihat</a></p>
+            @endif
+            <x-input-error class="mt-2" :messages="$errors->get('foto_identitas_pegawai')" />
         </div>
 
         <div class="flex items-center gap-4">

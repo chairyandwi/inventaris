@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -16,8 +17,17 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $user = $request->user();
+
+        if ($user && $user->role === 'peminjam' && $request->routeIs('peminjam.profile.*')) {
+            return view('profile.peminjam-edit', [
+                'user' => $user,
+                'missingFields' => $user->missingProfileFields(),
+            ]);
+        }
+
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $user,
         ]);
     }
 
@@ -33,14 +43,36 @@ class ProfileController extends Controller
             $user->prodi = null;
             $user->angkatan = null;
             $user->nim = null;
+            if ($user->foto_identitas_mahasiswa) {
+                Storage::disk('public')->delete($user->foto_identitas_mahasiswa);
+            }
+            $user->foto_identitas_mahasiswa = null;
         }
 
         if ($user->tipe_peminjam !== 'pegawai') {
             $user->divisi = null;
+            if ($user->foto_identitas_pegawai) {
+                Storage::disk('public')->delete($user->foto_identitas_pegawai);
+            }
+            $user->foto_identitas_pegawai = null;
         }
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
+        }
+
+        if ($request->hasFile('foto_identitas_mahasiswa')) {
+            if ($user->foto_identitas_mahasiswa) {
+                Storage::disk('public')->delete($user->foto_identitas_mahasiswa);
+            }
+            $user->foto_identitas_mahasiswa = $request->file('foto_identitas_mahasiswa')->store('identitas_peminjam', 'public');
+        }
+
+        if ($request->hasFile('foto_identitas_pegawai')) {
+            if ($user->foto_identitas_pegawai) {
+                Storage::disk('public')->delete($user->foto_identitas_pegawai);
+            }
+            $user->foto_identitas_pegawai = $request->file('foto_identitas_pegawai')->store('identitas_peminjam', 'public');
         }
 
         $user->save();

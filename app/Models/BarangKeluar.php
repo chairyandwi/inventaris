@@ -13,8 +13,16 @@ class BarangKeluar extends Model
         'idbarang',
         'iduser',
         'tgl_keluar',
+        'tgl_pengambilan_rencana',
+        'tgl_diterima',
         'jumlah',
         'keterangan',
+        'status',
+        'approved_by',
+        'approved_at',
+        'rejected_by',
+        'rejected_at',
+        'alasan_penolakan',
     ];
 
     public function barang()
