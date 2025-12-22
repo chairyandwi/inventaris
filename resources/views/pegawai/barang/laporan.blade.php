@@ -162,14 +162,6 @@
             font-style: italic;
         }
 
-        .section-title {
-            font-size: 13pt;
-            font-weight: bold;
-            margin-top: 25px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
 
         .badge {
             display: inline-block;
@@ -319,16 +311,17 @@
         </div>
 
         <div>
-            <div class="section-title">Ringkasan Stok Barang</div>
             <table class="isi">
-                <tr>
-                    <th width="20">NO</th>
-                    <th>Kode Barang</th>
-                    <th>Nama Barang</th>
-                    <th>Kategori</th>
-                    <th>Keterangan</th>
-                    <th>Stok</th>
-                </tr>
+                <thead> <br>
+                    <tr>
+                        <th width="20">NO</th>
+                        <th>Kode Barang</th>
+                        <th>Nama Barang</th>
+                        <th>Kategori</th>
+                        <th>Keterangan</th>
+                        <th>Stok</th>
+                    </tr>
+                </thead>
                 @php $no = 1; @endphp
                 @forelse($barang as $d)
                     <tr>

@@ -169,7 +169,6 @@
                         <a href="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.index') }}" class="px-3 py-1 rounded-full bg-white/10 border border-white/10 hover:bg-white/20 transition">Reset</a>
                     </div>
                 @endif
-            </div>
 
             <div class="bg-slate-900/80 border border-white/10 rounded-2xl shadow-xl shadow-indigo-500/15 overflow-hidden">
                 <div class="grid gap-6 p-6 md:grid-cols-2 xl:grid-cols-3">
@@ -340,6 +339,7 @@
                         {{ $units->links() }}
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     </div>

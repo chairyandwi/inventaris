@@ -140,10 +140,15 @@ class InventarisRuangController extends Controller
             abort(403, 'Anda tidak memiliki akses.');
         }
 
+        $gedungFilter = trim((string) $request->get('gedung', ''));
+        $lantaiFilter = trim((string) $request->get('lantai', ''));
+        $statusFilter = $request->get('status', '');
+
         $query = BarangUnit::with([
                 'barang:idbarang,nama_barang,idkategori',
                 'barang.kategori:idkategori,nama_kategori',
                 'ruang:idruang,nama_ruang,nama_gedung',
+                'kerusakanAktif',
             ])
             ->select('id', 'idbarang', 'idruang', 'kode_unit', 'keterangan', 'nomor_unit')
             ->orderBy('idruang')
@@ -160,16 +165,51 @@ class InventarisRuangController extends Controller
             $query->where('idbarang', $request->idbarang);
         }
 
+        if ($gedungFilter !== '') {
+            $query->whereHas('ruang', function ($q) use ($gedungFilter) {
+                $q->where('nama_gedung', $gedungFilter);
+            });
+        }
+
+        if ($lantaiFilter !== '') {
+            $query->whereHas('ruang', function ($q) use ($lantaiFilter) {
+                $q->where('nama_lantai', $lantaiFilter);
+            });
+        }
+
+        if ($statusFilter === 'rusak') {
+            $query->whereHas('kerusakanAktif');
+        } elseif ($statusFilter === 'baik') {
+            $query->whereDoesntHave('kerusakanAktif')
+                ->where(function ($q) {
+                    $q->whereNull('keterangan')
+                      ->orWhereRaw("LOWER(keterangan) NOT LIKE '%kurang%'");
+                });
+        } elseif ($statusFilter === 'kurang_baik') {
+            $query->whereDoesntHave('kerusakanAktif')
+                ->where(function ($q) {
+                    $q->whereRaw("LOWER(keterangan) LIKE '%kurang%'")
+                      ->orWhereRaw("LOWER(keterangan) LIKE '%kb%'");
+                });
+        }
+
         $hasFilters = $request->filled('idruang')
             || $request->filled('idbarang')
             || $request->filled('gedung')
             || $request->filled('lantai')
             || $request->filled('status');
+        $shouldZip = !$request->filled('idruang') && ($gedungFilter !== '' || $lantaiFilter !== '');
 
-        if (!$hasFilters) {
+        if (!$hasFilters || $shouldZip) {
             $ruangList = Ruang::orderBy('nama_gedung')
                 ->orderBy('nama_ruang')
-                ->get(['idruang', 'nama_ruang', 'nama_gedung']);
+                ->when($gedungFilter !== '', function ($q) use ($gedungFilter) {
+                    $q->where('nama_gedung', $gedungFilter);
+                })
+                ->when($lantaiFilter !== '', function ($q) use ($lantaiFilter) {
+                    $q->where('nama_lantai', $lantaiFilter);
+                })
+                ->get(['idruang', 'nama_ruang', 'nama_gedung', 'nama_lantai']);
             $dateStamp = now()->format('Ymd_His');
             $zipName = "Laporan_Inventaris_Ruang_{$dateStamp}.zip";
             $tempDir = storage_path('app/tmp/inventaris_zip_' . $dateStamp);
@@ -198,7 +238,12 @@ class InventarisRuangController extends Controller
                 $pdfFile = "{$safeGedung}_{$safeRuang}.pdf";
                 $pdfPath = $tempDir . DIRECTORY_SEPARATOR . $pdfFile;
 
-                $pdf = Pdf::loadView('pegawai.inventaris_ruang.laporan', compact('units'))
+                $pdf = Pdf::loadView('pegawai.inventaris_ruang.laporan', [
+                        'units' => $units,
+                        'selectedRuang' => $ruang,
+                        'gedungFilter' => $gedungFilter,
+                        'lantaiFilter' => $lantaiFilter,
+                    ])
                     ->setPaper('A4', 'portrait');
                 file_put_contents($pdfPath, $pdf->output());
                 $zip->addFile($pdfPath, $pdfFile);
@@ -210,7 +255,12 @@ class InventarisRuangController extends Controller
         }
 
         $units = $query->get();
-        $pdf = Pdf::loadView('pegawai.inventaris_ruang.laporan', compact('units'))
+        $pdf = Pdf::loadView('pegawai.inventaris_ruang.laporan', [
+                'units' => $units,
+                'selectedRuang' => $selectedRuang,
+                'gedungFilter' => $gedungFilter,
+                'lantaiFilter' => $lantaiFilter,
+            ])
             ->setPaper('A4', 'portrait');
 
         return $pdf->download('Laporan_Inventaris_Ruang.pdf');
