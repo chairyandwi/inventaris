@@ -16,7 +16,7 @@
                 <div>
                     <p class="text-xs uppercase tracking-[0.25em] text-indigo-100/80">Log Aktivitas</p>
                     <h1 class="text-3xl sm:text-4xl font-bold leading-tight mt-2">Jejak perubahan sistem</h1>
-                    <p class="mt-3 text-indigo-50/90 max-w-2xl">Lihat siapa melakukan apa dan kapan, dengan tampilan futuristik dan tetap mudah dibaca.</p>
+                    <p class="mt-3 text-indigo-50/90 max-w-2xl">Lihat siapa melakukan apa dan kapan, tersusun rapi dan mudah dibaca.</p>
                 </div>
                 <a href="{{ route('admin.index') }}" class="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-white text-indigo-700 font-semibold shadow-lg shadow-indigo-500/30 hover:-translate-y-0.5 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

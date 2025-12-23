@@ -11,7 +11,7 @@
                 <div class="flex-1">
                     <p class="text-sm uppercase tracking-[0.25em] text-indigo-100/80">Dashboard Admin</p>
                     <h2 class="text-4xl sm:text-5xl font-bold leading-tight mt-2">Halo, {{ auth()->user()->nama }} 👋</h2>
-                    <p class="mt-4 text-indigo-100/90 max-w-3xl">Pantau aset, peminjaman, dan log aktivitas dengan tampilan ringkas dan futuristik. Semua fungsi penting dalam satu layar.</p>
+                    <p class="mt-4 text-indigo-100/90 max-w-3xl">Pantau aset, peminjaman, dan log aktivitas dalam satu tampilan ringkas. Semua fungsi penting tersusun rapi.</p>
                     <div class="mt-6 flex flex-wrap gap-3">
                         <a href="{{ route('admin.barang.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-indigo-700 font-semibold shadow-lg shadow-indigo-500/30 hover:-translate-y-0.5 transition">
                             Kelola Barang

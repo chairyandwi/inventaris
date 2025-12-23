@@ -22,7 +22,7 @@
                         <div>
                             <p class="text-xs uppercase tracking-[0.4em] text-indigo-200 mb-3">Sistem Inventaris Kampus</p>
                             <h1 class="text-3xl font-bold leading-tight text-white">Kelola aset, ruang, dan peminjaman dengan satu dashboard.</h1>
-                            <p class="mt-3 text-slate-200 text-sm">Pantau stok, ajukan pinjam, dan ekspor laporan dalam sekali klik. Semua terlihat rapi dengan visual yang konsisten.</p>
+                            <p class="mt-3 text-slate-200 text-sm">Pantau stok, ajukan pinjam, dan ekspor laporan dalam sekali klik. Semua tersaji rapi dan konsisten.</p>
                         </div>
                         <div class="mt-8 grid grid-cols-2 gap-3 text-sm">
                             <div class="rounded-2xl bg-white/5 border border-white/10 p-4">

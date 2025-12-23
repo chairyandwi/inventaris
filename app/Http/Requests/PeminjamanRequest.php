@@ -21,7 +21,6 @@ class PeminjamanRequest extends FormRequest
             'jumlah' => ['required', 'integer', 'min:1'],
             'tgl_pinjam_rencana' => ['required', 'date', 'after_or_equal:today'],
             'tgl_kembali_rencana' => ['required', 'date', 'after_or_equal:tgl_pinjam_rencana'],
-            'foto_identitas' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
         ];
     }
 
@@ -29,7 +28,6 @@ class PeminjamanRequest extends FormRequest
     {
         return [
             'idruang.required_if' => 'Ruang wajib dipilih untuk kegiatan di kampus.',
-            'foto_identitas.required' => 'Foto identitas wajib diunggah.',
         ];
     }
 }

@@ -17,7 +17,7 @@
                     <div>
                         <p class="text-xs uppercase tracking-[0.25em] text-indigo-100/80">Kategori Barang</p>
                         <h1 class="text-3xl sm:text-4xl font-bold leading-tight mt-2">Klasifikasi rapi dalam satu layar</h1>
-                        <p class="mt-3 text-indigo-50/90 max-w-2xl">Kelola nama kategori dan catatan singkat dengan tampilan futuristik yang konsisten.</p>
+                        <p class="mt-3 text-indigo-50/90 max-w-2xl">Kelola nama kategori dan catatan singkat dengan tampilan rapi yang konsisten.</p>
                     </div>
                     <a href="{{ route(($routePrefix ?? 'pegawai') . '.kategori.create') }}"
                         class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-indigo-700 font-semibold shadow-lg shadow-indigo-500/30 hover:-translate-y-0.5 transition">

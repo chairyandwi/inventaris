@@ -14,7 +14,7 @@
                 <div class="flex-1">
                     <p class="text-sm uppercase tracking-[0.25em] text-indigo-100/80">Dashboard Pegawai</p>
                     <h2 class="text-4xl sm:text-5xl font-bold leading-tight mt-2">Hai, {{ auth()->user()->nama }} 👋</h2>
-                    <p class="mt-4 text-indigo-100/90 max-w-2xl">Kelola aset, ruang, dan peminjaman dengan visual yang lebih jelas, insight cepat, dan aksi singkat di satu layar.</p>
+                    <p class="mt-4 text-indigo-100/90 max-w-2xl">Kelola aset, ruang, dan peminjaman dengan ringkasan jelas, insight cepat, dan aksi singkat di satu layar.</p>
                     <div class="mt-6 flex flex-wrap gap-3">
                         <a href="{{ route($routePrefix . '.barang.create') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 transition">
                             <span class="text-sm font-semibold">Tambah Barang</span>

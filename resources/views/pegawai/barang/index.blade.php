@@ -18,7 +18,7 @@
                     <div>
                         <p class="text-xs uppercase tracking-[0.25em] text-indigo-100/80">Barang & Stok</p>
                         <h1 class="text-3xl sm:text-4xl font-bold leading-tight mt-2">Inventaris barang dengan insight cepat</h1>
-                        <p class="mt-3 text-indigo-50/90 max-w-2xl">Kelola barang pinjam dan tetap, cek stok, serta ekspor laporan dengan tampilan futuristik.</p>
+                        <p class="mt-3 text-indigo-50/90 max-w-2xl">Kelola barang pinjam dan tetap, cek stok, serta ekspor laporan dengan tampilan rapi.</p>
                     </div>
                     <div class="flex flex-wrap gap-2">
                         <a href="{{ route($routePrefix . 'barang.laporan') }}"

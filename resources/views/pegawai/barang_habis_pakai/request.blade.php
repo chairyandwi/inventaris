@@ -85,28 +85,16 @@
                         </thead>
                         <tbody class="divide-y divide-white/5">
                             @forelse($pending as $row)
-                                <tr class="hover:bg-white/5 transition" x-data="{ detailOpen: false }">
+                                <tr class="hover:bg-white/5 transition">
                                     <td class="px-6 py-4 text-sm text-indigo-50">{{ $row->tgl_keluar }}</td>
                                     <td class="px-6 py-4 text-sm text-white">{{ $row->barang?->nama_barang ?? '-' }}</td>
                                     <td class="px-6 py-4 text-sm text-indigo-100/80">
                                         <div class="flex items-center gap-2">
                                             <span>{{ $row->user?->nama ?? $row->user?->username ?? '-' }}</span>
-                                            <button type="button" @click="detailOpen = !detailOpen"
+                                            <a href="{{ route($routePrefix . '.barang-habis-pakai.show', $row->idbarang_keluar) }}"
                                                 class="px-2 py-1 rounded-lg text-xs font-semibold bg-white/10 border border-white/10 text-indigo-100 hover:bg-white/20 transition">
                                                 Detail
-                                            </button>
-                                        </div>
-                                        <div x-show="detailOpen" x-cloak class="mt-2 text-xs text-indigo-100/80 space-y-1">
-                                            <div>Profil: {{ ucfirst($row->user?->tipe_peminjam ?? 'Tidak diketahui') }}</div>
-                                            @if($row->user?->tipe_peminjam === 'mahasiswa')
-                                                <div>Prodi: {{ $row->user?->prodi ?? '-' }}</div>
-                                                <div>NIM: {{ $row->user?->nim ?? '-' }}</div>
-                                                <div>Angkatan: {{ $row->user?->angkatan ?? '-' }}</div>
-                                            @elseif($row->user?->tipe_peminjam === 'pegawai')
-                                                <div>Divisi: {{ $row->user?->divisi ?? '-' }}</div>
-                                            @endif
-                                            <div>Kontak: {{ $row->user?->nohp ?? '-' }}</div>
-                                            <div>Email: {{ $row->user?->email ?? '-' }}</div>
+                                            </a>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 text-sm text-indigo-100/80">{{ $row->user?->divisi ?? '-' }}</td>
@@ -192,7 +180,12 @@
                         <a href="{{ route($routePrefix . '.barang-habis-pakai.request') }}" class="px-4 py-2 rounded-xl border border-white/15 text-sm font-semibold text-indigo-50 hover:bg-white/10 transition">
                             Reset
                         </a>
-                        <a href="{{ route($routePrefix . '.barang-habis-pakai.laporan', request()->only(['riwayat_status', 'riwayat_from', 'riwayat_to'])) }}"
+                        <a href="{{ route($routePrefix . '.barang-habis-pakai.laporan', [
+                            'status' => request('riwayat_status'),
+                            'start_date' => request('riwayat_from'),
+                            'end_date' => request('riwayat_to'),
+                            'search' => request('riwayat_search'),
+                        ]) }}"
                            class="px-4 py-2 rounded-xl border border-white/15 text-sm font-semibold text-indigo-50 hover:bg-white/10 transition">
                             Unduh Laporan Barang Keluar
                         </a>
@@ -216,28 +209,16 @@
                         </thead>
                         <tbody class="divide-y divide-white/5">
                             @forelse($riwayat as $row)
-                                <tr class="hover:bg-white/5 transition" x-data="{ detailOpen: false }">
+                                <tr class="hover:bg-white/5 transition">
                                     <td class="px-6 py-4 text-sm text-indigo-50">{{ $row->tgl_keluar }}</td>
                                     <td class="px-6 py-4 text-sm text-white">{{ $row->barang?->nama_barang ?? '-' }}</td>
                                     <td class="px-6 py-4 text-sm text-indigo-100/80">
                                         <div class="flex items-center gap-2">
                                             <span>{{ $row->user?->nama ?? $row->user?->username ?? '-' }}</span>
-                                            <button type="button" @click="detailOpen = !detailOpen"
+                                            <a href="{{ route($routePrefix . '.barang-habis-pakai.show', $row->idbarang_keluar) }}"
                                                 class="px-2 py-1 rounded-lg text-xs font-semibold bg-white/10 border border-white/10 text-indigo-100 hover:bg-white/20 transition">
                                                 Detail
-                                            </button>
-                                        </div>
-                                        <div x-show="detailOpen" x-cloak class="mt-2 text-xs text-indigo-100/80 space-y-1">
-                                            <div>Profil: {{ ucfirst($row->user?->tipe_peminjam ?? 'Tidak diketahui') }}</div>
-                                            @if($row->user?->tipe_peminjam === 'mahasiswa')
-                                                <div>Prodi: {{ $row->user?->prodi ?? '-' }}</div>
-                                                <div>NIM: {{ $row->user?->nim ?? '-' }}</div>
-                                                <div>Angkatan: {{ $row->user?->angkatan ?? '-' }}</div>
-                                            @elseif($row->user?->tipe_peminjam === 'pegawai')
-                                                <div>Divisi: {{ $row->user?->divisi ?? '-' }}</div>
-                                            @endif
-                                            <div>Kontak: {{ $row->user?->nohp ?? '-' }}</div>
-                                            <div>Email: {{ $row->user?->email ?? '-' }}</div>
+                                            </a>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 text-sm text-indigo-100/80">{{ $row->user?->divisi ?? '-' }}</td>

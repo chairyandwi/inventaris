@@ -3,7 +3,7 @@
         <div>
             <p class="text-xs font-semibold text-indigo-600 uppercase tracking-[0.3em]">Registrasi</p>
             <h1 class="text-2xl font-bold text-gray-900 mt-1">Buat akun baru 🔐</h1>
-            <p class="text-sm text-gray-500">Isi data Anda untuk mengakses dashboard futuristik inventaris.</p>
+            <p class="text-sm text-gray-500">Isi data Anda untuk mengakses dashboard inventaris.</p>
         </div>
 
         <form method="POST" action="{{ route('register') }}" class="space-y-4">

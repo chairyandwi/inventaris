@@ -104,6 +104,24 @@ class BarangHabisPakaiController extends Controller
         return view('pegawai.barang_habis_pakai.request', compact('pending', 'riwayat', 'stats', 'routePrefix'));
     }
 
+    public function show($id)
+    {
+        $user = Auth::user();
+        abort_unless($user && in_array($user->role, ['admin', 'pegawai']), 403);
+
+        $barangKeluar = BarangKeluar::with(['barang', 'user'])->findOrFail($id);
+        $routePrefix = $this->getRoutePrefix();
+
+        $fotoIdentitas = null;
+        if ($barangKeluar->user) {
+            $fotoIdentitas = $barangKeluar->user->tipe_peminjam === 'mahasiswa'
+                ? $barangKeluar->user->foto_identitas_mahasiswa
+                : $barangKeluar->user->foto_identitas_pegawai;
+        }
+
+        return view('pegawai.barang_habis_pakai.show', compact('barangKeluar', 'routePrefix', 'fotoIdentitas'));
+    }
+
     public function laporan(Request $request)
     {
         if (!auth('web')->check()) {
@@ -120,8 +138,6 @@ class BarangHabisPakaiController extends Controller
 
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
-        } else {
-            $query->where('status', 'approved');
         }
 
         if ($request->filled('start_date')) {
@@ -130,6 +146,20 @@ class BarangHabisPakaiController extends Controller
 
         if ($request->filled('end_date')) {
             $query->whereDate('tgl_keluar', '<=', $request->end_date);
+        }
+
+        if ($request->filled('search')) {
+            $term = $request->search;
+            $query->where(function ($sub) use ($term) {
+                $sub->whereHas('barang', function ($q) use ($term) {
+                    $q->where('kode_barang', 'like', "%{$term}%")
+                        ->orWhere('nama_barang', 'like', "%{$term}%");
+                })->orWhereHas('user', function ($q) use ($term) {
+                    $q->where('nama', 'like', "%{$term}%")
+                        ->orWhere('username', 'like', "%{$term}%")
+                        ->orWhere('email', 'like', "%{$term}%");
+                });
+            });
         }
 
         $riwayat = $query->orderByDesc('tgl_keluar')->get();

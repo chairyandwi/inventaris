@@ -27,7 +27,7 @@
                 <div>
                     <p class="text-xs uppercase tracking-[0.3em] text-indigo-100/70">Inventaris</p>
                     <h1 class="text-3xl sm:text-4xl font-bold leading-tight mt-2">{{ $barang->nama_barang }}</h1>
-                    <p class="mt-3 text-indigo-50/90 max-w-2xl">Pantau informasi lengkap barang, distribusi unit, dan detail ruang dengan tampilan yang konsisten dengan tema futuristik.</p>
+                    <p class="mt-3 text-indigo-50/90 max-w-2xl">Pantau informasi lengkap barang, distribusi unit, dan detail ruang dengan tampilan yang konsisten.</p>
                 </div>
                 <div class="flex flex-wrap gap-3">
                     <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/10 text-indigo-100">

@@ -26,7 +26,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('peminjam.peminjaman.store') }}" method="POST" class="space-y-6" enctype="multipart/form-data">
+                <form action="{{ route('peminjam.peminjaman.store') }}" method="POST" class="space-y-6">
                     @csrf
 
                     <div>
@@ -118,18 +118,6 @@
                             <p class="text-sm text-rose-300 mt-1">{{ $message }}</p>
                         @enderror
                         <p class="text-xs text-indigo-100/70 mt-2">Pastikan jumlah tidak melebihi stok barang yang tersedia.</p>
-                    </div>
-
-                    <div>
-                        <label for="foto_identitas" class="block text-sm font-semibold text-indigo-100 mb-2">Unggah Foto Identitas (KTM/KTP/Kartu Pegawai)</label>
-                        <input type="file" name="foto_identitas" id="foto_identitas"
-                            accept="image/*"
-                            class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white file:mr-4 file:rounded-lg file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-white/20"
-                            required>
-                        @error('foto_identitas')
-                            <p class="text-sm text-rose-300 mt-1">{{ $message }}</p>
-                        @enderror
-                        <p class="text-xs text-indigo-100/70 mt-2">Format jpg/png, ukuran maks 2MB.</p>
                     </div>
 
                     <div class="pt-4 flex items-center justify-between">

@@ -11,7 +11,7 @@
                 <div class="flex-1">
                     <p class="text-sm uppercase tracking-[0.25em] text-indigo-100/80">Dashboard Peminjam</p>
                     <h2 class="text-4xl sm:text-5xl font-bold leading-tight mt-2">Halo, {{ auth()->user()->nama }}</h2>
-                    <p class="mt-4 text-indigo-100/90 max-w-3xl">Lihat status permintaan, ajukan peminjaman baru, dan ketahui progres barang yang Anda pinjam dengan visual informatif.</p>
+                    <p class="mt-4 text-indigo-100/90 max-w-3xl">Lihat status permintaan, ajukan peminjaman baru, dan ketahui progres barang yang Anda pinjam secara ringkas.</p>
                     <div class="mt-6 flex flex-wrap gap-3">
                         <a href="{{ route('peminjam.peminjaman.create') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-indigo-700 font-semibold shadow-lg shadow-indigo-500/30 hover:-translate-y-0.5 transition">
                             Ajukan Peminjaman
@@ -122,7 +122,7 @@
                     <div class="mt-6">
                         <canvas id="statusChart" class="w-full h-60"></canvas>
                         <div id="statusChartFallback" class="hidden mt-4 space-y-2 text-indigo-100/80">
-                            <p class="text-sm font-semibold">Grafik belum tersedia, gunakan ringkasan di atas.</p>
+                            <p class="text-sm font-semibold">Grafik belum tersedia. Gunakan ringkasan di atas.</p>
                         </div>
                     </div>
                 </div>

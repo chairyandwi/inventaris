@@ -71,18 +71,31 @@ class PeminjamanController extends Controller
 
         $rusakCounts = $this->getRusakCounts();
 
+        $latestNonNullMasuk = BarangMasuk::select('idbarang', DB::raw('MAX(idbarang_masuk) as latest_id'))
+            ->whereNotNull('jenis_barang')
+            ->groupBy('idbarang');
+
+        $pinjamBarangIds = BarangMasuk::joinSub($latestNonNullMasuk, 'latest_non_null', function ($join) {
+            $join->on('barang_masuk.idbarang', '=', 'latest_non_null.idbarang')
+                ->on('barang_masuk.idbarang_masuk', '=', 'latest_non_null.latest_id');
+        })
+            ->where('barang_masuk.jenis_barang', 'pinjam')
+            ->pluck('barang_masuk.idbarang')
+            ->unique()
+            ->values();
+
         $pinjamMasuk = BarangMasuk::where('jenis_barang', 'pinjam')
+            ->whereIn('idbarang', $pinjamBarangIds)
             ->select('idbarang', DB::raw('SUM(jumlah) as total'))
             ->groupBy('idbarang')
             ->pluck('total', 'idbarang');
         $pinjamTerpakai = Peminjaman::whereIn('status', ['pending', 'disetujui', 'dipinjam'])
+            ->whereIn('idbarang', $pinjamBarangIds)
             ->select('idbarang', DB::raw('SUM(jumlah) as total'))
             ->groupBy('idbarang')
             ->pluck('total', 'idbarang');
 
-        $barang = Barang::whereHas('barangMasuk', function ($q) {
-            $q->where('jenis_barang', 'pinjam');
-        })
+        $barang = Barang::whereIn('idbarang', $pinjamBarangIds)
             ->get()
             ->filter(function ($item) use ($rusakCounts, $pinjamMasuk, $pinjamTerpakai) {
                 $rusak = $rusakCounts[$item->idbarang] ?? 0;
@@ -117,9 +130,8 @@ class PeminjamanController extends Controller
         $barang = Barang::findOrFail($validated['idbarang']);
         $jenisBarang = $barang->barangMasuk()
             ->whereNotNull('jenis_barang')
-            ->orderByDesc('tgl_masuk')
-            ->orderByDesc('created_at')
-            ->value('jenis_barang') ?? 'pinjam';
+            ->orderByDesc('idbarang_masuk')
+            ->value('jenis_barang');
         if ($jenisBarang !== 'pinjam') {
             return back()->with('error', 'Barang ini tidak tersedia untuk peminjaman.');
         }
@@ -150,7 +162,14 @@ class PeminjamanController extends Controller
             return back()->with('error', 'Stok barang tidak mencukupi.');
         }
 
-        $fotoPath = $request->file('foto_identitas')->store('identitas', 'public');
+        $fotoPath = $user->tipe_peminjam === 'mahasiswa'
+            ? $user->foto_identitas_mahasiswa
+            : $user->foto_identitas_pegawai;
+
+        if (!$fotoPath) {
+            return redirect()->route('peminjam.profile.edit')
+                ->with('error', 'Lengkapi foto identitas di profil sebelum mengajukan peminjaman.');
+        }
 
         Peminjaman::create([
             'idbarang' => $validated['idbarang'],

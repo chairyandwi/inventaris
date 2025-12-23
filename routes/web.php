@@ -85,6 +85,7 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
 
     Route::get('barang-habis-pakai', [BarangHabisPakaiController::class, 'index'])->name('barang-habis-pakai.index');
     Route::get('barang-habis-pakai/request', [BarangHabisPakaiController::class, 'requestIndex'])->name('barang-habis-pakai.request');
+    Route::get('barang-habis-pakai/riwayat/{id}', [BarangHabisPakaiController::class, 'show'])->name('barang-habis-pakai.show');
     Route::get('barang-habis-pakai/laporan', [BarangHabisPakaiController::class, 'laporan'])->name('barang-habis-pakai.laporan');
     Route::post('barang-habis-pakai/{id}/approve', [BarangHabisPakaiController::class, 'approve'])->name('barang-habis-pakai.approve');
     Route::post('barang-habis-pakai/{id}/receive', [BarangHabisPakaiController::class, 'receive'])->name('barang-habis-pakai.receive');
@@ -224,6 +225,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('barang_masuk/laporan', [BarangMasukController::class, 'laporan'])->name('barang_masuk.laporan');
     Route::get('barang-habis-pakai', [BarangHabisPakaiController::class, 'index'])->name('barang-habis-pakai.index');
     Route::get('barang-habis-pakai/request', [BarangHabisPakaiController::class, 'requestIndex'])->name('barang-habis-pakai.request');
+    Route::get('barang-habis-pakai/riwayat/{id}', [BarangHabisPakaiController::class, 'show'])->name('barang-habis-pakai.show');
     Route::get('barang-habis-pakai/laporan', [BarangHabisPakaiController::class, 'laporan'])->name('barang-habis-pakai.laporan');
     Route::post('barang-habis-pakai/{id}/approve', [BarangHabisPakaiController::class, 'approve'])->name('barang-habis-pakai.approve');
     Route::post('barang-habis-pakai/{id}/receive', [BarangHabisPakaiController::class, 'receive'])->name('barang-habis-pakai.receive');

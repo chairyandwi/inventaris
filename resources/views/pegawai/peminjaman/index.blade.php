@@ -18,8 +18,8 @@
                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
                     <div>
                         <p class="text-xs uppercase tracking-[0.25em] text-indigo-100/80">Peminjaman</p>
-                        <h1 class="text-3xl sm:text-4xl font-bold leading-tight mt-2">Proses peminjaman yang informatif</h1>
-                        <p class="mt-3 text-indigo-50/90 max-w-2xl">Monitor jadwal pinjam-kembali, peminjam, dan status approval dengan gaya futuristik.</p>
+                        <h1 class="text-3xl sm:text-4xl font-bold leading-tight mt-2">Proses peminjaman terstruktur</h1>
+                        <p class="mt-3 text-indigo-50/90 max-w-2xl">Monitor jadwal pinjam-kembali, peminjam, dan status approval dengan tampilan rapi.</p>
                     </div>
                     <a href="{{ route($laporanRoute) }}"
                         class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-indigo-700 font-semibold shadow-lg shadow-indigo-500/30 hover:-translate-y-0.5 transition">
