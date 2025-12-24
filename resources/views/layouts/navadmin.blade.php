@@ -58,6 +58,13 @@
                         </svg>
                         <span>Barang</span>
                     </a>
+                    <a href="{{ route('admin.barang-pinjam.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-indigo-900/40 transition">
+                        <svg class="w-5 h-5 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 7.5h15M4.5 12h15M4.5 16.5h9" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 16.5h3m-1.5-1.5v3" />
+                        </svg>
+                        <span>Barang Pinjam</span>
+                    </a>
                     <a href="{{ route('admin.barang-habis-pakai.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-indigo-900/40 transition">
                         <svg class="w-5 h-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h7.5M6 9.75h12M6 12.75h12M8.25 15.75h7.5" />
@@ -162,6 +169,12 @@
                         </svg>
                         <span>Laporan Barang Keluar</span>
                     </a>
+                    <a href="{{ route('admin.barang-pinjam.laporan') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-indigo-900/40 transition">
+                        <svg class="w-5 h-5 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12M8 11h12m-7 4h7M5 7h.01M5 11h.01M5 15h.01" />
+                        </svg>
+                        <span>Laporan Barang Pinjam</span>
+                    </a>
                 </div>
             </div>
 
@@ -261,6 +274,13 @@
                     </svg>
                     Barang
                 </a>
+                <a href="{{ route('admin.barang-pinjam.index') }}" class="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-white/10 transition">
+                    <svg class="w-5 h-5 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 7.5h15M4.5 12h15M4.5 16.5h9" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 16.5h3m-1.5-1.5v3" />
+                    </svg>
+                    Barang Pinjam
+                </a>
                 <a href="{{ route('admin.barang-habis-pakai.index') }}" class="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-white/10 transition">
                     <svg class="w-5 h-5 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h7.5M6 9.75h12M6 12.75h12M8.25 15.75h7.5" />
@@ -304,16 +324,16 @@
                         </svg>
                         Barang Masuk
                     </a>
-                    <a href="{{ route('admin.peminjaman.index') }}" class="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-white/10 transition">
-                        <svg class="w-5 h-5 text-sky-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
-                        </svg>
-                        Peminjaman
-                    </a>
-                    <a href="{{ route('admin.barang-habis-pakai.request') }}" class="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-white/10 transition">
-                        <svg class="w-5 h-5 text-sky-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 5.25h9a2.25 2.25 0 0 1 2.25 2.25v6.5a2.25 2.25 0 0 1-2.25 2.25h-9A2.25 2.25 0 0 1 5.25 14V7.5A2.25 2.25 0 0 1 7.5 5.25Z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9h7.5M10 12h3.5" />
+                <a href="{{ route('admin.peminjaman.index') }}" class="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-white/10 transition">
+                    <svg class="w-5 h-5 text-sky-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+                    </svg>
+                    Peminjaman
+                </a>
+                <a href="{{ route('admin.barang-habis-pakai.request') }}" class="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-white/10 transition">
+                    <svg class="w-5 h-5 text-sky-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 5.25h9a2.25 2.25 0 0 1 2.25 2.25v6.5a2.25 2.25 0 0 1-2.25 2.25h-9A2.25 2.25 0 0 1 5.25 14V7.5A2.25 2.25 0 0 1 7.5 5.25Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9h7.5M10 12h3.5" />
                         </svg>
                         Request Barang
                     </a>
@@ -360,12 +380,18 @@
                         </svg>
                         Laporan Peminjaman
                     </a>
-                    <a href="{{ route('admin.barang-habis-pakai.laporan') }}" class="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-white/10 transition">
-                        <svg class="w-5 h-5 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h10" />
-                        </svg>
-                        Laporan Barang Keluar
-                    </a>
+                <a href="{{ route('admin.barang-habis-pakai.laporan') }}" class="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-white/10 transition">
+                    <svg class="w-5 h-5 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h10" />
+                    </svg>
+                    Laporan Barang Keluar
+                </a>
+                <a href="{{ route('admin.barang-pinjam.laporan') }}" class="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-white/10 transition">
+                    <svg class="w-5 h-5 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12M8 11h12m-7 4h7M5 7h.01M5 11h.01M5 15h.01" />
+                    </svg>
+                    Laporan Barang Pinjam
+                </a>
                 </div>
             </div>
 

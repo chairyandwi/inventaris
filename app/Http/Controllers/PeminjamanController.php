@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Barang;
 use App\Models\BarangMasuk;
+use App\Models\BarangPinjamUsage;
 use App\Models\Peminjaman;
 use Illuminate\Http\Request;
 use App\Http\Requests\PeminjamanRequest;
@@ -12,6 +13,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use App\Models\BarangUnitKerusakan;
 use Illuminate\Support\Facades\DB;
+use App\Support\ActivityLogger;
 
 class PeminjamanController extends Controller
 {
@@ -94,20 +96,28 @@ class PeminjamanController extends Controller
             ->select('idbarang', DB::raw('SUM(jumlah) as total'))
             ->groupBy('idbarang')
             ->pluck('total', 'idbarang');
+        $pinjamDigunakan = BarangPinjamUsage::where('digunakan_sampai', '>', now())
+            ->whereIn('idbarang', $pinjamBarangIds)
+            ->select('idbarang', DB::raw('SUM(jumlah) as total'))
+            ->groupBy('idbarang')
+            ->pluck('total', 'idbarang');
 
         $barang = Barang::whereIn('idbarang', $pinjamBarangIds)
+            ->where('kondisi_pinjam', 'tersedia')
             ->get()
-            ->filter(function ($item) use ($rusakCounts, $pinjamMasuk, $pinjamTerpakai) {
+            ->filter(function ($item) use ($rusakCounts, $pinjamMasuk, $pinjamTerpakai, $pinjamDigunakan) {
                 $rusak = $rusakCounts[$item->idbarang] ?? 0;
                 $totalPinjam = $pinjamMasuk[$item->idbarang] ?? 0;
                 $terpakai = $pinjamTerpakai[$item->idbarang] ?? 0;
-                return ($totalPinjam - $terpakai - $rusak) > 0;
+                $digunakan = $pinjamDigunakan[$item->idbarang] ?? 0;
+                return ($totalPinjam - $terpakai - $rusak - $digunakan) > 0;
             })
-            ->map(function ($item) use ($rusakCounts, $pinjamMasuk, $pinjamTerpakai) {
+            ->map(function ($item) use ($rusakCounts, $pinjamMasuk, $pinjamTerpakai, $pinjamDigunakan) {
                 $rusak = $rusakCounts[$item->idbarang] ?? 0;
                 $totalPinjam = $pinjamMasuk[$item->idbarang] ?? 0;
                 $terpakai = $pinjamTerpakai[$item->idbarang] ?? 0;
-                $item->available_stok = max(($totalPinjam - $terpakai - $rusak), 0);
+                $digunakan = $pinjamDigunakan[$item->idbarang] ?? 0;
+                $item->available_stok = max(($totalPinjam - $terpakai - $rusak - $digunakan), 0);
                 return $item;
             })->values();
         $ruang = Ruang::orderBy('nama_ruang')->get();
@@ -135,6 +145,9 @@ class PeminjamanController extends Controller
         if ($jenisBarang !== 'pinjam') {
             return back()->with('error', 'Barang ini tidak tersedia untuk peminjaman.');
         }
+        if ($barang->kondisi_pinjam === 'sedang_digunakan') {
+            return back()->with('error', 'Barang ini sedang digunakan dan tidak bisa dipinjam.');
+        }
 
         $hasActiveLoan = Peminjaman::where('iduser', Auth::id())
             ->whereIn('status', ['pending', 'dipinjam'])
@@ -152,7 +165,10 @@ class PeminjamanController extends Controller
             ->whereIn('status', ['pending', 'disetujui', 'dipinjam'])
             ->sum('jumlah');
         $rusak = $this->getRusakCounts([$barang->idbarang])[$barang->idbarang] ?? 0;
-        $availableStok = max(($totalPinjam - $terpakai - $rusak), 0);
+        $digunakan = BarangPinjamUsage::where('idbarang', $barang->idbarang)
+            ->where('digunakan_sampai', '>', now())
+            ->sum('jumlah');
+        $availableStok = max(($totalPinjam - $terpakai - $rusak - $digunakan), 0);
 
         if ($availableStok <= 0) {
             return back()->with('error', 'Barang ini sedang tidak tersedia untuk dipinjam.');
@@ -183,6 +199,11 @@ class PeminjamanController extends Controller
             'keterangan_kegiatan' => $validated['keterangan_kegiatan'],
             'status' => 'pending',
         ]);
+
+        ActivityLogger::log(
+            'Ajukan Peminjaman',
+            'Mengajukan peminjaman barang: ' . ($barang->nama_barang ?? '-') . ' (' . $validated['jumlah'] . ' unit).'
+        );
 
         $redirectRoute = 'peminjam.peminjaman.index';
         if (Auth::user() && Auth::user()->role !== 'peminjam') {
@@ -228,6 +249,11 @@ class PeminjamanController extends Controller
             'tgl_pinjam' => null,
         ]);
 
+        ActivityLogger::log(
+            'Setujui Peminjaman',
+            'Menyetujui peminjaman barang: ' . ($barang->nama_barang ?? '-') . ' (' . $peminjaman->jumlah . ' unit).'
+        );
+
         return back()->with('success', 'Peminjaman disetujui dan menunggu pengambilan sesuai jadwal.');
     }
 
@@ -245,6 +271,11 @@ class PeminjamanController extends Controller
             'status' => 'ditolak',
             'alasan_penolakan' => $request->alasan_penolakan,
         ]);
+
+        ActivityLogger::log(
+            'Tolak Peminjaman',
+            'Menolak peminjaman ID ' . $peminjaman->idpeminjaman . '.'
+        );
 
         return back()->with('success', 'Peminjaman ditolak.');
     }
@@ -277,6 +308,11 @@ class PeminjamanController extends Controller
 
         $barang->decrement('stok', $peminjaman->jumlah);
 
+        ActivityLogger::log(
+            'Mulai Peminjaman',
+            'Menandai peminjaman barang: ' . ($barang->nama_barang ?? '-') . ' (' . $peminjaman->jumlah . ' unit) sebagai dipinjam.'
+        );
+
         return back()->with('success', 'Barang sudah ditandai diambil.');
     }
 
@@ -303,6 +339,11 @@ class PeminjamanController extends Controller
         ]);
 
         $barang->increment('stok', $peminjaman->jumlah);
+
+        ActivityLogger::log(
+            'Pengembalian Peminjaman',
+            'Mengembalikan barang: ' . ($barang->nama_barang ?? '-') . ' (' . $peminjaman->jumlah . ' unit).'
+        );
 
         return back()->with('success', 'Barang berhasil dikembalikan.');
     }

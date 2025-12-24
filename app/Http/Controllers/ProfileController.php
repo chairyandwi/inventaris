@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use App\Support\ActivityLogger;
 
 class ProfileController extends Controller
 {
@@ -78,6 +79,8 @@ class ProfileController extends Controller
         $user->save();
 
         $redirectRoute = $request->routeIs('peminjam.profile.*') ? 'peminjam.profile.edit' : 'profile.edit';
+
+        ActivityLogger::log('Update Profil', 'Pengguna memperbarui data profil.');
 
         return Redirect::route($redirectRoute)->with('status', 'profile-updated');
     }

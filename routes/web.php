@@ -7,6 +7,7 @@ use App\Models\Kategori;
 use App\Models\BarangMasuk;
 use App\Models\Peminjaman;
 use App\Models\BarangKeluar;
+use App\Models\BarangPinjamUsage;
 use App\Models\BarangUnitKerusakan;
 use App\Models\AppConfiguration;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RuangController;
 use App\Http\Controllers\BarangController;
+use App\Http\Controllers\BarangPinjamController;
 use App\Http\Controllers\BarangHabisPakaiController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\ProfileController;
@@ -90,6 +92,9 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
     Route::post('barang-habis-pakai/{id}/approve', [BarangHabisPakaiController::class, 'approve'])->name('barang-habis-pakai.approve');
     Route::post('barang-habis-pakai/{id}/receive', [BarangHabisPakaiController::class, 'receive'])->name('barang-habis-pakai.receive');
     Route::post('barang-habis-pakai/{id}/reject', [BarangHabisPakaiController::class, 'reject'])->name('barang-habis-pakai.reject');
+    Route::get('barang-pinjam', [BarangPinjamController::class, 'index'])->name('barang-pinjam.index');
+    Route::post('barang-pinjam/{barang}/usage', [BarangPinjamController::class, 'storeUsage'])->name('barang-pinjam.usage');
+    Route::get('barang-pinjam/laporan', [BarangPinjamController::class, 'laporan'])->name('barang-pinjam.laporan');
 
     // Master Data
     Route::resource('kategori', KategoriController::class);
@@ -145,15 +150,20 @@ Route::middleware(['auth', 'role:peminjam'])->prefix('peminjam')->name('peminjam
             ->select('idbarang', DB::raw('SUM(jumlah) as total'))
             ->groupBy('idbarang')
             ->pluck('total', 'idbarang');
+        $pinjamDigunakan = BarangPinjamUsage::where('digunakan_sampai', '>', now())
+            ->select('idbarang', DB::raw('SUM(jumlah) as total'))
+            ->groupBy('idbarang')
+            ->pluck('total', 'idbarang');
         $barangTersedia = Barang::whereHas('barangMasuk', function ($q) {
             $q->where('jenis_barang', 'pinjam');
         })
             ->get()
-            ->filter(function ($item) use ($rusakCounts, $pinjamMasuk, $pinjamTerpakai) {
+            ->filter(function ($item) use ($rusakCounts, $pinjamMasuk, $pinjamTerpakai, $pinjamDigunakan) {
                 $rusak = $rusakCounts[$item->idbarang] ?? 0;
                 $totalPinjam = $pinjamMasuk[$item->idbarang] ?? 0;
                 $terpakai = $pinjamTerpakai[$item->idbarang] ?? 0;
-                return ($totalPinjam - $terpakai - $rusak) > 0;
+                $digunakan = $pinjamDigunakan[$item->idbarang] ?? 0;
+                return ($totalPinjam - $terpakai - $rusak - $digunakan) > 0;
             })
             ->count();
         $requestHabisPakaiTotal = BarangKeluar::where('iduser', $userId)->count();
@@ -230,6 +240,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('barang-habis-pakai/{id}/approve', [BarangHabisPakaiController::class, 'approve'])->name('barang-habis-pakai.approve');
     Route::post('barang-habis-pakai/{id}/receive', [BarangHabisPakaiController::class, 'receive'])->name('barang-habis-pakai.receive');
     Route::post('barang-habis-pakai/{id}/reject', [BarangHabisPakaiController::class, 'reject'])->name('barang-habis-pakai.reject');
+    Route::get('barang-pinjam', [BarangPinjamController::class, 'index'])->name('barang-pinjam.index');
+    Route::post('barang-pinjam/{barang}/usage', [BarangPinjamController::class, 'storeUsage'])->name('barang-pinjam.usage');
+    Route::get('barang-pinjam/laporan', [BarangPinjamController::class, 'laporan'])->name('barang-pinjam.laporan');
     Route::resource('barang', BarangController::class);
     Route::resource('barang_masuk', BarangMasukController::class);
     Route::resource('inventaris-ruang', InventarisRuangController::class)->only(['index', 'create', 'store', 'destroy']);

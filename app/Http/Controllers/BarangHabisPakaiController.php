@@ -8,6 +8,7 @@ use App\Models\BarangMasuk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Support\ActivityLogger;
 
 class BarangHabisPakaiController extends Controller
 {
@@ -234,7 +235,7 @@ class BarangHabisPakaiController extends Controller
                 return ['error' => 'Stok barang tidak mencukupi.'];
             }
 
-            BarangKeluar::create([
+            $keluar = BarangKeluar::create([
                 'idbarang' => $barang->idbarang,
                 'iduser' => $user->id,
                 'tgl_keluar' => now()->toDateString(),
@@ -244,12 +245,21 @@ class BarangHabisPakaiController extends Controller
                 'status' => 'pending',
             ]);
 
-            return ['success' => true];
+            return [
+                'success' => true,
+                'barang_nama' => $barang->nama_barang ?? '-',
+                'jumlah' => $keluar->jumlah,
+            ];
         });
 
         if (!empty($result['error'])) {
             return back()->with('error', $result['error'])->withInput();
         }
+
+        ActivityLogger::log(
+            'Request Barang Habis Pakai',
+            'Mengajukan request barang: ' . ($result['barang_nama'] ?? '-') . ' (' . ($result['jumlah'] ?? 0) . ' unit).'
+        );
 
         return back()->with('success', 'Permintaan barang habis pakai berhasil dikirim dan menunggu persetujuan.');
     }
@@ -292,12 +302,21 @@ class BarangHabisPakaiController extends Controller
 
             $barang->decrement('stok', $keluar->jumlah);
 
-            return ['success' => true];
+            return [
+                'success' => true,
+                'nama_barang' => $keluar->barang?->nama_barang,
+                'jumlah' => $keluar->jumlah,
+            ];
         });
 
         if (!empty($result['error'])) {
             return back()->with('error', $result['error']);
         }
+
+        ActivityLogger::log(
+            'Setujui Request Barang',
+            'Menyetujui request barang: ' . ($result['nama_barang'] ?? '-') . ' (' . ($result['jumlah'] ?? 0) . ' unit).'
+        );
 
         return back()->with('success', 'Permintaan barang habis pakai disetujui.');
     }
@@ -320,6 +339,11 @@ class BarangHabisPakaiController extends Controller
         $keluar->update([
             'tgl_diterima' => now(),
         ]);
+
+        ActivityLogger::log(
+            'Barang Diterima',
+            'Menandai barang diterima untuk request ID ' . $keluar->idbarang_keluar . '.'
+        );
 
         return back()->with('success', 'Permintaan barang habis pakai ditandai sudah diterima.');
     }
@@ -345,6 +369,11 @@ class BarangHabisPakaiController extends Controller
             'rejected_at' => now(),
             'alasan_penolakan' => $validated['alasan_penolakan'],
         ]);
+
+        ActivityLogger::log(
+            'Tolak Request Barang',
+            'Menolak request barang ID ' . $keluar->idbarang_keluar . '.'
+        );
 
         return back()->with('success', 'Permintaan barang habis pakai ditolak.');
     }
