@@ -11,6 +11,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Support\KodeInventarisGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class InventarisRuangController extends Controller
 {
@@ -506,6 +507,18 @@ class InventarisRuangController extends Controller
             ->setPaper('A4', 'portrait');
 
         return $pdf->download('Riwayat_Pemindahan_Inventaris.pdf');
+    }
+
+    public function label(BarangUnit $inventaris_ruang)
+    {
+        $unit = BarangUnit::with(['barang', 'ruang', 'barangMasuk', 'kerusakanAktif'])
+            ->findOrFail($inventaris_ruang->id);
+
+        $pdf = Pdf::loadView('pegawai.inventaris_ruang.label', compact('unit'))
+            ->setPaper('A4', 'portrait');
+
+        $safeCode = Str::slug((string) ($unit->kode_unit ?? 'unit'));
+        return $pdf->download('Label_Inventaris_' . ($safeCode !== '' ? $safeCode : 'unit') . '.pdf');
     }
 
 }

@@ -105,6 +105,7 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
     Route::resource('inventaris-ruang', InventarisRuangController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::get('inventaris-ruang/riwayat', [InventarisRuangController::class, 'moveHistory'])->name('inventaris-ruang.riwayat');
     Route::get('inventaris-ruang/riwayat/cetak', [InventarisRuangController::class, 'moveHistoryPdf'])->name('inventaris-ruang.riwayat.cetak');
+    Route::get('inventaris-ruang/{inventaris_ruang}/label', [InventarisRuangController::class, 'label'])->name('inventaris-ruang.label');
     Route::post('inventaris-ruang/{inventaris_ruang}/mark-rusak', [InventarisRuangController::class, 'markRusak'])->name('inventaris-ruang.mark-rusak');
     Route::post('inventaris-ruang/{inventaris_ruang}/move', [InventarisRuangController::class, 'moveRuang'])->name('inventaris-ruang.move');
     Route::patch('inventaris-ruang/{inventaris_ruang}/kerusakan', [InventarisRuangController::class, 'updateKerusakan'])->name('inventaris-ruang.update-kerusakan');
@@ -275,6 +276,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('inventaris-ruang', InventarisRuangController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::get('inventaris-ruang/riwayat', [InventarisRuangController::class, 'moveHistory'])->name('inventaris-ruang.riwayat');
     Route::get('inventaris-ruang/riwayat/cetak', [InventarisRuangController::class, 'moveHistoryPdf'])->name('inventaris-ruang.riwayat.cetak');
+    Route::get('inventaris-ruang/{inventaris_ruang}/label', [InventarisRuangController::class, 'label'])->name('inventaris-ruang.label');
     Route::post('inventaris-ruang/{inventaris_ruang}/mark-rusak', [InventarisRuangController::class, 'markRusak'])->name('inventaris-ruang.mark-rusak');
     Route::post('inventaris-ruang/{inventaris_ruang}/move', [InventarisRuangController::class, 'moveRuang'])->name('inventaris-ruang.move');
     Route::patch('inventaris-ruang/{inventaris_ruang}/kerusakan', [InventarisRuangController::class, 'updateKerusakan'])->name('inventaris-ruang.update-kerusakan');

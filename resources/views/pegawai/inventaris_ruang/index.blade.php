@@ -306,6 +306,13 @@
                 Pindahkan
             </button>
         </form>
+        <a href="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.label', $unit) }}" target="_blank"
+            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-700/80 hover:bg-slate-700 text-white shadow-md shadow-slate-700/30 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10M7 11h10M7 15h6M5 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m0 10v2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-2" />
+            </svg>
+            Label
+        </a>
         <form action="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.destroy', $unit) }}" method="POST" data-confirm="Hapus unit ini?">
             @csrf
             @method('DELETE')
