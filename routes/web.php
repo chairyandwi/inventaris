@@ -103,7 +103,10 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
     Route::resource('barang', BarangController::class);
     Route::resource('barang_masuk', BarangMasukController::class);
     Route::resource('inventaris-ruang', InventarisRuangController::class)->only(['index', 'create', 'store', 'destroy']);
+    Route::get('inventaris-ruang/riwayat', [InventarisRuangController::class, 'moveHistory'])->name('inventaris-ruang.riwayat');
+    Route::get('inventaris-ruang/riwayat/cetak', [InventarisRuangController::class, 'moveHistoryPdf'])->name('inventaris-ruang.riwayat.cetak');
     Route::post('inventaris-ruang/{inventaris_ruang}/mark-rusak', [InventarisRuangController::class, 'markRusak'])->name('inventaris-ruang.mark-rusak');
+    Route::post('inventaris-ruang/{inventaris_ruang}/move', [InventarisRuangController::class, 'moveRuang'])->name('inventaris-ruang.move');
     Route::patch('inventaris-ruang/{inventaris_ruang}/kerusakan', [InventarisRuangController::class, 'updateKerusakan'])->name('inventaris-ruang.update-kerusakan');
     Route::delete('inventaris-ruang/{inventaris_ruang}/kerusakan', [InventarisRuangController::class, 'restoreKerusakan'])->name('inventaris-ruang.restore-kerusakan');
 
@@ -154,9 +157,11 @@ Route::middleware(['auth', 'role:peminjam'])->prefix('peminjam')->name('peminjam
             ->select('idbarang', DB::raw('SUM(jumlah) as total'))
             ->groupBy('idbarang')
             ->pluck('total', 'idbarang');
-        $barangTersedia = Barang::whereHas('barangMasuk', function ($q) {
+        $barangPinjamAvailable = Barang::whereHas('barangMasuk', function ($q) {
             $q->where('jenis_barang', 'pinjam');
         })
+            ->where('kondisi_pinjam', 'tersedia')
+            ->with('kategori')
             ->get()
             ->filter(function ($item) use ($rusakCounts, $pinjamMasuk, $pinjamTerpakai, $pinjamDigunakan) {
                 $rusak = $rusakCounts[$item->idbarang] ?? 0;
@@ -165,7 +170,27 @@ Route::middleware(['auth', 'role:peminjam'])->prefix('peminjam')->name('peminjam
                 $digunakan = $pinjamDigunakan[$item->idbarang] ?? 0;
                 return ($totalPinjam - $terpakai - $rusak - $digunakan) > 0;
             })
-            ->count();
+            ->map(function ($item) use ($rusakCounts, $pinjamMasuk, $pinjamTerpakai, $pinjamDigunakan) {
+                $rusak = $rusakCounts[$item->idbarang] ?? 0;
+                $totalPinjam = $pinjamMasuk[$item->idbarang] ?? 0;
+                $terpakai = $pinjamTerpakai[$item->idbarang] ?? 0;
+                $digunakan = $pinjamDigunakan[$item->idbarang] ?? 0;
+                $item->available_stok = max(($totalPinjam - $terpakai - $rusak - $digunakan), 0);
+                return $item;
+            })
+            ->sortByDesc('available_stok')
+            ->values();
+        $barangTersedia = $barangPinjamAvailable->count();
+        $barangPinjamList = $barangPinjamAvailable->take(6);
+        $barangHabisPakaiList = Barang::whereHas('barangMasuk', function ($q) {
+            $q->where('jenis_barang', 'habis_pakai');
+        })
+            ->where('stok', '>', 0)
+            ->with('kategori')
+            ->orderByDesc('stok')
+            ->orderBy('nama_barang')
+            ->take(6)
+            ->get();
         $requestHabisPakaiTotal = BarangKeluar::where('iduser', $userId)->count();
         $requestHabisPakaiUnit = BarangKeluar::where('iduser', $userId)->sum('jumlah');
         $requestHabisPakaiBulan = BarangKeluar::where('iduser', $userId)
@@ -180,6 +205,8 @@ Route::middleware(['auth', 'role:peminjam'])->prefix('peminjam')->name('peminjam
             'selesaiPeminjaman',
             'ditolakPeminjaman',
             'barangTersedia',
+            'barangPinjamList',
+            'barangHabisPakaiList',
             'requestHabisPakaiTotal',
             'requestHabisPakaiUnit',
             'requestHabisPakaiBulan',
@@ -246,7 +273,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('barang', BarangController::class);
     Route::resource('barang_masuk', BarangMasukController::class);
     Route::resource('inventaris-ruang', InventarisRuangController::class)->only(['index', 'create', 'store', 'destroy']);
+    Route::get('inventaris-ruang/riwayat', [InventarisRuangController::class, 'moveHistory'])->name('inventaris-ruang.riwayat');
+    Route::get('inventaris-ruang/riwayat/cetak', [InventarisRuangController::class, 'moveHistoryPdf'])->name('inventaris-ruang.riwayat.cetak');
     Route::post('inventaris-ruang/{inventaris_ruang}/mark-rusak', [InventarisRuangController::class, 'markRusak'])->name('inventaris-ruang.mark-rusak');
+    Route::post('inventaris-ruang/{inventaris_ruang}/move', [InventarisRuangController::class, 'moveRuang'])->name('inventaris-ruang.move');
     Route::patch('inventaris-ruang/{inventaris_ruang}/kerusakan', [InventarisRuangController::class, 'updateKerusakan'])->name('inventaris-ruang.update-kerusakan');
     Route::delete('inventaris-ruang/{inventaris_ruang}/kerusakan', [InventarisRuangController::class, 'restoreKerusakan'])->name('inventaris-ruang.restore-kerusakan');
     Route::get('peminjaman/laporan', [PeminjamanController::class, 'laporan'])->name('peminjaman.laporan');

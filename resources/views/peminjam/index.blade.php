@@ -70,13 +70,68 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 @php
+                    $totalPeminjaman = $totalPeminjaman ?? 0;
+                    $pendingPeminjaman = $pendingPeminjaman ?? 0;
+                    $dipinjamPeminjaman = $dipinjamPeminjaman ?? 0;
+                    $selesaiPeminjaman = $selesaiPeminjaman ?? 0;
+                    $ditolakPeminjaman = $ditolakPeminjaman ?? 0;
+                    $requestHabisPakaiTotal = $requestHabisPakaiTotal ?? 0;
+                    $requestHabisPakaiBulan = $requestHabisPakaiBulan ?? 0;
+                    $requestHabisPakaiUnit = $requestHabisPakaiUnit ?? 0;
+                    $activePeminjaman = $pendingPeminjaman + $dipinjamPeminjaman;
+                    $pendingRate = $totalPeminjaman > 0 ? round(($pendingPeminjaman / $totalPeminjaman) * 100) : 0;
+                    $dipinjamRate = $totalPeminjaman > 0 ? round(($dipinjamPeminjaman / $totalPeminjaman) * 100) : 0;
+                    $ditolakRate = $totalPeminjaman > 0 ? round(($ditolakPeminjaman / $totalPeminjaman) * 100) : 0;
+                    $requestBulanRate = $requestHabisPakaiTotal > 0 ? round(($requestHabisPakaiBulan / $requestHabisPakaiTotal) * 100) : 0;
                     $cards = [
-                        ['title' => 'Total Peminjaman', 'value' => $totalPeminjaman ?? 0, 'color' => 'from-indigo-500 to-blue-500', 'route' => route('peminjam.peminjaman.index')],
-                        ['title' => 'Pending', 'value' => $pendingPeminjaman ?? 0, 'color' => 'from-amber-500 to-orange-500', 'route' => route('peminjam.peminjaman.index')],
-                        ['title' => 'Sedang Dipinjam', 'value' => $dipinjamPeminjaman ?? 0, 'color' => 'from-emerald-500 to-teal-500', 'route' => route('peminjam.peminjaman.index')],
-                        ['title' => 'Ditolak', 'value' => $ditolakPeminjaman ?? 0, 'color' => 'from-rose-500 to-pink-500', 'route' => route('peminjam.peminjaman.index')],
-                        ['title' => 'Request Habis Pakai', 'value' => $requestHabisPakaiTotal ?? 0, 'color' => 'from-sky-500 to-cyan-500', 'route' => route('peminjam.barang-habis-pakai.index')],
-                        ['title' => 'Request Bulan Ini', 'value' => $requestHabisPakaiBulan ?? 0, 'color' => 'from-fuchsia-500 to-pink-500', 'route' => route('peminjam.barang-habis-pakai.index')],
+                        [
+                            'title' => 'Total Peminjaman',
+                            'value' => $totalPeminjaman,
+                            'note' => 'Aktif: ' . $activePeminjaman . ' | Selesai: ' . $selesaiPeminjaman,
+                            'meta' => 'Ditolak: ' . $ditolakPeminjaman . ' | Pending: ' . $pendingPeminjaman,
+                            'color' => 'from-indigo-500 to-blue-500',
+                            'route' => route('peminjam.peminjaman.index'),
+                        ],
+                        [
+                            'title' => 'Pending Persetujuan',
+                            'value' => $pendingPeminjaman,
+                            'note' => 'Menunggu persetujuan petugas',
+                            'meta' => $pendingRate . '% dari total peminjaman',
+                            'color' => 'from-amber-500 to-orange-500',
+                            'route' => route('peminjam.peminjaman.index'),
+                        ],
+                        [
+                            'title' => 'Sedang Dipinjam',
+                            'value' => $dipinjamPeminjaman,
+                            'note' => 'Barang masih dipinjam',
+                            'meta' => $dipinjamRate . '% dari total peminjaman',
+                            'color' => 'from-emerald-500 to-teal-500',
+                            'route' => route('peminjam.peminjaman.index'),
+                        ],
+                        [
+                            'title' => 'Ditolak',
+                            'value' => $ditolakPeminjaman,
+                            'note' => 'Permintaan tidak disetujui',
+                            'meta' => $ditolakRate . '% dari total peminjaman',
+                            'color' => 'from-rose-500 to-pink-500',
+                            'route' => route('peminjam.peminjaman.index'),
+                        ],
+                        [
+                            'title' => 'Request Habis Pakai',
+                            'value' => $requestHabisPakaiTotal,
+                            'note' => 'Total pengajuan barang habis pakai',
+                            'meta' => 'Total unit diminta: ' . $requestHabisPakaiUnit,
+                            'color' => 'from-sky-500 to-cyan-500',
+                            'route' => route('peminjam.barang-habis-pakai.index'),
+                        ],
+                        [
+                            'title' => 'Request Bulan Ini',
+                            'value' => $requestHabisPakaiBulan,
+                            'note' => 'Pengajuan bulan berjalan',
+                            'meta' => $requestBulanRate . '% dari total request',
+                            'color' => 'from-fuchsia-500 to-pink-500',
+                            'route' => route('peminjam.barang-habis-pakai.index'),
+                        ],
                     ];
                 @endphp
                 @foreach ($cards as $card)
@@ -92,7 +147,8 @@
                         </div>
                         <div class="relative mt-4">
                             <p class="text-3xl font-bold">{{ $card['value'] }}</p>
-                            <p class="text-xs text-white/60 mt-1">Lihat detail</p>
+                            <p class="text-xs text-white/70 mt-1">{{ $card['note'] }}</p>
+                            <p class="text-xs text-white/60 mt-2">{{ $card['meta'] }}</p>
                         </div>
                     </a>
                 @endforeach
@@ -119,10 +175,60 @@
                             <p class="text-xs text-indigo-100/70 mt-1">Sudah dikembalikan</p>
                         </div>
                     </div>
-                    <div class="mt-6">
-                        <canvas id="statusChart" class="w-full h-60"></canvas>
-                        <div id="statusChartFallback" class="hidden mt-4 space-y-2 text-indigo-100/80">
-                            <p class="text-sm font-semibold">Grafik belum tersedia. Gunakan ringkasan di atas.</p>
+                    <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <div>
+                                    <p class="text-xs uppercase tracking-[0.2em] text-indigo-200/70">Barang Dipinjam</p>
+                                    <h4 class="text-sm font-semibold">Tersedia untuk Dipinjam</h4>
+                                </div>
+                                <a href="{{ route('peminjam.peminjaman.create') }}" class="text-xs px-2 py-1 rounded-full bg-white/10 text-indigo-50 hover:bg-white/20 transition">Ajukan</a>
+                            </div>
+                            @if($barangPinjamList->isEmpty())
+                                <p class="text-xs text-indigo-100/70">Belum ada barang yang tersedia saat ini.</p>
+                            @else
+                                <div class="space-y-2">
+                                    @foreach ($barangPinjamList as $item)
+                                        <div class="flex items-center justify-between rounded-lg bg-white/5 border border-white/10 px-3 py-2">
+                                            <div>
+                                                <p class="text-sm font-semibold text-white">{{ $item->nama_barang }}</p>
+                                                <p class="text-xs text-indigo-100/70">{{ $item->kategori->nama_kategori ?? 'Tanpa kategori' }}</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="text-xs text-indigo-100/70">Tersedia</p>
+                                                <p class="text-sm font-semibold">{{ $item->available_stok }} unit</p>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                        <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <div>
+                                    <p class="text-xs uppercase tracking-[0.2em] text-indigo-200/70">Request Barang</p>
+                                    <h4 class="text-sm font-semibold">Barang Habis Pakai</h4>
+                                </div>
+                                <a href="{{ route('peminjam.barang-habis-pakai.index') }}" class="text-xs px-2 py-1 rounded-full bg-white/10 text-indigo-50 hover:bg-white/20 transition">Request</a>
+                            </div>
+                            @if($barangHabisPakaiList->isEmpty())
+                                <p class="text-xs text-indigo-100/70">Stok barang habis pakai belum tersedia.</p>
+                            @else
+                                <div class="space-y-2">
+                                    @foreach ($barangHabisPakaiList as $item)
+                                        <div class="flex items-center justify-between rounded-lg bg-white/5 border border-white/10 px-3 py-2">
+                                            <div>
+                                                <p class="text-sm font-semibold text-white">{{ $item->nama_barang }}</p>
+                                                <p class="text-xs text-indigo-100/70">{{ $item->kategori->nama_kategori ?? 'Tanpa kategori' }}</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="text-xs text-indigo-100/70">Stok</p>
+                                                <p class="text-sm font-semibold">{{ $item->stok }} unit</p>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -198,68 +304,4 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const canvas = document.getElementById('statusChart');
-    const fallback = document.getElementById('statusChartFallback');
-
-    if (typeof Chart === 'undefined' || !canvas) {
-        if (fallback) fallback.classList.remove('hidden');
-        return;
-    }
-
-    try {
-        const ctx = canvas.getContext('2d');
-        const total = {{ $totalPeminjaman ?? 0 }};
-        const pending = {{ $pendingPeminjaman ?? 0 }};
-        const dipinjam = {{ $dipinjamPeminjaman ?? 0 }};
-        const selesai = {{ $selesaiPeminjaman ?? 0 }};
-        const ditolak = {{ $ditolakPeminjaman ?? 0 }};
-
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Total', 'Pending', 'Dipinjam', 'Selesai', 'Ditolak'],
-                datasets: [{
-                    label: 'Peminjaman',
-                    data: [total, pending, dipinjam, selesai, ditolak],
-                    backgroundColor: [
-                        'rgba(99, 102, 241, 0.7)',
-                        'rgba(245, 158, 11, 0.7)',
-                        'rgba(16, 185, 129, 0.7)',
-                        'rgba(148, 163, 184, 0.7)',
-                        'rgba(239, 68, 68, 0.7)',
-                    ],
-                    borderRadius: 12,
-                    borderSkipped: false
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#0f172a',
-                        borderColor: '#1e293b',
-                        borderWidth: 1,
-                        padding: 10,
-                        titleColor: '#e2e8f0',
-                        bodyColor: '#e2e8f0',
-                    }
-                },
-                scales: {
-                    x: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { weight: '600' } } },
-                    y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#cbd5e1' } }
-                }
-            }
-        });
-    } catch (error) {
-        console.error('Gagal membuat chart status:', error);
-        canvas.style.display = 'none';
-        fallback.classList.remove('hidden');
-    }
-});
-</script>
 @endsection

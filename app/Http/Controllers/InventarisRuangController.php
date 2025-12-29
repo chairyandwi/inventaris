@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Barang;
 use App\Models\BarangUnit;
 use App\Models\BarangUnitKerusakan;
+use App\Models\InventarisRuangMove;
 use App\Models\Ruang;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Support\KodeInventarisGenerator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class InventarisRuangController extends Controller
 {
@@ -388,6 +390,122 @@ class InventarisRuangController extends Controller
         $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
         return redirect()->route($routePrefix . '.inventaris-ruang.index')
             ->with('success', 'Unit barang berhasil dihapus.');
+    }
+
+    public function moveRuang(Request $request, BarangUnit $inventaris_ruang)
+    {
+        $request->validate([
+            'idruang' => 'required|exists:ruang,idruang',
+        ]);
+
+        $targetRuang = Ruang::findOrFail($request->idruang);
+        $asalRuangId = (int) $inventaris_ruang->idruang;
+        if ($asalRuangId === (int) $targetRuang->idruang) {
+            return back()->with('error', 'Ruang tujuan sama dengan ruang saat ini.');
+        }
+
+        $lastNomor = BarangUnit::where('idbarang', $inventaris_ruang->idbarang)
+            ->where('idruang', $targetRuang->idruang)
+            ->max('nomor_unit') ?? 0;
+
+        $newNomor = $lastNomor + 1;
+        $inventaris_ruang->update([
+            'idruang' => $targetRuang->idruang,
+            'nomor_unit' => $newNomor,
+            'kode_unit' => KodeInventarisGenerator::make($inventaris_ruang->barang, $targetRuang, $newNomor),
+        ]);
+
+        InventarisRuangMove::create([
+            'barang_unit_id' => $inventaris_ruang->id,
+            'idbarang' => $inventaris_ruang->idbarang,
+            'idruang_asal' => $asalRuangId,
+            'idruang_tujuan' => $targetRuang->idruang,
+            'moved_by' => Auth::id(),
+            'moved_at' => now(),
+        ]);
+
+        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        return redirect()->route($routePrefix . '.inventaris-ruang.index')
+            ->with('success', 'Unit berhasil dipindahkan ke ruang ' . ($targetRuang->nama_ruang ?? '-'));
+    }
+
+    public function moveHistory(Request $request)
+    {
+        $routePrefix = $this->getRoutePrefix();
+
+        $query = InventarisRuangMove::with(['barang', 'barangUnit', 'ruangAsal', 'ruangTujuan', 'petugas'])
+            ->orderByDesc('moved_at')
+            ->orderByDesc('id');
+
+        if ($request->filled('idbarang')) {
+            $query->where('idbarang', $request->idbarang);
+        }
+
+        if ($request->filled('idruang_asal')) {
+            $query->where('idruang_asal', $request->idruang_asal);
+        }
+
+        if ($request->filled('idruang_tujuan')) {
+            $query->where('idruang_tujuan', $request->idruang_tujuan);
+        }
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('moved_at', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('moved_at', '<=', $request->end_date);
+        }
+
+        $perPage = in_array((int) $request->get('per_page', 15), [10, 15, 25, 50, 100]) ? (int) $request->get('per_page', 15) : 15;
+        $moves = $query->paginate($perPage)->appends($request->only([
+            'idbarang',
+            'idruang_asal',
+            'idruang_tujuan',
+            'start_date',
+            'end_date',
+            'per_page',
+        ]));
+
+        $barang = Barang::orderBy('nama_barang')->get();
+        $ruang = Ruang::orderBy('nama_ruang')->get();
+
+        return view('pegawai.inventaris_ruang.riwayat', compact('moves', 'barang', 'ruang', 'routePrefix'));
+    }
+
+    public function moveHistoryPdf(Request $request)
+    {
+        $query = InventarisRuangMove::with(['barang', 'barangUnit', 'ruangAsal', 'ruangTujuan', 'petugas'])
+            ->orderByDesc('moved_at')
+            ->orderByDesc('id');
+
+        if ($request->filled('idbarang')) {
+            $query->where('idbarang', $request->idbarang);
+        }
+
+        if ($request->filled('idruang_asal')) {
+            $query->where('idruang_asal', $request->idruang_asal);
+        }
+
+        if ($request->filled('idruang_tujuan')) {
+            $query->where('idruang_tujuan', $request->idruang_tujuan);
+        }
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('moved_at', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('moved_at', '<=', $request->end_date);
+        }
+
+        $moves = $query->get();
+        $filters = $request->only(['idbarang', 'idruang_asal', 'idruang_tujuan', 'start_date', 'end_date']);
+
+        $pdf = Pdf::loadView('pegawai.inventaris_ruang.riwayat_pdf', compact('moves', 'filters'))
+            ->setPaper('A4', 'portrait');
+
+        return $pdf->download('Riwayat_Pemindahan_Inventaris.pdf');
     }
 
 }

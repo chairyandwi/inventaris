@@ -19,13 +19,22 @@
                     <h1 class="text-3xl sm:text-4xl font-bold leading-tight mt-2">Mapping unit barang per ruang</h1>
                     <p class="mt-3 text-indigo-50/90 max-w-2xl">Pantau penyebaran aset tetap per ruang, unduh laporan, dan jaga keterisian ruang tetap terukur.</p>
                 </div>
-                <a href="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.create') }}"
-                   class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-indigo-700 font-semibold shadow-lg shadow-indigo-500/30 hover:-translate-y-0.5 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m-6-6h12" />
-                    </svg>
-                    Tambah Inventaris
-                </a>
+                <div class="flex flex-wrap items-center gap-3">
+                    <a href="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.riwayat') }}"
+                       class="inline-flex items-center gap-2 px-4 py-3 rounded-xl border border-white/20 text-white/90 font-semibold hover:bg-white/10 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        Riwayat Pemindahan
+                    </a>
+                    <a href="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.create') }}"
+                       class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-indigo-700 font-semibold shadow-lg shadow-indigo-500/30 hover:-translate-y-0.5 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m-6-6h12" />
+                        </svg>
+                        Tambah Inventaris
+                    </a>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
@@ -280,6 +289,23 @@
         <p>{{ $barang?->kode_barang ?? '-' }} • Unit ke-{{ $unit->nomor_unit }}</p>
     </div>
     <div class="flex flex-wrap items-center gap-2">
+        <form action="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.move', $unit) }}" method="POST" class="flex items-center gap-2">
+            @csrf
+            <select name="idruang" required class="rounded-lg bg-slate-800/60 border border-white/10 text-white text-xs px-2 py-1 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
+                <option class="text-slate-900" value="">Pindah ke...</option>
+                @foreach($ruangAll ?? $ruang as $r)
+                    <option class="text-slate-900" value="{{ $r->idruang }}" @selected($r->idruang == $unit->idruang)>
+                        {{ $r->nama_ruang }}
+                    </option>
+                @endforeach
+            </select>
+            <button type="submit" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-500/80 hover:bg-indigo-500 text-white shadow-md shadow-indigo-500/30 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12h16m-7-7 7 7-7 7" />
+                </svg>
+                Pindahkan
+            </button>
+        </form>
         <form action="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.destroy', $unit) }}" method="POST" data-confirm="Hapus unit ini?">
             @csrf
             @method('DELETE')

@@ -170,6 +170,12 @@
                         </svg>
                         <span>Laporan Inventaris Ruang</span>
                     </a>
+                    <a href="{{ route('pegawai.inventaris-ruang.riwayat') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-indigo-900/40 transition">
+                        <svg class="w-5 h-5 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        <span>Riwayat Perpindahan</span>
+                    </a>
                     <a href="{{ route('pegawai.peminjaman.laporan') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-indigo-900/40 transition">
                         <svg class="w-5 h-5 text-sky-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12M8 11h12m-7 4h7M5 7h.01M5 11h.01M5 15h.01" />
@@ -373,6 +379,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10M4 18h10" />
                     </svg>
                     Laporan Inventaris Ruang
+                </a>
+                <a href="{{ route('pegawai.inventaris-ruang.riwayat') }}" class="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-white/10 transition">
+                    <svg class="w-5 h-5 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    Riwayat Perpindahan
                 </a>
                 <a href="{{ route('pegawai.peminjaman.laporan') }}" class="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-white/10 transition">
                     <svg class="w-5 h-5 text-sky-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">

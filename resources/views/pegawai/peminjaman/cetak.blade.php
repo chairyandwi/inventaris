@@ -24,6 +24,7 @@
         hr { border:none; border-top:1px solid black; margin:20px 0; }
         .report-title { text-align:center; padding:10px; margin-bottom:20px; }
         .report-title b { font-size:14pt; font-weight:bold; text-transform:uppercase; letter-spacing:1px; }
+        .signature-block { page-break-inside: avoid; }
         table.isi { border-collapse:collapse; font-size:11pt; width:100%; margin-top:10px; }
         .isi th { border:1px solid #000; padding:8px 5px; background-color:#f5f5f5; font-weight:bold; text-align:center; }
         .isi td { border:1px solid #000; padding:5px; vertical-align:middle; }
@@ -209,19 +210,26 @@
 
     </div>
 
-    <div style="margin-top: 18px; text-align: right; padding-right: 6mm; line-height: 1.4; font-family: 'Arial', sans-serif; page-break-inside: avoid;">
-        <div style="font-size: 11pt; font-weight: bold; text-transform: uppercase;">Sleman, {{ $tanggal }}</div>
-        <div style="font-size: 11pt; font-weight: bold; margin-top: 4px;">Petugas Inventaris</div>
-        @if ($signatureBase64)
-            <div style="margin-top: 10px;">
-                <img src="{{ $signatureBase64 }}" alt="Tanda Tangan Petugas" style="height: 70px; width: auto; object-fit: contain;">
-            </div>
-        @else
-            <div style="margin-top: 26px;"></div>
-        @endif
-        <div style="margin-top: 12px; font-weight: bold; text-decoration: underline; font-size: 11pt;">
-            {{ $petugasInventaris }}
-        </div>
+    <div class="signature-block" style="margin-top: 18px; line-height: 1.4; font-family: 'Arial', sans-serif;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="width: 60%;"></td>
+                <td style="width: 40%; text-align: center;">
+                    <div style="font-size: 11pt; font-weight: bold; text-transform: uppercase;">Sleman, {{ $tanggal }}</div>
+                    <div style="font-size: 11pt; font-weight: bold; margin-top: 4px;">Petugas Inventaris</div>
+                    @if ($signatureBase64)
+                        <div style="margin-top: 10px;">
+                            <img src="{{ $signatureBase64 }}" alt="Tanda Tangan Petugas" style="height: 70px; width: auto; object-fit: contain;">
+                        </div>
+                    @else
+                        <div style="margin-top: 26px;"></div>
+                    @endif
+                    <div style="margin-top: 12px; font-weight: bold; text-decoration: underline; font-size: 11pt;">
+                        {{ $petugasInventaris }}
+                    </div>
+                </td>
+            </tr>
+        </table>
     </div>
 
 </body>

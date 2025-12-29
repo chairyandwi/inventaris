@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Inventaris Ruang</title>
+    <title>Riwayat Pemindahan Inventaris Ruang</title>
     <style>
         * {
             margin: 0;
@@ -187,65 +187,42 @@
         <hr style="border: none; border-top: 1px solid black; margin: 20px 0;">
 
         <div class="report-title">
-            <b>LAPORAN INVENTARIS PER RUANG</b>
+            <b>RIWAYAT PEMINDAHAN INVENTARIS RUANG</b>
         </div>
 
-        <div>
-            @php
-                $ruangLabel = $selectedRuang?->nama_ruang;
-                $gedungLabel = $selectedRuang?->nama_gedung;
-                $showRuang = $ruangLabel !== null && $ruangLabel !== '';
-                $showGedung = $gedungLabel !== null && $gedungLabel !== '';
-                $showLantai = isset($lantaiFilter) && $lantaiFilter !== '';
-                $showGedungFilter = isset($gedungFilter) && $gedungFilter !== '';
-            @endphp
-            @if ($showRuang || $showGedung || $showLantai || $showGedungFilter)
-                @if ($showRuang)
-                    <div class="section-title">Nama Ruang: {{ $ruangLabel }}</div>
-                @endif
-                @if ($showGedung)
-                    <div class="section-title" style="margin-top: 4px;">Gedung: {{ $gedungLabel }}</div>
-                @elseif ($showGedungFilter)
-                    <div class="section-title" style="margin-top: 4px;">Gedung: {{ $gedungFilter }}</div>
-                @endif
-                @if ($showLantai)
-                    <div class="section-title" style="margin-top: 4px;">Lantai: {{ $lantaiFilter }}</div>
-                @endif
-            @endif
-            <table class="isi">
-                <thead> <br>
-                    <tr>
-                        <th width="20">NO</th>
-                        <th>Ruang</th>
-                        <th>Gedung</th>
-                        <th>Kode Unit</th>
-                        <th>Barang</th>
-                        <th>Kategori</th>
-                        <th>Keterangan</th>
-                    </tr>
-                </thead>
-                @php $urut = 1; @endphp
-                @forelse($units as $unit)
-                    <tr>
-                        <td class="number-cell">{{ $urut++ }}</td>
-                        <td class="category-cell">{{ $unit->ruang->nama_ruang ?? '-' }}</td>
-                        <td class="category-cell">{{ $unit->ruang->nama_gedung ?? '-' }}</td>
-                        <td class="code-cell">{{ $unit->kode_unit ?? '-' }}</td>
-                        <td class="category-cell">{{ $unit->barang->nama_barang ?? '-' }}</td>
-                        <td class="category-cell">{{ $unit->barang->kategori->nama_kategori ?? '-' }}</td>
-                        <td class="category-cell">{{ $unit->keterangan ?? '-' }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="empty-state">
-                            Belum ada unit barang tercatat per ruang
-                        </td>
-                    </tr>
-                @endforelse
-            </table>
-        </div>
+        <table class="isi">
+            <thead>
+                <tr>
+                    <th width="20">NO</th>
+                    <th>Kode Unit</th>
+                    <th>Barang</th>
+                    <th>Ruang Asal</th>
+                    <th>Ruang Tujuan</th>
+                    <th>Tanggal</th>
+                    <th>Petugas</th>
+                </tr>
+            </thead>
+            @php $urut = 1; @endphp
+            @forelse($moves as $move)
+                <tr>
+                    <td class="number-cell">{{ $urut++ }}</td>
+                    <td class="code-cell">{{ $move->barangUnit?->kode_unit ?? '-' }}</td>
+                    <td class="category-cell">{{ $move->barang?->nama_barang ?? '-' }}</td>
+                    <td class="category-cell">{{ $move->ruangAsal?->nama_ruang ?? '-' }}</td>
+                    <td class="category-cell">{{ $move->ruangTujuan?->nama_ruang ?? '-' }}</td>
+                    <td class="category-cell">{{ $move->moved_at?->format('d-m-Y H:i') ?? '-' }}</td>
+                    <td class="category-cell">{{ $move->petugas?->nama ?? $move->petugas?->username ?? '-' }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="7" class="empty-state">
+                        Belum ada riwayat pemindahan inventaris ruang
+                    </td>
+                </tr>
+            @endforelse
+        </table>
 
-        <div class="signature-block" style="margin-top: 24px; text-align: right; line-height: 1.4;">
+        <div class="signature-block" style="margin-top: 24px; line-height: 1.4;">
             <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                     <td style="width: 60%;"></td>
