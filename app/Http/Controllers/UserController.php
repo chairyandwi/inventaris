@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 
+use Illuminate\Support\Facades\Auth;
 class UserController extends Controller
 {
     /**
@@ -71,7 +72,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
         $validator = Validator::make($request->all(), [
             'nama'      => 'required|string|max:255',
             'username'  => 'required|string|max:100|unique:users,username',
@@ -119,7 +120,7 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
         $validator = Validator::make($request->all(), [
             'nama'      => 'required|string|max:255',
             'username'  => [
@@ -157,7 +158,7 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
         try {
             $user->delete();
             return redirect()->route($routePrefix . '.user.index')->with('success', 'User berhasil dihapus');

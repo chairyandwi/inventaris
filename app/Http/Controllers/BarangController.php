@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Arr;
 
+use Illuminate\Support\Facades\Auth;
 class BarangController extends Controller
 {
     public function index(Request $request)
@@ -56,7 +57,7 @@ class BarangController extends Controller
 
     public function store(BarangRequest $request)
     {
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
         $validated = $request->validated();
         $barangData = Arr::except($validated, ['ruang_tetap', 'jumlah_tetap', 'keterangan_inventaris']);
         $barangData['stok'] = 0; // stok dikalkulasi dari transaksi (barang masuk / peminjaman)
@@ -89,7 +90,7 @@ class BarangController extends Controller
 
     public function update(BarangRequest $request, Barang $barang)
     {
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
         $validated = $request->validated();
         $barangData = Arr::except($validated, ['ruang_tetap', 'jumlah_tetap', 'keterangan_inventaris', 'stok']);
 
@@ -100,7 +101,7 @@ class BarangController extends Controller
 
     public function destroy(Barang $barang)
     {
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
         try {
             $barang->delete();
             return redirect()->route($routePrefix . '.barang.index')->with('success', 'Barang berhasil dihapus');

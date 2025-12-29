@@ -16,11 +16,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Support\KodeInventarisGenerator;
 
+use Illuminate\Support\Facades\Auth;
 class BarangMasukController extends Controller
 {
     private function getRoutePrefix(): string
     {
-        return auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        return Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
     }
 
     public function index(Request $request)
@@ -334,14 +335,14 @@ class BarangMasukController extends Controller
                 });
         }
 
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
 
         return view('pegawai.barang_masuk.edit', compact('barangMasuk', 'barang', 'kategori', 'ruang', 'distribusi', 'routePrefix'));
     }
 
     public function update(BarangMasukRequest $request, BarangMasuk $barangMasuk)
     {
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
         $validator = Validator::make($request->all(), [
             'idbarang'    => 'required|exists:barang,idbarang',
             'tgl_masuk'   => 'required|date',
@@ -539,7 +540,7 @@ class BarangMasukController extends Controller
 
     public function destroy(BarangMasuk $barangMasuk)
     {
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
         try {
             DB::transaction(function () use ($barangMasuk) {
                 $barang = Barang::lockForUpdate()->find($barangMasuk->idbarang);

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
+use Illuminate\Support\Facades\Auth;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -44,8 +45,8 @@ class AppServiceProvider extends ServiceProvider
         }
 
         View::composer('pegawai::*', function ($view) {
-            $homeRoute = (auth()->check() && auth()->user()->role === 'admin') ? 'admin.index' : 'pegawai.index';
-            $routePrefix = (auth()->check() && auth()->user()->role === 'admin') ? 'admin' : 'pegawai';
+            $homeRoute = (Auth::check() && Auth::user()->role === 'admin') ? 'admin.index' : 'pegawai.index';
+            $routePrefix = (Auth::check() && Auth::user()->role === 'admin') ? 'admin' : 'pegawai';
             $view->with(compact('homeRoute', 'routePrefix'));
         });
     }

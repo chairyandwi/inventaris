@@ -14,7 +14,7 @@ class BarangHabisPakaiController extends Controller
 {
     private function getRoutePrefix(): string
     {
-        return auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        return Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
     }
 
     public function index(Request $request)

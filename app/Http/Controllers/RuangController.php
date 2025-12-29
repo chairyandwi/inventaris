@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use App\Support\ActivityLogger;
 
+use Illuminate\Support\Facades\Auth;
 class RuangController extends Controller
 {
     public function index(Request $request)
@@ -58,7 +59,7 @@ class RuangController extends Controller
 
     public function store(Request $request)
     {
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
         $validator = Validator::make($request->all(), [
             'nama_ruang'   => 'required|string|max:100|unique:ruang,nama_ruang',
             'kode_ruang'   => 'required|string|max:50|unique:ruang,kode_ruang',
@@ -100,7 +101,7 @@ class RuangController extends Controller
 
     public function update(Request $request, Ruang $ruang)
     {
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
         $validator = Validator::make($request->all(), [
             'nama_ruang'   => [
                 'required',
@@ -141,7 +142,7 @@ class RuangController extends Controller
 
     public function destroy(Ruang $ruang)
     {
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
         try {
             $nama = $ruang->nama_ruang;
             $ruang->delete();

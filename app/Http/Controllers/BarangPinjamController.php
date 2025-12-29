@@ -17,7 +17,7 @@ class BarangPinjamController extends Controller
 {
     public function index(Request $request)
     {
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
 
         $pinjamBarangIds = $this->getPinjamBarangIds();
         $pinjamMasuk = BarangMasuk::where('jenis_barang', 'pinjam')
@@ -230,7 +230,7 @@ class BarangPinjamController extends Controller
             'Mencatat pemakaian barang: ' . ($barang->nama_barang ?? '-') . ' (Merk: ' . $merk . ').'
         );
 
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
 
         return redirect()->route($routePrefix . '.barang-pinjam.index')
             ->with('success', 'Pemakaian barang dicatat.');

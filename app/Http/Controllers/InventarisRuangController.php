@@ -16,7 +16,7 @@ class InventarisRuangController extends Controller
 {
     private function getRoutePrefix(): string
     {
-        return auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        return Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
     }
 
     public function index(Request $request)
@@ -378,7 +378,7 @@ class InventarisRuangController extends Controller
 
         BarangUnit::insert($records);
 
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
         return redirect()->route($routePrefix . '.inventaris-ruang.index')
             ->with('success', $request->jumlah . ' unit barang berhasil dicatat untuk ruang ini.');
     }
@@ -387,7 +387,7 @@ class InventarisRuangController extends Controller
     {
         $inventaris_ruang->delete();
 
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
         return redirect()->route($routePrefix . '.inventaris-ruang.index')
             ->with('success', 'Unit barang berhasil dihapus.');
     }
@@ -424,7 +424,7 @@ class InventarisRuangController extends Controller
             'moved_at' => now(),
         ]);
 
-        $routePrefix = auth()->check() && auth()->user()->role === 'admin' ? 'admin' : 'pegawai';
+        $routePrefix = Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
         return redirect()->route($routePrefix . '.inventaris-ruang.index')
             ->with('success', 'Unit berhasil dipindahkan ke ruang ' . ($targetRuang->nama_ruang ?? '-'));
     }
