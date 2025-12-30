@@ -514,11 +514,38 @@ class InventarisRuangController extends Controller
         $unit = BarangUnit::with(['barang', 'ruang', 'barangMasuk', 'kerusakanAktif'])
             ->findOrFail($inventaris_ruang->id);
 
-        $pdf = Pdf::loadView('pegawai.inventaris_ruang.label', compact('unit'))
-            ->setPaper('A4', 'portrait');
+        $units = collect([$unit]);
+        $layout = 'single';
+
+        $pdf = Pdf::loadView('pegawai.inventaris_ruang.label', compact('units', 'layout'))
+            ->setPaper([0, 0, 141.73, 70.87], 'portrait');
 
         $safeCode = Str::slug((string) ($unit->kode_unit ?? 'unit'));
         return $pdf->download('Label_Inventaris_' . ($safeCode !== '' ? $safeCode : 'unit') . '.pdf');
+    }
+
+    public function labelRuang(Request $request)
+    {
+        $request->validate([
+            'idruang' => 'required|exists:ruang,idruang',
+        ]);
+
+        $ruang = Ruang::findOrFail($request->idruang);
+        $units = BarangUnit::with(['barang', 'ruang', 'barangMasuk', 'kerusakanAktif'])
+            ->where('idruang', $ruang->idruang)
+            ->orderBy('kode_unit')
+            ->get();
+
+        if ($units->isEmpty()) {
+            return back()->with('error', 'Tidak ada unit di ruang ini untuk dicetak label.');
+        }
+
+        $layout = 'grid';
+        $pdf = Pdf::loadView('pegawai.inventaris_ruang.label', compact('units', 'layout'))
+            ->setPaper('A4', 'portrait');
+
+        $safeName = Str::slug((string) ($ruang->nama_ruang ?? 'ruang'));
+        return $pdf->download('Label_Ruang_' . ($safeName !== '' ? $safeName : 'ruang') . '.pdf');
     }
 
 }

@@ -1,194 +1,207 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Label Inventaris</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<title>Label Inventaris</title>
 
-        body {
-            font-family: Arial, sans-serif;
-            color: #111;
-            background: #fff;
-        }
+<style>
+/* ========== RESET ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        .sheet {
-            padding: 10mm 8mm;
-        }
+/* ========== KERTAS ========== */
+@page {
+    size: A4;
+    margin: 12mm;
+}
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(3, 5cm);
-            grid-auto-rows: 2.5cm;
-            gap: 4mm;
-        }
+body {
+    font-family: Arial, sans-serif;
+    font-size: 7pt;
+    color: #111;
+}
 
-        .label {
-            width: 5cm;
-            height: 2.5cm;
-            border: 0.35mm solid #111;
-            padding: 1mm;
-        }
+/* ========== GRID KERTAS ========== */
+.sheet {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 4mm 4mm;
+}
 
-        .label-inner {
-            width: 100%;
-            height: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-        }
+.sheet td {
+    width: 33.33%;
+}
 
-        .label-inner tr {
-            height: 8.3mm;
-        }
+/* ========== LABEL ========== */
+.label {
+    width: 6cm;
+    height: 2.5cm;
+    border: 0.35mm solid #111;
+}
 
-        .logo-col {
-            width: 22%;
-            text-align: center;
-            vertical-align: middle;
-            border-right: 0.25mm solid #111;
-        }
+/* ========== STRUKTUR LABEL ========== */
+.label-table {
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
 
-        .info-col {
-            width: 58%;
-            vertical-align: middle;
-            text-align: center;
-            border-right: 0.25mm solid #111;
-        }
+.label-table td {
+    vertical-align: middle;
+    text-align: center;
+    border-right: 0.25mm solid #111;
+}
 
-        .cond-col {
-            width: 20%;
-            text-align: center;
-            vertical-align: middle;
-            font-size: 7pt;
-            font-weight: bold;
-        }
+.label-table td:last-child {
+    border-right: none;
+}
 
-        .label-inner td {
-            line-height: 1.15;
-            overflow: hidden;
-        }
+/* ========== KOLOM (FINAL) ========== */
+.col-logo {
+    width: 1.1cm;
+}
 
-        .row {
-            border-bottom: 0.25mm solid #111;
-        }
+.col-info {
+    width: 4.1cm;
+    padding: 0.8mm 1.2mm;
+}
 
-        .row:last-child {
-            border-bottom: none;
-        }
+.col-cond {
+    width: 0.8cm;
+    font-weight: bold;
+}
 
-        .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            min-height: 20mm;
-        }
+/* ========== LOGO ========== */
+.logo img {
+    width: 9mm;
+    height: 9mm;
+    object-fit: contain;
+}
 
-        .title {
-            font-weight: bold;
-            font-size: 7pt;
-        }
+/* ========== INFO INTERNAL ========== */
+.info-block {
+    border-bottom: 0.25mm solid #111;
+    padding: 0.6mm 0;
+}
 
-        .value {
-            font-size: 7.4pt;
-            font-weight: bold;
-        }
+.info-block:last-child {
+    border-bottom: none;
+}
 
-        .small {
-            font-size: 6.4pt;
-        }
+/* ========== TEKS ========== */
+.title {
+    font-weight: bold;
+    font-size: 6.8pt;
+}
 
-        .muted {
-            color: #444;
-        }
+.value {
+    font-weight: bold;
+    font-size: 6.8pt;
+    white-space: nowrap;
+}
 
-        .cond-label {
-            font-size: 6.2pt;
-            text-transform: uppercase;
-            letter-spacing: 0.2px;
-        }
-    </style>
+.small {
+    font-size: 6pt;
+    color: #444;
+}
+
+/* ========== KONDISI ========== */
+.cond-title {
+    font-size: 6pt;
+}
+
+.cond-value {
+    font-size: 6.6pt;
+    font-weight: bold;
+}
+</style>
 </head>
+
 <body>
-    @php
-        $appConfig = $globalAppConfig ?? null;
-        $usePdfConfig = $appConfig && $appConfig->apply_pdf;
-        $logoFile =
-            $usePdfConfig && $appConfig && $appConfig->logo
-                ? storage_path('app/public/' . $appConfig->logo)
-                : public_path('images/up.png');
-        $logoBase64 = '';
-        if (file_exists($logoFile)) {
-            $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoFile));
-        }
 
-        $isRusak = (bool) $unit->kerusakanAktif;
-        $isKurangBaik = !$isRusak && $unit->keterangan && str_contains(strtolower($unit->keterangan), 'kurang');
-        $statusLabel = $isRusak ? 'Rusak' : ($isKurangBaik ? 'Kurang Baik' : 'Baik');
+@php
+$units = collect($units ?? []);
 
-        $monthNames = [
-            1 => 'Januari',
-            2 => 'Februari',
-            3 => 'Maret',
-            4 => 'April',
-            5 => 'Mei',
-            6 => 'Juni',
-            7 => 'Juli',
-            8 => 'Agustus',
-            9 => 'September',
-            10 => 'Oktober',
-            11 => 'November',
-            12 => 'Desember',
-        ];
-        $cekTanggal = now()->format('d') . ' ' . $monthNames[(int) now()->format('n')] . ' ' . now()->format('Y');
-    @endphp
+$logoPath = $globalAppConfig?->logo
+    ? storage_path('app/public/' . $globalAppConfig->logo)
+    : public_path('images/up.png');
 
-    <div class="sheet">
-        <div class="grid">
-            @for ($i = 0; $i < 9; $i++)
-                <div class="label">
-                    <table class="label-inner">
-                        <tr class="row">
-                            <td class="logo-col" rowspan="3">
-                                <div class="logo">
-                                    @if ($logoBase64)
-                                        <img src="{{ $logoBase64 }}" alt="Logo" style="width: 9mm; height: 9mm; object-fit: contain;">
-                                    @else
-                                        <span class="small">LOGO</span>
-                                    @endif
-                                </div>
-                            </td>
-                            <td class="info-col">
-                                <div class="title">No Reg:</div>
-                                <div class="value">{{ $unit->kode_unit ?? '-' }}</div>
-                            </td>
-                            <td class="cond-col" rowspan="3">
-                                <div class="cond-label">Kondisi</div>
-                                <div>{{ $statusLabel }}</div>
-                            </td>
-                        </tr>
-                        <tr class="row">
-                            <td class="info-col">
-                                <div class="title">Barang:</div>
-                                <div class="value">
-                                    {{ $unit->barang?->nama_barang ?? '-' }}
-                                    <span class="small muted">({{ $unit->ruang?->nama_ruang ?? '-' }})</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="info-col">
-                                <div class="small muted">Cek: {{ $cekTanggal }}</div>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            @endfor
+$logoBase64 = file_exists($logoPath)
+    ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+    : '';
+
+$bulan = [
+    1=>'Januari','Februari','Maret','April','Mei','Juni',
+    'Juli','Agustus','September','Oktober','November','Desember'
+];
+
+$cekTanggal = now()->format('d').' '.$bulan[now()->format('n')].' '.now()->format('Y');
+@endphp
+
+<table class="sheet">
+@foreach ($units->chunk(3) as $row)
+<tr>
+@foreach ($row as $unit)
+@php
+$status = (bool)$unit->kerusakanAktif ? 'Rusak' : 'Baik';
+@endphp
+
+<td>
+<div class="label">
+<table class="label-table">
+<tr>
+
+    <!-- LOGO -->
+    <td class="col-logo">
+        @if ($logoBase64)
+            <div class="logo">
+                <img src="{{ $logoBase64 }}">
+            </div>
+        @endif
+    </td>
+
+    <!-- INFO -->
+    <td class="col-info">
+
+        <div class="info-block">
+            <div class="title">No Reg:</div>
+            <div class="value">{{ $unit->kode_unit }}</div>
         </div>
-    </div>
+
+        <div class="info-block">
+            <div class="title">Barang:</div>
+            <div class="value">{{ $unit->barang?->nama_barang }}</div>
+            <div class="small">({{ $unit->ruang?->nama_ruang }})</div>
+        </div>
+
+        <div class="info-block">
+            <div class="small">Cek: {{ $cekTanggal }}</div>
+        </div>
+
+    </td>
+
+    <!-- KONDISI -->
+    <td class="col-cond">
+        <div class="cond-title">KONDISI</div>
+        <div class="cond-value">{{ $status }}</div>
+    </td>
+
+</tr>
+</table>
+</div>
+</td>
+
+@endforeach
+@for ($i = $row->count(); $i < 3; $i++)
+<td></td>
+@endfor
+</tr>
+@endforeach
+</table>
+
 </body>
 </html>

@@ -145,6 +145,12 @@
                                 class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-900 font-semibold shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition">
                                 Unduh
                             </button>
+                            @if(request('idruang'))
+                                <a href="{{ route(($routePrefix ?? 'pegawai') . '.inventaris-ruang.label-ruang', ['idruang' => request('idruang')]) }}"
+                                   class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-white/10 border border-white/20 text-indigo-50 hover:bg-white/20 transition">
+                                    Cetak Label Ruang
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </form>
