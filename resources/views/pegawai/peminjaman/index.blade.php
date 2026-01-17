@@ -195,8 +195,11 @@
                                                     $bolehMulai = !$p->tgl_pinjam_rencana || now()->greaterThanOrEqualTo($p->tgl_pinjam_rencana->startOfDay());
                                                 @endphp
                                                 <form action="{{ route($routePrefix . '.pickup', $p->idpeminjaman) }}"
-                                                    method="POST" class="inline">
+                                                    method="POST" class="space-y-2">
                                                     @csrf
+                                                    <input type="text" name="rfid_uid" autocomplete="off"
+                                                        placeholder="RFID (opsional)"
+                                                        class="w-full max-w-xs rounded-lg bg-slate-800/70 border border-white/10 text-white text-xs focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 px-2 py-1.5">
                                                     <button type="submit"
                                                         class="px-3 py-2 text-xs rounded text-center shadow transition {{ $bolehMulai ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-white/10 text-indigo-100/60 cursor-not-allowed' }}"
                                                         {{ $bolehMulai ? '' : 'disabled' }}>
@@ -217,6 +220,12 @@
                                                         <input type="checkbox" name="konfirmasi_pengembalian" required class="text-indigo-600 border-white/20 rounded bg-slate-800/70">
                                                         <span>Barang sudah dikembalikan</span>
                                                     </label>
+                                                    <div>
+                                                        <label class="block text-xs font-medium text-indigo-100 mb-1">RFID (opsional)</label>
+                                                        <input type="text" name="rfid_uid" autocomplete="off"
+                                                            class="w-full rounded-lg bg-slate-800/70 border border-white/10 text-white text-xs focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+                                                            placeholder="Scan kartu/tag RFID">
+                                                    </div>
                                                     <button type="submit"
                                                         class="w-full px-2 py-1.5 bg-emerald-500 text-white text-xs rounded shadow hover:bg-emerald-600 transition">Konfirmasi</button>
                                                 </form>

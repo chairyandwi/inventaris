@@ -31,6 +31,7 @@ class User extends Authenticatable
         'divisi',
         'foto_identitas_mahasiswa',
         'foto_identitas_pegawai',
+        'rfid_uid',
     ];
 
     public function missingProfileFields(): array

@@ -242,8 +242,12 @@
                                     </td>
                                     <td class="px-6 py-4 text-sm text-indigo-100/70">
                                         @if($row->status === 'approved' && !$row->tgl_diterima)
-                                            <form method="POST" action="{{ route($routePrefix . '.barang-habis-pakai.receive', $row->idbarang_keluar) }}">
+                                            <form method="POST" action="{{ route($routePrefix . '.barang-habis-pakai.receive', $row->idbarang_keluar) }}"
+                                                class="space-y-2">
                                                 @csrf
+                                                <input type="text" name="rfid_uid" autocomplete="off"
+                                                    placeholder="RFID (opsional)"
+                                                    class="w-full rounded-lg bg-slate-800/70 border border-white/10 text-white text-xs focus:ring-2 focus:ring-sky-400 focus:border-sky-400 px-2 py-1.5">
                                                 <button type="submit" data-confirm="Tandai barang sudah diterima?"
                                                     class="px-3 py-2 rounded-lg bg-sky-500/20 text-sky-100 text-xs font-semibold hover:bg-sky-500/30 transition">
                                                     Tandai Diterima

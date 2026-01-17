@@ -78,6 +78,7 @@ class UserController extends Controller
             'username'  => 'required|string|max:100|unique:users,username',
             'email'     => 'required|email|unique:users,email',
             'nohp'      => 'nullable|string|max:20',
+            'rfid_uid'  => 'nullable|string|max:50|unique:users,rfid_uid',
             'role'      => 'required|in:admin,kabag,pegawai,peminjam',
             'password'  => 'required|string|min:6|confirmed'
         ], [
@@ -95,11 +96,16 @@ class UserController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        $rfidUid = $request->input('rfid_uid');
+        $rfidUid = is_string($rfidUid) ? trim($rfidUid) : null;
+        $rfidUid = $rfidUid !== '' ? $rfidUid : null;
+
         User::create([
             'nama' => $request->nama,
             'username' => $request->username,
             'email' => $request->email,
             'nohp' => $request->nohp,
+            'rfid_uid' => $rfidUid,
             'role' => $request->role,
             'password' => Hash::make($request->password),
         ]);
@@ -135,6 +141,12 @@ class UserController extends Controller
                 Rule::unique('users', 'email')->ignore($user->id, 'id'),
             ],
             'nohp'      => 'nullable|string|max:20',
+            'rfid_uid'  => [
+                'nullable',
+                'string',
+                'max:50',
+                Rule::unique('users', 'rfid_uid')->ignore($user->id, 'id'),
+            ],
             'role'      => 'required|in:admin,kabag,pegawai,peminjam',
             'password'  => 'nullable|string|min:6|confirmed'
         ]);
@@ -143,7 +155,12 @@ class UserController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        $rfidUid = $request->input('rfid_uid');
+        $rfidUid = is_string($rfidUid) ? trim($rfidUid) : null;
+        $rfidUid = $rfidUid !== '' ? $rfidUid : null;
+
         $data = $request->only(['nama', 'username', 'email', 'nohp', 'role']);
+        $data['rfid_uid'] = $rfidUid;
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }

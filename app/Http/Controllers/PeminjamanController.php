@@ -22,6 +22,7 @@ class PeminjamanController extends Controller
      */
     public function index(Request $request)
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
         if ($user && $user->role === 'peminjam') {
@@ -51,6 +52,7 @@ class PeminjamanController extends Controller
      */
     public function create()
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
         if (!$user || $user->role !== 'peminjam') {
@@ -130,6 +132,7 @@ class PeminjamanController extends Controller
      */
     public function store(\App\Http\Requests\PeminjamanRequest $request)
     {
+        /** @var \App\Models\User|null $user */
         $user = $request->user();
         if ($user && $user->role === 'peminjam' && !$user->isProfileComplete()) {
             return redirect()->route('peminjam.profile.edit')
@@ -220,7 +223,7 @@ class PeminjamanController extends Controller
      */
     public function approve($id)
     {
-        $peminjaman = Peminjaman::with('barang')->findOrFail($id);
+        $peminjaman = Peminjaman::with(['barang', 'user'])->findOrFail($id);
 
         if ($peminjaman->status !== 'pending') {
             return back()->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
@@ -283,8 +286,12 @@ class PeminjamanController extends Controller
     /**
      * Tandai barang sudah diambil sesuai jadwal (role: pegawai).
      */
-    public function pickup($id)
+    public function pickup(Request $request, $id)
     {
+        $request->validate([
+            'rfid_uid' => 'nullable|string|max:50',
+        ]);
+
         $peminjaman = Peminjaman::with('barang')->findOrFail($id);
 
         if ($peminjaman->status !== 'disetujui') {
@@ -301,9 +308,21 @@ class PeminjamanController extends Controller
             return back()->with('error', 'Stok barang habis, tidak bisa memulai peminjaman.');
         }
 
+        $rfidUid = $request->input('rfid_uid');
+        $rfidUid = is_string($rfidUid) ? trim($rfidUid) : null;
+        $rfidUid = $rfidUid !== '' ? $rfidUid : null;
+        if ($rfidUid) {
+            $registeredUid = $peminjaman->user?->rfid_uid;
+            if (!$registeredUid || $registeredUid !== $rfidUid) {
+                return back()->with('error', 'RFID tidak sesuai dengan peminjam.');
+            }
+        }
+
         $peminjaman->update([
             'status' => 'dipinjam',
             'tgl_pinjam' => now(),
+            'pickup_konfirmasi_metode' => $rfidUid ? 'rfid' : 'manual',
+            'pickup_rfid_uid' => $rfidUid,
         ]);
 
         $barang->decrement('stok', $peminjaman->jumlah);
@@ -324,18 +343,31 @@ class PeminjamanController extends Controller
         $request->validate([
             'tgl_kembali_real' => 'required|date',
             'konfirmasi_pengembalian' => 'accepted',
+            'rfid_uid' => 'nullable|string|max:50',
         ]);
 
-        $peminjaman = Peminjaman::with('barang')->findOrFail($id);
+        $peminjaman = Peminjaman::with(['barang', 'user'])->findOrFail($id);
         $barang = $peminjaman->barang;
 
         if ($peminjaman->status !== 'dipinjam') {
             return back()->with('error', 'Barang belum dalam status dipinjam.');
         }
 
+        $rfidUid = $request->input('rfid_uid');
+        $rfidUid = is_string($rfidUid) ? trim($rfidUid) : null;
+        $rfidUid = $rfidUid !== '' ? $rfidUid : null;
+        if ($rfidUid) {
+            $registeredUid = $peminjaman->user?->rfid_uid;
+            if (!$registeredUid || $registeredUid !== $rfidUid) {
+                return back()->with('error', 'RFID tidak sesuai dengan peminjam.');
+            }
+        }
+
         $peminjaman->update([
             'status' => 'dikembalikan',
             'tgl_kembali' => $request->tgl_kembali_real,
+            'return_konfirmasi_metode' => $rfidUid ? 'rfid' : 'manual',
+            'return_rfid_uid' => $rfidUid,
         ]);
 
         $barang->increment('stok', $peminjaman->jumlah);
@@ -354,7 +386,7 @@ class PeminjamanController extends Controller
      * @param  array<int>|null  $barangIds
      * @return \Illuminate\Support\Collection keyed by idbarang
      */
-    protected function getRusakCounts(array $barangIds = null)
+    protected function getRusakCounts(?array $barangIds = null)
     {
         $query = BarangUnitKerusakan::where('status', 'rusak')
             ->join('barang_units', 'barang_unit_kerusakan.barang_unit_id', '=', 'barang_units.id');
@@ -404,6 +436,7 @@ class PeminjamanController extends Controller
     public function show($id)
     {
         $peminjaman = Peminjaman::with(['barang', 'user', 'ruang'])->findOrFail($id);
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
         if ($user && $user->role === 'peminjam') {

@@ -321,12 +321,16 @@ class BarangHabisPakaiController extends Controller
         return back()->with('success', 'Permintaan barang habis pakai disetujui.');
     }
 
-    public function receive($id)
+    public function receive(Request $request, $id)
     {
         $user = Auth::user();
         abort_unless($user && in_array($user->role, ['admin', 'pegawai']), 403);
 
-        $keluar = BarangKeluar::findOrFail($id);
+        $request->validate([
+            'rfid_uid' => 'nullable|string|max:50',
+        ]);
+
+        $keluar = BarangKeluar::with('user')->findOrFail($id);
 
         if ($keluar->status !== 'approved') {
             return back()->with('error', 'Permintaan belum disetujui atau sudah ditolak.');
@@ -336,8 +340,20 @@ class BarangHabisPakaiController extends Controller
             return back()->with('error', 'Permintaan ini sudah ditandai diterima.');
         }
 
+        $rfidUid = $request->input('rfid_uid');
+        $rfidUid = is_string($rfidUid) ? trim($rfidUid) : null;
+        $rfidUid = $rfidUid !== '' ? $rfidUid : null;
+        if ($rfidUid) {
+            $registeredUid = $keluar->user?->rfid_uid;
+            if (!$registeredUid || $registeredUid !== $rfidUid) {
+                return back()->with('error', 'RFID tidak sesuai dengan peminjam.');
+            }
+        }
+
         $keluar->update([
             'tgl_diterima' => now(),
+            'receive_konfirmasi_metode' => $rfidUid ? 'rfid' : 'manual',
+            'receive_rfid_uid' => $rfidUid,
         ]);
 
         ActivityLogger::log(

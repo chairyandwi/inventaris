@@ -15,6 +15,8 @@ class BarangKeluar extends Model
         'tgl_keluar',
         'tgl_pengambilan_rencana',
         'tgl_diterima',
+        'receive_konfirmasi_metode',
+        'receive_rfid_uid',
         'jumlah',
         'keterangan',
         'status',

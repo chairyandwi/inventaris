@@ -85,6 +85,19 @@
                         </div>
 
                         <div>
+                            <label for="rfid_uid" class="block text-sm font-semibold text-indigo-100 mb-2">
+                                RFID UID
+                            </label>
+                            <input type="text" id="rfid_uid" name="rfid_uid"
+                                   value="{{ old('rfid_uid') }}"
+                                   class="w-full px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent {{ $errors->has('rfid_uid') ? 'border-rose-400' : '' }}"
+                                   placeholder="Scan RFID (opsional)">
+                            @error('rfid_uid')
+                                <p class="mt-1 text-sm text-rose-300">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
                             <label for="role" class="block text-sm font-semibold text-indigo-100 mb-2">
                                 Role <span class="text-rose-300">*</span>
                             </label>
