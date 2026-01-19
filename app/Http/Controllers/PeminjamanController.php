@@ -290,6 +290,7 @@ class PeminjamanController extends Controller
     {
         $request->validate([
             'rfid_uid' => 'nullable|string|max:50',
+            'manual_password' => 'nullable|string',
         ]);
 
         $peminjaman = Peminjaman::with('barang')->findOrFail($id);
@@ -308,21 +309,38 @@ class PeminjamanController extends Controller
             return back()->with('error', 'Stok barang habis, tidak bisa memulai peminjaman.');
         }
 
-        $rfidUid = $request->input('rfid_uid');
-        $rfidUid = is_string($rfidUid) ? trim($rfidUid) : null;
-        $rfidUid = $rfidUid !== '' ? $rfidUid : null;
-        if ($rfidUid) {
+        $rfidUid = trim((string) $request->input('rfid_uid', ''));
+        $manualPassword = (string) $request->input('manual_password', '');
+        $manualPassword = $manualPassword !== '' ? $manualPassword : null;
+
+        if ($rfidUid === '' && !$manualPassword) {
+            return back()->with('error', 'Scan RFID atau gunakan konfirmasi manual.');
+        }
+
+        if ($rfidUid !== '') {
             $registeredUid = $peminjaman->user?->rfid_uid;
-            if (!$registeredUid || $registeredUid !== $rfidUid) {
+            if (!$registeredUid) {
+                return back()->with('error', 'Peminjam belum memiliki UID RFID.');
+            }
+            if ($registeredUid !== $rfidUid) {
                 return back()->with('error', 'RFID tidak sesuai dengan peminjam.');
+            }
+        } else {
+            /** @var \App\Models\User|null $actor */
+            $actor = Auth::user();
+            if (!$actor || !in_array($actor->role, ['admin', 'pegawai'], true)) {
+                return back()->with('error', 'Akses konfirmasi manual tidak valid.');
+            }
+            if (!\Illuminate\Support\Facades\Hash::check($manualPassword, $actor->password)) {
+                return back()->with('error', 'Password konfirmasi manual tidak sesuai.');
             }
         }
 
         $peminjaman->update([
             'status' => 'dipinjam',
             'tgl_pinjam' => now(),
-            'pickup_konfirmasi_metode' => $rfidUid ? 'rfid' : 'manual',
-            'pickup_rfid_uid' => $rfidUid,
+            'pickup_konfirmasi_metode' => $rfidUid !== '' ? 'rfid' : 'manual',
+            'pickup_rfid_uid' => $rfidUid !== '' ? $rfidUid : null,
         ]);
 
         $barang->decrement('stok', $peminjaman->jumlah);
@@ -344,6 +362,7 @@ class PeminjamanController extends Controller
             'tgl_kembali_real' => 'required|date',
             'konfirmasi_pengembalian' => 'accepted',
             'rfid_uid' => 'nullable|string|max:50',
+            'manual_password' => 'nullable|string',
         ]);
 
         $peminjaman = Peminjaman::with(['barang', 'user'])->findOrFail($id);
@@ -353,21 +372,38 @@ class PeminjamanController extends Controller
             return back()->with('error', 'Barang belum dalam status dipinjam.');
         }
 
-        $rfidUid = $request->input('rfid_uid');
-        $rfidUid = is_string($rfidUid) ? trim($rfidUid) : null;
-        $rfidUid = $rfidUid !== '' ? $rfidUid : null;
-        if ($rfidUid) {
+        $rfidUid = trim((string) $request->input('rfid_uid', ''));
+        $manualPassword = (string) $request->input('manual_password', '');
+        $manualPassword = $manualPassword !== '' ? $manualPassword : null;
+
+        if ($rfidUid === '' && !$manualPassword) {
+            return back()->with('error', 'Scan RFID atau gunakan konfirmasi manual.');
+        }
+
+        if ($rfidUid !== '') {
             $registeredUid = $peminjaman->user?->rfid_uid;
-            if (!$registeredUid || $registeredUid !== $rfidUid) {
+            if (!$registeredUid) {
+                return back()->with('error', 'Peminjam belum memiliki UID RFID.');
+            }
+            if ($registeredUid !== $rfidUid) {
                 return back()->with('error', 'RFID tidak sesuai dengan peminjam.');
+            }
+        } else {
+            /** @var \App\Models\User|null $actor */
+            $actor = Auth::user();
+            if (!$actor || !in_array($actor->role, ['admin', 'pegawai'], true)) {
+                return back()->with('error', 'Akses konfirmasi manual tidak valid.');
+            }
+            if (!\Illuminate\Support\Facades\Hash::check($manualPassword, $actor->password)) {
+                return back()->with('error', 'Password konfirmasi manual tidak sesuai.');
             }
         }
 
         $peminjaman->update([
             'status' => 'dikembalikan',
             'tgl_kembali' => $request->tgl_kembali_real,
-            'return_konfirmasi_metode' => $rfidUid ? 'rfid' : 'manual',
-            'return_rfid_uid' => $rfidUid,
+            'return_konfirmasi_metode' => $rfidUid !== '' ? 'rfid' : 'manual',
+            'return_rfid_uid' => $rfidUid !== '' ? $rfidUid : null,
         ]);
 
         $barang->increment('stok', $peminjaman->jumlah);

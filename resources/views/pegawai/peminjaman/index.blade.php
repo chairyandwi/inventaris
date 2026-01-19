@@ -195,20 +195,38 @@
                                                     $bolehMulai = !$p->tgl_pinjam_rencana || now()->greaterThanOrEqualTo($p->tgl_pinjam_rencana->startOfDay());
                                                 @endphp
                                                 <form action="{{ route($routePrefix . '.pickup', $p->idpeminjaman) }}"
-                                                    method="POST" class="space-y-2">
+                                                    method="POST" class="space-y-2" data-rfid-form>
                                                     @csrf
-                                                    <input type="text" name="rfid_uid" autocomplete="off"
-                                                        placeholder="RFID (opsional)"
-                                                        class="w-full max-w-xs rounded-lg bg-slate-800/70 border border-white/10 text-white text-xs focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 px-2 py-1.5">
-                                                    <button type="submit"
-                                                        class="px-3 py-2 text-xs rounded text-center shadow transition {{ $bolehMulai ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-white/10 text-indigo-100/60 cursor-not-allowed' }}"
-                                                        {{ $bolehMulai ? '' : 'disabled' }}>
-                                                        {{ $bolehMulai ? 'Mulai Peminjaman' : 'Menunggu Jadwal' }}
-                                                    </button>
+                                                    <input type="text" name="rfid_uid" autocomplete="off" inputmode="none"
+                                                        aria-label="RFID UID"
+                                                        class="sr-only rfid-input">
+                                                    <p class="text-[10px] text-indigo-100/70 rfid-helper">Scan kartu/tag RFID peminjam untuk melanjutkan.</p>
+                                                    <div class="hidden rfid-manual space-y-2">
+                                                        <label class="block text-[10px] text-indigo-100/70">Password {{ auth()->user()?->role === 'admin' ? 'admin' : 'pegawai' }}</label>
+                                                        <input type="password" name="manual_password" autocomplete="current-password"
+                                                            class="w-full max-w-xs rounded-lg bg-slate-800/70 border border-white/10 text-white text-xs focus:ring-2 focus:ring-amber-400 focus:border-amber-400 px-2 py-1.5"
+                                                            placeholder="Masukkan password">
+                                                    </div>
+                                                    <label class="inline-flex items-center gap-2 text-[10px] text-indigo-100/70">
+                                                        <input type="checkbox" class="rounded border-white/20 bg-slate-800/70 text-amber-400 manual-toggle">
+                                                        Konfirmasi manual
+                                                    </label>
+                                                    <div class="flex flex-wrap gap-2">
+                                                        <button type="button"
+                                                            class="px-3 py-2 text-xs rounded text-center shadow transition bg-white/10 text-indigo-100 hover:bg-white/20 rfid-scan-btn">
+                                                            Scan RFID
+                                                        </button>
+                                                        <button type="submit"
+                                                            data-allow="{{ $bolehMulai ? '1' : '0' }}"
+                                                            class="px-3 py-2 text-xs rounded text-center shadow transition {{ $bolehMulai ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-white/10 text-indigo-100/60 cursor-not-allowed' }} rfid-submit"
+                                                            disabled>
+                                                            {{ $bolehMulai ? 'Mulai Peminjaman' : 'Menunggu Jadwal' }}
+                                                        </button>
+                                                    </div>
                                                 </form>
                                             @elseif($p->status == 'dipinjam')
                                                 <form action="{{ route($routePrefix . '.return', $p->idpeminjaman) }}"
-                                                    method="POST" class="space-y-2 bg-white/5 border border-white/10 rounded-xl p-3 w-full max-w-xs">
+                                                    method="POST" class="space-y-2 bg-white/5 border border-white/10 rounded-xl p-3 w-full max-w-xs" data-rfid-form>
                                                     @csrf
                                                     <div>
                                                         <label class="block text-xs font-medium text-indigo-100 mb-1">Tanggal pengembalian aktual</label>
@@ -220,14 +238,32 @@
                                                         <input type="checkbox" name="konfirmasi_pengembalian" required class="text-indigo-600 border-white/20 rounded bg-slate-800/70">
                                                         <span>Barang sudah dikembalikan</span>
                                                     </label>
-                                                    <div>
-                                                        <label class="block text-xs font-medium text-indigo-100 mb-1">RFID (opsional)</label>
-                                                        <input type="text" name="rfid_uid" autocomplete="off"
-                                                            class="w-full rounded-lg bg-slate-800/70 border border-white/10 text-white text-xs focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
-                                                            placeholder="Scan kartu/tag RFID">
+                                                    <input type="text" name="rfid_uid" autocomplete="off" inputmode="none"
+                                                        aria-label="RFID UID"
+                                                        class="sr-only rfid-input">
+                                                    <p class="text-[10px] text-indigo-100/70 rfid-helper">Scan kartu/tag RFID peminjam untuk konfirmasi pengembalian.</p>
+                                                    <div class="hidden rfid-manual space-y-2">
+                                                        <label class="block text-[10px] text-indigo-100/70">Password {{ auth()->user()?->role === 'admin' ? 'admin' : 'pegawai' }}</label>
+                                                        <input type="password" name="manual_password" autocomplete="current-password"
+                                                            class="w-full rounded-lg bg-slate-800/70 border border-white/10 text-white text-xs focus:ring-2 focus:ring-amber-400 focus:border-amber-400 px-2 py-1.5"
+                                                            placeholder="Masukkan password">
                                                     </div>
-                                                    <button type="submit"
-                                                        class="w-full px-2 py-1.5 bg-emerald-500 text-white text-xs rounded shadow hover:bg-emerald-600 transition">Konfirmasi</button>
+                                                    <label class="inline-flex items-center gap-2 text-[10px] text-indigo-100/70">
+                                                        <input type="checkbox" class="rounded border-white/20 bg-slate-800/70 text-amber-400 manual-toggle">
+                                                        Konfirmasi manual
+                                                    </label>
+                                                    <div class="flex flex-wrap gap-2">
+                                                        <button type="button"
+                                                            class="px-3 py-2 text-xs rounded text-center shadow transition bg-white/10 text-indigo-100 hover:bg-white/20 rfid-scan-btn">
+                                                            Scan RFID
+                                                        </button>
+                                                        <button type="submit"
+                                                            data-allow="1"
+                                                            class="px-3 py-2 text-xs rounded text-center shadow transition bg-emerald-500 text-white hover:bg-emerald-600 rfid-submit"
+                                                            disabled>
+                                                            Konfirmasi
+                                                        </button>
+                                                    </div>
                                                 </form>
                                             @endif
                                         </div>
@@ -328,6 +364,75 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
             closeModal();
         }
+    });
+
+    document.querySelectorAll('[data-rfid-form]').forEach((form) => {
+        const input = form.querySelector('.rfid-input');
+        const scanButton = form.querySelector('.rfid-scan-btn');
+        const submitButton = form.querySelector('.rfid-submit');
+        const helper = form.querySelector('.rfid-helper');
+        const manualToggle = form.querySelector('.manual-toggle');
+        const manualWrap = form.querySelector('.rfid-manual');
+        const manualInput = form.querySelector('input[name="manual_password"]');
+        const canSchedule = submitButton?.dataset.allow === '1';
+
+        const syncSubmitState = () => {
+            const hasValue = input && input.value.trim() !== '';
+            const manualValue = manualInput && manualInput.value.trim() !== '';
+            if (!submitButton) {
+                return;
+            }
+            submitButton.disabled = !(canSchedule && (hasValue || manualValue));
+        };
+
+        scanButton?.addEventListener('click', () => {
+            input?.focus();
+            if (helper) {
+                helper.textContent = 'Siap scan RFID...';
+            }
+        });
+
+        input?.addEventListener('input', () => {
+            syncSubmitState();
+            if (helper && input.value.trim() !== '') {
+                helper.textContent = 'RFID terbaca. Silakan konfirmasi.';
+            }
+        });
+
+        manualToggle?.addEventListener('change', () => {
+            if (manualWrap) {
+                manualWrap.classList.toggle('hidden', !manualToggle.checked);
+            }
+            if (manualToggle.checked) {
+                manualInput?.focus();
+                if (helper) {
+                    helper.textContent = 'Mode manual aktif. Masukkan password.';
+                }
+            } else {
+                if (helper) {
+                    helper.textContent = 'Scan kartu/tag RFID peminjam untuk melanjutkan.';
+                }
+            }
+            syncSubmitState();
+        });
+
+        manualInput?.addEventListener('input', () => {
+            syncSubmitState();
+        });
+
+        form.addEventListener('submit', (event) => {
+            const hasRfid = input && input.value.trim() !== '';
+            const hasManual = manualInput && manualInput.value.trim() !== '';
+            if (!hasRfid && !hasManual) {
+                event.preventDefault();
+                if (helper) {
+                    helper.textContent = 'Scan RFID atau gunakan konfirmasi manual.';
+                }
+                (manualToggle?.checked ? manualInput : input)?.focus();
+            }
+        });
+
+        syncSubmitState();
     });
 });
 </script>

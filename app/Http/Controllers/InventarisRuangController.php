@@ -17,7 +17,13 @@ class InventarisRuangController extends Controller
 {
     private function getRoutePrefix(): string
     {
-        return Auth::check() && Auth::user()->role === 'admin' ? 'admin' : 'pegawai';
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            return 'admin';
+        }
+        if (Auth::check() && Auth::user()->role === 'kabag') {
+            return 'kabag';
+        }
+        return 'pegawai';
     }
 
     public function index(Request $request)
@@ -143,7 +149,7 @@ class InventarisRuangController extends Controller
         }
 
         $user = auth('web')->user();
-        if (!$user || !in_array($user->role, ['pegawai', 'admin'])) {
+        if (!$user || !in_array($user->role, ['pegawai', 'admin', 'kabag'])) {
             abort(403, 'Anda tidak memiliki akses.');
         }
 

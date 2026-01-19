@@ -101,22 +101,22 @@
                                     <td class="px-6 py-4 text-sm font-semibold text-right text-indigo-50">{{ $row->jumlah }}</td>
                                     <td class="px-6 py-4 text-sm text-indigo-100/80">{{ $row->tgl_pengambilan_rencana ?? '-' }}</td>
                                     <td class="px-6 py-4 text-sm text-indigo-100/70">{{ $row->keterangan ?? '-' }}</td>
-                                    <td class="px-6 py-4 text-sm text-indigo-100/70">
-                                        <div class="space-y-2 min-w-[180px]">
-                                            <form method="POST" action="{{ route($routePrefix . '.barang-habis-pakai.approve', $row->idbarang_keluar) }}">
+                                    <td class="px-6 py-4 text-sm text-indigo-100/70 align-bottom">
+                                        <div class="min-w-[180px] h-full flex flex-col items-end justify-end gap-2">
+                                            <form method="POST" action="{{ route($routePrefix . '.barang-habis-pakai.approve', $row->idbarang_keluar) }}" class="w-full flex justify-end">
                                                 @csrf
                                                 <button type="submit" data-confirm="Setujui permintaan ini?"
-                                                    class="w-full px-3 py-2 rounded-lg bg-emerald-500/20 text-emerald-100 text-xs font-semibold hover:bg-emerald-500/30 transition">
+                                                    class="w-full max-w-[180px] px-3 py-2 rounded-lg bg-emerald-500/20 text-emerald-100 text-xs font-semibold hover:bg-emerald-500/30 transition">
                                                     Setujui
                                                 </button>
                                             </form>
-                                            <form method="POST" action="{{ route($routePrefix . '.barang-habis-pakai.reject', $row->idbarang_keluar) }}" class="space-y-2">
+                                            <form method="POST" action="{{ route($routePrefix . '.barang-habis-pakai.reject', $row->idbarang_keluar) }}" class="w-full flex flex-col items-end gap-2">
                                                 @csrf
                                                 <input type="text" name="alasan_penolakan" required maxlength="255"
-                                                    class="w-full rounded-lg bg-slate-800/70 border border-white/10 text-white px-2 py-1 text-xs focus:ring-2 focus:ring-rose-400 focus:border-rose-400"
+                                                    class="w-full max-w-[180px] rounded-lg bg-slate-800/70 border border-white/10 text-white px-2 py-1 text-xs focus:ring-2 focus:ring-rose-400 focus:border-rose-400"
                                                     placeholder="Alasan penolakan">
                                                 <button type="submit" data-confirm="Tolak permintaan ini?"
-                                                    class="w-full px-3 py-2 rounded-lg bg-rose-500/20 text-rose-100 text-xs font-semibold hover:bg-rose-500/30 transition">
+                                                    class="w-full max-w-[180px] px-3 py-2 rounded-lg bg-rose-500/20 text-rose-100 text-xs font-semibold hover:bg-rose-500/30 transition">
                                                     Tolak
                                                 </button>
                                             </form>
@@ -243,15 +243,33 @@
                                     <td class="px-6 py-4 text-sm text-indigo-100/70">
                                         @if($row->status === 'approved' && !$row->tgl_diterima)
                                             <form method="POST" action="{{ route($routePrefix . '.barang-habis-pakai.receive', $row->idbarang_keluar) }}"
-                                                class="space-y-2">
+                                                class="space-y-2" data-rfid-form>
                                                 @csrf
-                                                <input type="text" name="rfid_uid" autocomplete="off"
-                                                    placeholder="RFID (opsional)"
-                                                    class="w-full rounded-lg bg-slate-800/70 border border-white/10 text-white text-xs focus:ring-2 focus:ring-sky-400 focus:border-sky-400 px-2 py-1.5">
-                                                <button type="submit" data-confirm="Tandai barang sudah diterima?"
-                                                    class="px-3 py-2 rounded-lg bg-sky-500/20 text-sky-100 text-xs font-semibold hover:bg-sky-500/30 transition">
-                                                    Tandai Diterima
-                                                </button>
+                                                <input type="text" name="rfid_uid" autocomplete="off" inputmode="none"
+                                                    aria-label="RFID UID"
+                                                    class="sr-only rfid-input">
+                                                <p class="text-[10px] text-indigo-100/70 rfid-helper">Scan kartu/tag RFID peminjam untuk menandai diterima.</p>
+                                                <div class="hidden rfid-manual space-y-2">
+                                                    <label class="block text-[10px] text-indigo-100/70">Password {{ auth()->user()?->role === 'admin' ? 'admin' : 'pegawai' }}</label>
+                                                    <input type="password" name="manual_password" autocomplete="current-password"
+                                                        class="w-full rounded-lg bg-slate-800/70 border border-white/10 text-white text-xs focus:ring-2 focus:ring-amber-400 focus:border-amber-400 px-2 py-1.5"
+                                                        placeholder="Masukkan password">
+                                                </div>
+                                                <label class="inline-flex items-center gap-2 text-[10px] text-indigo-100/70">
+                                                    <input type="checkbox" class="rounded border-white/20 bg-slate-800/70 text-amber-400 manual-toggle">
+                                                    Konfirmasi manual
+                                                </label>
+                                                <div class="flex flex-wrap gap-2">
+                                                    <button type="button"
+                                                        class="px-3 py-2 rounded-lg bg-white/10 text-indigo-100 text-xs font-semibold hover:bg-white/20 transition rfid-scan-btn">
+                                                        Scan RFID
+                                                    </button>
+                                                    <button type="submit" data-confirm="Tandai barang sudah diterima?"
+                                                        class="px-3 py-2 rounded-lg bg-sky-500/20 text-sky-100 text-xs font-semibold hover:bg-sky-500/30 transition rfid-submit"
+                                                        disabled>
+                                                        Tandai Diterima
+                                                    </button>
+                                                </div>
                                             </form>
                                         @else
                                             -
@@ -281,3 +299,74 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-rfid-form]').forEach((form) => {
+        const input = form.querySelector('.rfid-input');
+        const scanButton = form.querySelector('.rfid-scan-btn');
+        const submitButton = form.querySelector('.rfid-submit');
+        const helper = form.querySelector('.rfid-helper');
+        const manualToggle = form.querySelector('.manual-toggle');
+        const manualWrap = form.querySelector('.rfid-manual');
+        const manualInput = form.querySelector('input[name="manual_password"]');
+
+        const syncSubmitState = () => {
+            const hasValue = input && input.value.trim() !== '';
+            const manualValue = manualInput && manualInput.value.trim() !== '';
+            if (submitButton) {
+                submitButton.disabled = !(hasValue || manualValue);
+            }
+        };
+
+        scanButton?.addEventListener('click', () => {
+            input?.focus();
+            if (helper) {
+                helper.textContent = 'Siap scan RFID...';
+            }
+        });
+
+        input?.addEventListener('input', () => {
+            syncSubmitState();
+            if (helper && input.value.trim() !== '') {
+                helper.textContent = 'RFID terbaca. Silakan konfirmasi.';
+            }
+        });
+
+        manualToggle?.addEventListener('change', () => {
+            if (manualWrap) {
+                manualWrap.classList.toggle('hidden', !manualToggle.checked);
+            }
+            if (manualToggle.checked) {
+                manualInput?.focus();
+                if (helper) {
+                    helper.textContent = 'Mode manual aktif. Masukkan password.';
+                }
+            } else if (helper) {
+                helper.textContent = 'Scan kartu/tag RFID peminjam untuk menandai diterima.';
+            }
+            syncSubmitState();
+        });
+
+        manualInput?.addEventListener('input', () => {
+            syncSubmitState();
+        });
+
+        form.addEventListener('submit', (event) => {
+            const hasRfid = input && input.value.trim() !== '';
+            const hasManual = manualInput && manualInput.value.trim() !== '';
+            if (!hasRfid && !hasManual) {
+                event.preventDefault();
+                if (helper) {
+                    helper.textContent = 'Scan RFID atau gunakan konfirmasi manual.';
+                }
+                (manualToggle?.checked ? manualInput : input)?.focus();
+            }
+        });
+
+        syncSubmitState();
+    });
+});
+</script>
+@endpush

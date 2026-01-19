@@ -131,7 +131,7 @@ class BarangHabisPakaiController extends Controller
 
         $user = auth('web')->user();
 
-        if (!$user || !in_array($user->role, ['pegawai', 'admin'])) {
+        if (!$user || !in_array($user->role, ['pegawai', 'admin', 'kabag'])) {
             abort(403, 'Anda tidak memiliki akses.');
         }
 
@@ -328,6 +328,7 @@ class BarangHabisPakaiController extends Controller
 
         $request->validate([
             'rfid_uid' => 'nullable|string|max:50',
+            'manual_password' => 'nullable|string',
         ]);
 
         $keluar = BarangKeluar::with('user')->findOrFail($id);
@@ -340,20 +341,37 @@ class BarangHabisPakaiController extends Controller
             return back()->with('error', 'Permintaan ini sudah ditandai diterima.');
         }
 
-        $rfidUid = $request->input('rfid_uid');
-        $rfidUid = is_string($rfidUid) ? trim($rfidUid) : null;
-        $rfidUid = $rfidUid !== '' ? $rfidUid : null;
-        if ($rfidUid) {
+        $rfidUid = trim((string) $request->input('rfid_uid', ''));
+        $manualPassword = (string) $request->input('manual_password', '');
+        $manualPassword = $manualPassword !== '' ? $manualPassword : null;
+
+        if ($rfidUid === '' && !$manualPassword) {
+            return back()->with('error', 'Scan RFID atau gunakan konfirmasi manual.');
+        }
+
+        if ($rfidUid !== '') {
             $registeredUid = $keluar->user?->rfid_uid;
-            if (!$registeredUid || $registeredUid !== $rfidUid) {
+            if (!$registeredUid) {
+                return back()->with('error', 'Peminjam belum memiliki UID RFID.');
+            }
+            if ($registeredUid !== $rfidUid) {
                 return back()->with('error', 'RFID tidak sesuai dengan peminjam.');
+            }
+        } else {
+            /** @var \App\Models\User|null $actor */
+            $actor = Auth::user();
+            if (!$actor || !in_array($actor->role, ['admin', 'pegawai'], true)) {
+                return back()->with('error', 'Akses konfirmasi manual tidak valid.');
+            }
+            if (!\Illuminate\Support\Facades\Hash::check($manualPassword, $actor->password)) {
+                return back()->with('error', 'Password konfirmasi manual tidak sesuai.');
             }
         }
 
         $keluar->update([
             'tgl_diterima' => now(),
-            'receive_konfirmasi_metode' => $rfidUid ? 'rfid' : 'manual',
-            'receive_rfid_uid' => $rfidUid,
+            'receive_konfirmasi_metode' => $rfidUid !== '' ? 'rfid' : 'manual',
+            'receive_rfid_uid' => $rfidUid !== '' ? $rfidUid : null,
         ]);
 
         ActivityLogger::log(

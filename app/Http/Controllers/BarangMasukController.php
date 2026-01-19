@@ -574,7 +574,7 @@ class BarangMasukController extends Controller
 
             $user = auth('web')->user();
 
-            if (!$user || !in_array($user->role, ['pegawai', 'admin'])) {
+            if (!$user || !in_array($user->role, ['pegawai', 'admin', 'kabag'])) {
                 abort(403, 'Anda tidak memiliki akses.');
             }
 

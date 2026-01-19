@@ -299,8 +299,42 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 Route::middleware(['auth', 'role:kabag'])->prefix('kabag')->name('kabag.')->group(function () {
     Route::get('/', function () {
-        return view('kabag.index');
+        $barang = Barang::count();
+        $barangMasuk = BarangMasuk::count();
+        $ruang = Ruang::count();
+        $kategori = Kategori::count();
+        $peminjamanPending = Peminjaman::where('status', 'pending')->count();
+        $peminjamanDipinjam = Peminjaman::where('status', 'dipinjam')->count();
+        $peminjamanDikembalikan = Peminjaman::where('status', 'dikembalikan')->count();
+        $peminjamanDitolak = Peminjaman::where('status', 'ditolak')->count();
+        $requestBarangPending = BarangKeluar::where('status', 'pending')->count();
+        $requestBarangApproved = BarangKeluar::where('status', 'approved')->count();
+        $requestBarangRejected = BarangKeluar::where('status', 'rejected')->count();
+
+        return view('kabag.index', compact(
+            'barang',
+            'barangMasuk',
+            'ruang',
+            'kategori',
+            'peminjamanPending',
+            'peminjamanDipinjam',
+            'peminjamanDikembalikan',
+            'peminjamanDitolak',
+            'requestBarangPending',
+            'requestBarangApproved',
+            'requestBarangRejected'
+        ));
     })->name('index');
+
+    Route::get('inventaris-ruang', [InventarisRuangController::class, 'index'])->name('inventaris-ruang.index');
+    Route::get('barang/laporan', [BarangController::class, 'laporan'])->name('barang.laporan');
+    Route::get('barang_masuk/laporan', [BarangMasukController::class, 'laporan'])->name('barang_masuk.laporan');
+    Route::get('peminjaman/laporan', [PeminjamanController::class, 'laporan'])->name('peminjaman.laporan');
+    Route::get('inventaris-ruang/laporan', [InventarisRuangController::class, 'laporan'])->name('inventaris-ruang.laporan');
+    Route::get('inventaris-ruang/riwayat', [InventarisRuangController::class, 'moveHistory'])->name('inventaris-ruang.riwayat');
+    Route::get('inventaris-ruang/riwayat/cetak', [InventarisRuangController::class, 'moveHistoryPdf'])->name('inventaris-ruang.riwayat.cetak');
+    Route::get('barang-habis-pakai/laporan', [BarangHabisPakaiController::class, 'laporan'])->name('barang-habis-pakai.laporan');
+    Route::get('barang-pinjam/laporan', [BarangPinjamController::class, 'laporan'])->name('barang-pinjam.laporan');
 });
 
 require __DIR__ . '/auth.php';
