@@ -95,24 +95,45 @@
                                             <p class="text-base font-semibold text-white">{{ $p->barang->nama_barang }}</p>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-3">
-                                        <a href="{{ route($routePrefix . '.show', $p->idpeminjaman) }}"
-                                            class="inline-flex items-center px-4 py-2 rounded-full text-xs font-semibold text-indigo-900 bg-white hover:bg-indigo-50 transition">
-                                            Lihat Detail
-                                            <svg class="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                            </svg>
-                                        </a>
-                                        <span @class([
-                                            'px-3 py-1 text-xs rounded-full font-semibold',
-                                            'bg-yellow-100 text-yellow-800' => $p->status === 'pending',
-                                            'bg-indigo-100 text-indigo-800' => $p->status === 'disetujui',
-                                            'bg-blue-100 text-blue-800' => $p->status === 'dipinjam',
-                                            'bg-green-100 text-green-800' => $p->status === 'dikembalikan',
-                                            'bg-red-100 text-red-800' => $p->status === 'ditolak',
-                                        ])>
-                                            {{ ucfirst($p->status) }}
-                                        </span>
+                                    <div class="flex flex-col items-end gap-1 md:self-start">
+                                        <div class="flex items-center gap-3">
+                                            <a href="{{ route($routePrefix . '.show', $p->idpeminjaman) }}"
+                                                class="inline-flex items-center px-4 py-2 rounded-full text-xs font-semibold text-indigo-900 bg-white hover:bg-indigo-50 transition">
+                                                Lihat Detail
+                                                <svg class="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                </svg>
+                                            </a>
+                                            <span @class([
+                                                'px-3 py-1 text-xs rounded-full font-semibold',
+                                                'bg-yellow-100 text-yellow-800' => $p->status === 'pending',
+                                                'bg-indigo-100 text-indigo-800' => $p->status === 'disetujui',
+                                                'bg-blue-100 text-blue-800' => $p->status === 'dipinjam',
+                                                'bg-green-100 text-green-800' => $p->status === 'dikembalikan',
+                                                'bg-red-100 text-red-800' => $p->status === 'ditolak',
+                                            ])>
+                                                {{ ucfirst($p->status) }}
+                                            </span>
+                                        </div>
+                                        @if ($p->status == 'pending')
+                                            <div class="flex flex-wrap items-stretch justify-end gap-2">
+                                                <form action="{{ route($routePrefix . '.approve', $p->idpeminjaman) }}"
+                                                    method="POST" class="inline-flex">
+                                                    @csrf
+                                                    <button type="submit"
+                                                        class="h-9 px-4 inline-flex items-center justify-center bg-emerald-500 text-white text-xs leading-none rounded text-center shadow hover:bg-emerald-600 transition">
+                                                        Approve
+                                                    </button>
+                                                </form>
+                                                <button type="button"
+                                                    class="h-9 px-4 inline-flex items-center justify-center bg-rose-500 text-white text-xs leading-none rounded text-center shadow hover:bg-rose-600 transition open-reject-modal"
+                                                    data-action="{{ route($routePrefix . '.reject', $p->idpeminjaman) }}"
+                                                    data-barang="{{ $p->barang->nama_barang }}"
+                                                    data-peminjam="{{ $p->user->nama ?? $p->user->username ?? $p->user->email ?? '-' }}">
+                                                    Reject
+                                                </button>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
 
@@ -174,23 +195,7 @@
                                         @endif
 
                                         <div class="flex flex-wrap gap-2">
-                                            @if ($p->status == 'pending')
-                                                <form action="{{ route($routePrefix . '.approve', $p->idpeminjaman) }}"
-                                                    method="POST" class="inline">
-                                                    @csrf
-                                                    <button type="submit"
-                                                        class="px-3 py-2 bg-emerald-500 text-white text-xs rounded text-center shadow hover:bg-emerald-600 transition">
-                                                        Approve
-                                                    </button>
-                                                </form>
-                                                <button type="button"
-                                                    class="px-3 py-2 bg-rose-500 text-white text-xs rounded text-center shadow hover:bg-rose-600 transition open-reject-modal"
-                                                    data-action="{{ route($routePrefix . '.reject', $p->idpeminjaman) }}"
-                                                    data-barang="{{ $p->barang->nama_barang }}"
-                                                    data-peminjam="{{ $p->user->nama ?? $p->user->username ?? $p->user->email ?? '-' }}">
-                                                    Reject
-                                                </button>
-                                            @elseif($p->status == 'disetujui')
+                                            @if($p->status == 'disetujui')
                                                 @php
                                                     $bolehMulai = !$p->tgl_pinjam_rencana || now()->greaterThanOrEqualTo($p->tgl_pinjam_rencana->startOfDay());
                                                 @endphp
