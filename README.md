@@ -112,13 +112,13 @@ php artisan serve
 ```bash
 npm run dev
 ```
-### Login Credentials 
-| Role     | Email                | Password     |
-|----------|----------------------|--------------|
-| Admin    | admin@example.com    | admin123     |
-| Auditor  | auditor@example.com  | auditor123   |
-| Staff    | staff@example.com    | staff123     |
-| Borrower | borrower@example.com | borrower123  |
+### Login Credentials
+| Role     | Email                | Password |
+|----------|----------------------|----------|
+| Admin    | admin@example.com    | password |
+| Kabag    | kabag@example.com    | password |
+| Pegawai  | pegawai@example.com  | password |
+| Peminjam | peminjam@example.com | password |
 
 ## 📄 License
 MIT License
